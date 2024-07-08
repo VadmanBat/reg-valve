@@ -2,14 +2,14 @@
 // Created by Vadma on 08.07.2024.
 //
 
-#ifndef REGVALVE_MATCH_CORE_H
-#define REGVALVE_MATCH_CORE_H
+#ifndef REGVALVE_MATH_CORE_H
+#define REGVALVE_MATH_CORE_H
 
 #include <vector>
 #include <complex>
 #include <valarray>
 
-class MatchCore {
+class MathCore {
 private:
     using Complex       = std::complex <double>;
 
@@ -52,4 +52,4 @@ public:
     }
 };
 
-#endif //REGVALVE_MATCH_CORE_H
+#endif //REGVALVE_MATH_CORE_H

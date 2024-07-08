@@ -5,6 +5,9 @@
 #include <QFileDialog>
 #include <QtCharts>
 
+#include "code/math-core.h"
+#include "code/convert-core.h"
+
 using namespace QtCharts;
 
 class GraphWindow : public QWidget {
@@ -31,8 +34,8 @@ private slots:
             // ...
 
             // После загрузки данных, создайте серию и добавьте ее в график
-            double xMin(-10), xMax(10);
-            double yMin(-10), yMax(10);
+            double xMin(-0), xMax(10);
+            double yMin(-0), yMax(100);
 
             QLineSeries *series = new QLineSeries();
             for (const QPointF &point : points) {

@@ -48,7 +48,7 @@ private slots:
 private:
     QChart *chart;
     QChartView *chartView;
-    QVector<QPointF> points; // Данные для графика
+    QVector <QPointF> points; // Данные для графика
 };
 
 int main(int argc, char *argv[]) {

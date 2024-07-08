@@ -4,45 +4,69 @@
 #include "../application.h"
 
 QWidget* GraphWindow::createNumTab() {
-    QWidget *coefficientsTab = new QWidget();
-    QVBoxLayout *coefficientsLayout = new QVBoxLayout(coefficientsTab);
+    QWidget *numTab = new QWidget();
 
-    // Горизонтальный макет для коэффициентов числителя
+    QVBoxLayout *mainLayout = new QVBoxLayout;
+    QLabel *label = new QLabel("W<sub>ОУ</sub>(p) = ");
+    label->setAlignment(Qt::AlignCenter);
+    setFontSize(label, 24);
+
+    QVBoxLayout *coefficientsLayout = new QVBoxLayout();
+
     QHBoxLayout *numeratorLayout = new QHBoxLayout;
-    QLabel *numeratorLabel = new QLabel("Числитель: ");
-    numeratorLayout->addWidget(numeratorLabel);
-
-    QLineEdit *a[6];
-    for (int i = 0; i < 6; ++i) {
-        a[i] = new QLineEdit;
-        a[i]->setValidator(new QIntValidator(a[i])); // Валидатор для целых чисел
-        numeratorLayout->addWidget(a[i]);
-        if (i > 0) { // Добавление метки степени p, если это не свободный член
-            QLabel *powerLabel = new QLabel(QString("p^%1").arg(i));
-            numeratorLayout->addWidget(powerLabel);
-        }
-    }
-
-    // Горизонтальный макет для коэффициентов знаменателя
     QHBoxLayout *denominatorLayout = new QHBoxLayout;
-    QLabel *denominatorLabel = new QLabel("Знаменатель: ");
+    QLabel *numeratorLabel = new QLabel("Числитель:\t");
+    QLabel *denominatorLabel = new QLabel("Знаменатель:\t");
+    numeratorLayout->addWidget(numeratorLabel);
     denominatorLayout->addWidget(denominatorLabel);
 
-    QLineEdit *b[6];
+    QLineEdit *a[6], *b[6];
     for (int i = 0; i < 6; ++i) {
+        a[i] = new QLineEdit;
         b[i] = new QLineEdit;
-        b[i]->setValidator(new QIntValidator(b[i])); // Валидатор для целых чисел
+        numeratorLayout->addWidget(a[i]);
         denominatorLayout->addWidget(b[i]);
         if (i > 0) { // Добавление метки степени p, если это не свободный член
-            QLabel *powerLabel = new QLabel(QString("p^%1").arg(i));
-            denominatorLayout->addWidget(powerLabel);
+            QLabel *label = new QLabel(QString("p<sup>%1</sup>").arg(i));
+            setFontSize(label, 16);
+            numeratorLayout->addWidget(label);
+            label = new QLabel(QString("p<sup>%1</sup>").arg(i));
+            setFontSize(label, 16);
+            denominatorLayout->addWidget(label);
         }
     }
+
+    QDoubleValidator *realNumberValidator = new QDoubleValidator(this);
+    realNumberValidator->setNotation(QDoubleValidator::StandardNotation);
+
+    for (int i = 0; i < 6; ++i) {
+        a[i]->setValidator(realNumberValidator);
+        b[i]->setValidator(realNumberValidator);
+
+        a[i]->setMinimumSize(QSize(10, 0)); // Минимальный размер
+        a[i]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed); // Расширение при необходимости
+        b[i]->setMinimumSize(QSize(10, 0));
+        b[i]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+        a[i]->setMinimumSize(QSize(50, 50));
+        b[i]->setMinimumSize(QSize(50, 50));
+    }
+
+    QFrame *line = new QFrame();
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
 
     // Добавление макетов в общий макет
     coefficientsLayout->addLayout(numeratorLayout);
+    coefficientsLayout->addWidget(line);
     coefficientsLayout->addLayout(denominatorLayout);
-    coefficientsTab->setLayout(coefficientsLayout);
 
-    return coefficientsTab;
+    QSpacerItem* verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    coefficientsLayout->addItem(verticalSpacer);
+
+    mainLayout->addWidget(label);
+    mainLayout->addLayout(coefficientsLayout);
+
+    numTab->setLayout(mainLayout);
+    return numTab;
 }

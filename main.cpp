@@ -33,18 +33,29 @@ private slots:
             // Например, вы можете прочитать файл и заполнить QVector<QPointF> points данными для построения графика
             // ...
 
-            // После загрузки данных, создайте серию и добавьте ее в график
-            double xMin(-0), xMax(10);
-            double yMin(-0), yMax(100);
 
             QLineSeries *series = new QLineSeries();
+            series->setName("КЧХ выбранного сигнала");
             for (const QPointF &point : points) {
                 series->append(point);
             }
+
+            chart->setTitle("Комплексно-частотная характеристика (КЧХ)");
             chart->addSeries(series);
             chart->createDefaultAxes();
-            chart->axes(Qt::Horizontal).first()->setRange(xMin, xMax);
-            chart->axes(Qt::Vertical).first()->setRange(yMin, yMax);
+
+            QAbstractAxis *axisX = chart->axes(Qt::Horizontal).first();
+            QAbstractAxis *axisY = chart->axes(Qt::Vertical).first();
+
+            if (QValueAxis *axisXValue = qobject_cast<QValueAxis *>(axisX); axisXValue) {
+                axisXValue->setTitleText("Реальная ось");
+                axisXValue->setLabelFormat("%.2f"); // Формат подписи оси X
+            }
+
+            if (QValueAxis *axisYValue = qobject_cast<QValueAxis *>(axisY); axisYValue) {
+                axisYValue->setTitleText("Мнимая ось");
+                axisYValue->setLabelFormat("%.2f"); // Формат подписи оси Y
+            }
         }
     }
 

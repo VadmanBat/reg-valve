@@ -3,70 +3,59 @@
 //
 #include "../application.h"
 
+void GraphWindow::createLineEdit(const char* name, QHBoxLayout* layout, QDoubleValidator* validator) {
+    layout->addWidget(new QLabel(name));
+
+    QLineEdit *lineEdit[6];
+    for (int i = 0; i < 6; ++i) {
+        layout->addWidget(lineEdit[i] = new QLineEdit);
+        lineEdit[i]->setAlignment(Qt::AlignRight);
+        lineEdit[i]->setStyleSheet("font-size: 16pt;");
+        lineEdit[i]->setText("+0");
+
+        if (i > 0) { // Добавление метки степени p, если это не свободный член
+            QLabel *label = new QLabel(QString("p<sup>%1</sup>").arg(i));
+            label->setStyleSheet("font-size: 16pt;");
+            layout->addWidget(label);
+        }
+
+        lineEdit[i]->setValidator(validator);
+    }
+}
+
 QWidget* GraphWindow::createNumTab() {
-    QWidget *numTab = new QWidget();
-
-    QVBoxLayout *mainLayout = new QVBoxLayout;
-    QLabel *label = new QLabel("W<sub>ОУ</sub>(p) = ");
-    label->setAlignment(Qt::AlignCenter);
-    setFontSize(label, 24);
-
-    QVBoxLayout *coefficientsLayout = new QVBoxLayout();
+    QLabel *transferFunctionLabel = new QLabel("W<sub>ОУ</sub>(p) = ");
+    transferFunctionLabel->setAlignment(Qt::AlignCenter);
+    transferFunctionLabel->setStyleSheet("font-size: 24pt;");
 
     QHBoxLayout *numeratorLayout = new QHBoxLayout;
     QHBoxLayout *denominatorLayout = new QHBoxLayout;
-    QLabel *numeratorLabel = new QLabel("Числитель:\t");
-    QLabel *denominatorLabel = new QLabel("Знаменатель:\t");
-    numeratorLayout->addWidget(numeratorLabel);
-    denominatorLayout->addWidget(denominatorLabel);
-
-    QLineEdit *a[6], *b[6];
-    for (int i = 0; i < 6; ++i) {
-        a[i] = new QLineEdit;
-        b[i] = new QLineEdit;
-        numeratorLayout->addWidget(a[i]);
-        denominatorLayout->addWidget(b[i]);
-        if (i > 0) { // Добавление метки степени p, если это не свободный член
-            QLabel *label = new QLabel(QString("p<sup>%1</sup>").arg(i));
-            setFontSize(label, 16);
-            numeratorLayout->addWidget(label);
-            label = new QLabel(QString("p<sup>%1</sup>").arg(i));
-            setFontSize(label, 16);
-            denominatorLayout->addWidget(label);
-        }
-    }
 
     QDoubleValidator *realNumberValidator = new QDoubleValidator(this);
     realNumberValidator->setNotation(QDoubleValidator::StandardNotation);
 
-    for (int i = 0; i < 6; ++i) {
-        a[i]->setValidator(realNumberValidator);
-        b[i]->setValidator(realNumberValidator);
-
-        a[i]->setMinimumSize(QSize(10, 0)); // Минимальный размер
-        a[i]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed); // Расширение при необходимости
-        b[i]->setMinimumSize(QSize(10, 0));
-        b[i]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-
-        a[i]->setMinimumSize(QSize(50, 50));
-        b[i]->setMinimumSize(QSize(50, 50));
-    }
+    createLineEdit("Числитель:\t", numeratorLayout, realNumberValidator);
+    createLineEdit("Знаменатель:\t", denominatorLayout, realNumberValidator);
 
     QFrame *line = new QFrame();
     line->setFrameShape(QFrame::HLine);
     line->setFrameShadow(QFrame::Sunken);
+    line->setMidLineWidth(100);
 
-    // Добавление макетов в общий макет
-    coefficientsLayout->addLayout(numeratorLayout);
-    coefficientsLayout->addWidget(line);
-    coefficientsLayout->addLayout(denominatorLayout);
+    QVBoxLayout *transferFunctionLayout = new QVBoxLayout();
+    transferFunctionLayout->addLayout(numeratorLayout);
+    transferFunctionLayout->addWidget(line);
+    transferFunctionLayout->addLayout(denominatorLayout);
 
-    QSpacerItem* verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
-    coefficientsLayout->addItem(verticalSpacer);
+    QHBoxLayout *uppLayout = new QHBoxLayout;
+    uppLayout->addWidget(transferFunctionLabel);
+    uppLayout->addLayout(transferFunctionLayout);
 
-    mainLayout->addWidget(label);
-    mainLayout->addLayout(coefficientsLayout);
+    QVBoxLayout *resLayout = new QVBoxLayout;
+    resLayout->addLayout(uppLayout);
+    resLayout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
 
-    numTab->setLayout(mainLayout);
+    QWidget *numTab = new QWidget();
+    numTab->setLayout(resLayout);
     return numTab;
 }

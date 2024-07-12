@@ -19,11 +19,7 @@ using namespace QtCharts;
 
 class GraphWindow : public QWidget {
 private:
-    void setFontSize(QLabel* label, int size) {
-        QFont labelFont = label->font();
-        labelFont.setPointSize(size);
-        label->setFont(labelFont);
-    }
+    void createLineEdit(const char* name, QHBoxLayout* layout, QDoubleValidator* validator);
 
     QWidget* createExpTab();
     QWidget* createNumTab();

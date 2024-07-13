@@ -19,9 +19,11 @@ using namespace QtCharts;
 
 class GraphWindow : public QWidget {
 private:
+    static QString getColor(const double& value);
     static void adjustLineEditWidth(QLineEdit *lineEdit);
+    static QVector<double> getLineEditData(QHBoxLayout *layout);
     static void updateStyleSheetProperty(QLineEdit *lineEdit, const QString &property, const QString &value);
-    void createLineEdit(const char* name, QHBoxLayout* layout, QDoubleValidator* validator);
+    static void createLineEdit(const char* name, QHBoxLayout* layout, QDoubleValidator* validator);
 
     QWidget* createExpTab();
     QWidget* createNumTab();
@@ -76,7 +78,6 @@ private:
     QChart *chart;
     QChartView *chartView;
     QVector <QPointF> points; // Данные для графика
-    static QString getColor(const double &value);
 };
 
 #endif //REGVALVE_APPLICATION_H

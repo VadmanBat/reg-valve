@@ -1,12 +1,29 @@
 //
-// Created by Vadma on 08.07.2024.
+// Created by Vadma on 13.07.2024.
 //
 #include "../application.h"
+
+QString GraphWindow::getColor(const double& value) {
+    if (value == 0)
+        return "violet";
+    return value > 0 ? "blue" : "red";
+}
 
 void GraphWindow::adjustLineEditWidth(QLineEdit* lineEdit) {
     int width(lineEdit->fontMetrics().horizontalAdvance(lineEdit->text()) + 10);
     lineEdit->setMinimumWidth(width);
     lineEdit->setMaximumWidth(width);
+}
+
+QVector<double> GraphWindow::getLineEditData(QHBoxLayout* layout) {
+    QVector<double> data;
+    for (int i = 0; i < layout->count(); ++i) {
+        QLineEdit* lineEdit = qobject_cast<QLineEdit*>(layout->itemAt(i)->widget());
+        if (lineEdit) {
+            data.append(lineEdit->text().toDouble());
+        }
+    }
+    return data;
 }
 
 void GraphWindow::updateStyleSheetProperty(QLineEdit* lineEdit, const QString& property, const QString& value) {
@@ -19,12 +36,6 @@ void GraphWindow::updateStyleSheetProperty(QLineEdit* lineEdit, const QString& p
     else
         style += replacement;
     lineEdit->setStyleSheet(style);
-}
-
-QString GraphWindow::getColor(const double& value) {
-    if (value == 0)
-        return "violet";
-    return value > 0 ? "blue" : "red";
 }
 
 void GraphWindow::createLineEdit(const char* name, QHBoxLayout* layout, QDoubleValidator* validator) {
@@ -56,9 +67,7 @@ void GraphWindow::createLineEdit(const char* name, QHBoxLayout* layout, QDoubleV
 
             adjustLineEditWidth(lineEdit);
             text.replace(',', '.');
-            updateStyleSheetProperty(lineEdit, "color",
-                getColor(text.toDouble())
-            );
+            updateStyleSheetProperty(lineEdit, "color", getColor(text.toDouble());
         });
 
         lineEdit->setMinimumWidth(36);
@@ -66,41 +75,4 @@ void GraphWindow::createLineEdit(const char* name, QHBoxLayout* layout, QDoubleV
         lineEdit->setValidator(validator);
     }
     layout->setAlignment(Qt::AlignLeft);
-}
-
-QWidget* GraphWindow::createNumTab() {
-    QLabel *transferFunctionLabel = new QLabel("W<sub>ОУ</sub>(p) = ");
-    transferFunctionLabel->setAlignment(Qt::AlignCenter);
-    transferFunctionLabel->setStyleSheet("font-size: 24pt;");
-
-    QHBoxLayout *numeratorLayout = new QHBoxLayout;
-    QHBoxLayout *denominatorLayout = new QHBoxLayout;
-
-    QDoubleValidator *realNumberValidator = new QDoubleValidator(this);
-    realNumberValidator->setNotation(QDoubleValidator::StandardNotation);
-
-    createLineEdit("Числитель:\t", numeratorLayout, realNumberValidator);
-    createLineEdit("Знаменатель:\t", denominatorLayout, realNumberValidator);
-
-    QFrame *line = new QFrame();
-    line->setFrameShape(QFrame::HLine);
-    line->setFrameShadow(QFrame::Sunken);
-    line->setMidLineWidth(10);
-
-    QVBoxLayout *transferFunctionLayout = new QVBoxLayout();
-    transferFunctionLayout->addLayout(numeratorLayout);
-    transferFunctionLayout->addWidget(line);
-    transferFunctionLayout->addLayout(denominatorLayout);
-
-    QHBoxLayout *uppLayout = new QHBoxLayout;
-    uppLayout->addWidget(transferFunctionLabel);
-    uppLayout->addLayout(transferFunctionLayout);
-
-    QVBoxLayout *resLayout = new QVBoxLayout;
-    resLayout->addLayout(uppLayout);
-    resLayout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
-
-    QWidget *numTab = new QWidget();
-    numTab->setLayout(resLayout);
-    return numTab;
 }

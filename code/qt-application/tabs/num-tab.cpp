@@ -35,16 +35,59 @@ QWidget* GraphWindow::createNumTab() {
     connect(calculateButton, &QPushButton::clicked, [this, numeratorLayout, denominatorLayout] {
         auto numeratorData = getLineEditData(numeratorLayout);
         auto denominatorData = getLineEditData(denominatorLayout);
-        //calculateAndPlot(numeratorData, denominatorData);
-        auto x = MathCore::calculateFrequencyResponse(numeratorData, denominatorData, {});
+
+        std::vector <double> time;
+        for (double t = 0.00; t < 60; t += 0.01)
+            time.push_back(t);
+
+        std::vector <double> omega;
+        for (double w = 0.01; w < 60; w += 0.01)
+            omega.push_back(w);
+
+        GraphWindow::addPoints(numChartH,
+                               MathCore::calculateImpulseResponse(
+                                   numeratorData,
+                                   denominatorData,
+                                   time),
+                               "Тест");
+        GraphWindow::addComplexPoints(numChartFreqResp,
+                                      MathCore::calculateFrequencyResponse(
+                                          numeratorData,
+                                          denominatorData,
+                                          omega),
+                                      "Тест");
+        /*setChart(numChartFreqResp,
+                 "Комплексно-частотная характеристика (КЧХ)",
+                 "Реальная ось", "Мнимая ось"
+        );*/
     });
+
+    numChartH = new QChart();
+    numChartFreqResp = new QChart();
+
+    setChart(numChartH,
+             "Переходная характеристика",
+             "Ось времени", "Ось значений"
+    );
+    setChart(numChartFreqResp,
+             "Комплексно-частотная характеристика (КЧХ)",
+             "Реальная ось", "Мнимая ось"
+    );
+
+    QWidget *numTab = new QWidget();
+
+    numChartHView = new QChartView(numChartH, numTab);
+    numChartFreqRespView = new QChartView(numChartFreqResp, numTab);
+
+    QHBoxLayout* chartsLayout = new QHBoxLayout;
+    chartsLayout->addWidget(numChartHView);
+    chartsLayout->addWidget(numChartFreqRespView);
 
     QVBoxLayout *resLayout = new QVBoxLayout;
     resLayout->addLayout(uppLayout);
     resLayout->addWidget(calculateButton); // Добавляем кнопку в макет
-    resLayout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
+    resLayout->addLayout(chartsLayout);
 
-    QWidget *numTab = new QWidget();
     numTab->setLayout(resLayout);
     return numTab;
 }

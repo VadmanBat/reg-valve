@@ -93,7 +93,7 @@ void GraphWindow::setChart(
 {
     chart->setTitle(title);
 
-    QLineSeries *series = new QLineSeries();
+    /*QLineSeries *series = new QLineSeries();
     series->setName("КЧХ выбранного сигнала");
     series->append(0, 0);
     series->append(1, 1);
@@ -106,19 +106,19 @@ void GraphWindow::setChart(
     series->append(8, 64);
     series->append(9, 81);
     series->append(10, 100);
-    chart->addSeries(series);
+    chart->addSeries(series);*/
 
     chart->createDefaultAxes();
 
     QAbstractAxis *axisX = chart->axes(Qt::Horizontal).first();
     QAbstractAxis *axisY = chart->axes(Qt::Vertical).first();
 
-    if (QValueAxis *axisXValue = qobject_cast<QValueAxis *>(axisX); axisXValue) {
-        axisXValue->setTitleText(axisXTitle);
-        axisXValue->setLabelFormat("%.2f"); // Формат подписи оси X
-    }
-    if (QValueAxis *axisYValue = qobject_cast<QValueAxis *>(axisY); axisYValue) {
-        axisYValue->setTitleText(axisYTitle);
-        axisYValue->setLabelFormat("%.2f"); // Формат подписи оси Y
-    }
+    //if (QValueAxis *axisXValue = qobject_cast<QValueAxis *>(axisX); axisXValue) {
+        /*axisXValue->setTitleText(axisXTitle);
+        axisXValue->setLabelFormat("%.2f");*/ // Формат подписи оси X
+    //}
+    //if (QValueAxis *axisYValue = qobject_cast<QValueAxis *>(axisY); axisYValue) {
+        /*axisYValue->setTitleText(axisYTitle);
+        axisYValue->setLabelFormat("%.2f");*/ // Формат подписи оси Y
+    //}
 }

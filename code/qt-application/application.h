@@ -25,7 +25,25 @@ private:
     static MathCore::VectorComp getLineEditData(QHBoxLayout *layout);
     static void updateStyleSheetProperty(QLineEdit *lineEdit, const QString &property, const QString &value);
     static void createLineEdit(const char* name, QHBoxLayout* layout, QDoubleValidator* validator);
-    static void setChart(QChart* chart, const QString& title, const QString& axisXTitle, const QString& axisXYitle);
+
+    static void setChart(QChart* chart, const QString& title, const QString& axisXTitle, const QString& axisYTitle);
+
+    template <class Points>
+    void addPoints(QChart* chart, const Points& points, const QString& title) {
+        QLineSeries *series = new QLineSeries();
+        series->setName(title);
+        for (const auto& [x, y] : points)
+            series->append(x, y);
+        chart->addSeries(series);
+    }
+    template <class Points>
+    void addComplexPoints(QChart* chart, const Points& points, const QString& title) {
+        QLineSeries *series = new QLineSeries();
+        series->setName(title);
+        for (const auto& point : points)
+            series->append(point.real(), point.imag());
+        chart->addSeries(series);
+    }
 
     QWidget* createExpTab();
     QWidget* createNumTab();
@@ -50,13 +68,6 @@ private slots:
             // Например, вы можете прочитать файл и заполнить QVector<QPointF> points данными для построения графика
             // ...
 
-            QLineSeries *series = new QLineSeries();
-            series->setName("КЧХ выбранного сигнала");
-            for (const QPointF &point : points) {
-                series->append(point);
-            }
-            expChartH->addSeries(series);
-
         }
     }
 
@@ -65,7 +76,6 @@ private:
     QChart *numChartH, *numChartFreqResp;
     QChartView *expChartHView, *expChartFreqRespView;
     QChartView *numChartHView, *numChartFreqRespView;
-    QVector <QPointF> points; // Данные для графика
 };
 
 #endif //REGVALVE_APPLICATION_H

@@ -3,24 +3,69 @@
 //
 #include "../application.h"
 
+void GraphWindow::adjustLineEditWidth(QLineEdit* lineEdit) {
+    int width(lineEdit->fontMetrics().horizontalAdvance(lineEdit->text()) + 10);
+    lineEdit->setMinimumWidth(width);
+    lineEdit->setMaximumWidth(width);
+}
+
+void GraphWindow::updateStyleSheetProperty(QLineEdit* lineEdit, const QString& property, const QString& value) {
+    QString style = lineEdit->styleSheet();
+    QString replacement = QString("%1: %2;").arg(property).arg(value);
+    if (style.contains(property)) {
+        QString pattern = QString("%1: \\w+;").arg(property);
+        style = style.replace(QRegExp(pattern), replacement);
+    }
+    else
+        style += replacement;
+    lineEdit->setStyleSheet(style);
+}
+
+QString GraphWindow::getColor(const double& value) {
+    if (value == 0)
+        return "violet";
+    return value > 0 ? "blue" : "red";
+}
+
 void GraphWindow::createLineEdit(const char* name, QHBoxLayout* layout, QDoubleValidator* validator) {
     layout->addWidget(new QLabel(name));
 
-    QLineEdit *lineEdit[6];
-    for (int i = 0; i < 6; ++i) {
-        layout->addWidget(lineEdit[i] = new QLineEdit);
-        lineEdit[i]->setAlignment(Qt::AlignRight);
-        lineEdit[i]->setStyleSheet("font-size: 16pt;");
-        lineEdit[i]->setText("+0");
+    int p(-1);
+    QLineEdit* lineEdits[6];
+    for (auto lineEdit : lineEdits) {
+        layout->addWidget(lineEdit = new QLineEdit);
+        lineEdit->setAlignment(Qt::AlignRight);
+        lineEdit->setStyleSheet("font-size: 16pt; color: violet;");
+        lineEdit->setText("+0");
 
-        if (i > 0) { // Добавление метки степени p, если это не свободный член
-            QLabel *label = new QLabel(QString("p<sup>%1</sup>").arg(i));
-            label->setStyleSheet("font-size: 16pt;");
-            layout->addWidget(label);
-        }
+        QLabel *label = new QLabel(QString("p<sup>%1</sup>").arg(++p));
+        label->setStyleSheet("font-size: 16pt;");
+        layout->addWidget(label);
 
-        lineEdit[i]->setValidator(validator);
+        lineEdit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        connect(lineEdit, &QLineEdit::textChanged, [lineEdit] {
+            auto text(lineEdit->text());
+            if (text.isEmpty()) {
+                lineEdit->setText("+0");
+                return;
+            }
+            if (lineEdit->text().at(0).isDigit()) {
+                lineEdit->setText('+' + lineEdit->text());
+                return;
+            }
+
+            adjustLineEditWidth(lineEdit);
+            text.replace(',', '.');
+            updateStyleSheetProperty(lineEdit, "color",
+                getColor(text.toDouble())
+            );
+        });
+
+        lineEdit->setMinimumWidth(36);
+        lineEdit->setMaximumWidth(36);
+        lineEdit->setValidator(validator);
     }
+    layout->setAlignment(Qt::AlignLeft);
 }
 
 QWidget* GraphWindow::createNumTab() {
@@ -40,7 +85,7 @@ QWidget* GraphWindow::createNumTab() {
     QFrame *line = new QFrame();
     line->setFrameShape(QFrame::HLine);
     line->setFrameShadow(QFrame::Sunken);
-    line->setMidLineWidth(100);
+    line->setMidLineWidth(10);
 
     QVBoxLayout *transferFunctionLayout = new QVBoxLayout();
     transferFunctionLayout->addLayout(numeratorLayout);

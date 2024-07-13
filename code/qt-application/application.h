@@ -19,6 +19,8 @@ using namespace QtCharts;
 
 class GraphWindow : public QWidget {
 private:
+    static void adjustLineEditWidth(QLineEdit *lineEdit);
+    static void updateStyleSheetProperty(QLineEdit *lineEdit, const QString &property, const QString &value);
     void createLineEdit(const char* name, QHBoxLayout* layout, QDoubleValidator* validator);
 
     QWidget* createExpTab();
@@ -74,6 +76,7 @@ private:
     QChart *chart;
     QChartView *chartView;
     QVector <QPointF> points; // Данные для графика
+    static QString getColor(const double &value);
 };
 
 #endif //REGVALVE_APPLICATION_H

@@ -9,18 +9,26 @@ QString GraphWindow::getColor(const double& value) {
     return value > 0 ? "blue" : "red";
 }
 
+double GraphWindow::getValue(QString text) {
+    text.replace(',', '.');
+    if (text.count() == 1)
+        text += '1';
+    return text.toDouble();
+}
+
 void GraphWindow::adjustLineEditWidth(QLineEdit* lineEdit) {
     int width(lineEdit->fontMetrics().horizontalAdvance(lineEdit->text()) + 10);
     lineEdit->setMinimumWidth(width);
     lineEdit->setMaximumWidth(width);
 }
 
-QVector<double> GraphWindow::getLineEditData(QHBoxLayout* layout) {
-    QVector<double> data;
-    for (int i = 0; i < layout->count(); ++i) {
+MathCore::VectorComp GraphWindow::getLineEditData(QHBoxLayout* layout) {
+    MathCore::VectorComp data;
+    const auto count(layout->count());
+    for (int i = 0; i < count; ++i) {
         QLineEdit* lineEdit = qobject_cast<QLineEdit*>(layout->itemAt(i)->widget());
         if (lineEdit) {
-            data.append(lineEdit->text().toDouble());
+            data.emplace_back(getValue(lineEdit->text()), 0);
         }
     }
     return data;
@@ -66,8 +74,7 @@ void GraphWindow::createLineEdit(const char* name, QHBoxLayout* layout, QDoubleV
             }
 
             adjustLineEditWidth(lineEdit);
-            text.replace(',', '.');
-            updateStyleSheetProperty(lineEdit, "color", getColor(text.toDouble());
+            updateStyleSheetProperty(lineEdit, "color", getColor(getValue(text)));
         });
 
         lineEdit->setMinimumWidth(36);
@@ -75,4 +82,43 @@ void GraphWindow::createLineEdit(const char* name, QHBoxLayout* layout, QDoubleV
         lineEdit->setValidator(validator);
     }
     layout->setAlignment(Qt::AlignLeft);
+}
+
+void GraphWindow::setChart(
+    QChart* chart,
+    const QString& title,
+    const QString& axisXTitle,
+    const QString& axisYTitle
+)
+{
+    chart->setTitle(title);
+
+    QLineSeries *series = new QLineSeries();
+    series->setName("КЧХ выбранного сигнала");
+    series->append(0, 0);
+    series->append(1, 1);
+    series->append(2, 4);
+    series->append(3, 9);
+    series->append(4, 16);
+    series->append(5, 25);
+    series->append(6, 36);
+    series->append(7, 49);
+    series->append(8, 64);
+    series->append(9, 81);
+    series->append(10, 100);
+    chart->addSeries(series);
+
+    chart->createDefaultAxes();
+
+    QAbstractAxis *axisX = chart->axes(Qt::Horizontal).first();
+    QAbstractAxis *axisY = chart->axes(Qt::Vertical).first();
+
+    if (QValueAxis *axisXValue = qobject_cast<QValueAxis *>(axisX); axisXValue) {
+        axisXValue->setTitleText(axisXTitle);
+        axisXValue->setLabelFormat("%.2f"); // Формат подписи оси X
+    }
+    if (QValueAxis *axisYValue = qobject_cast<QValueAxis *>(axisY); axisYValue) {
+        axisYValue->setTitleText(axisYTitle);
+        axisYValue->setLabelFormat("%.2f"); // Формат подписи оси Y
+    }
 }

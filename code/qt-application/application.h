@@ -20,10 +20,12 @@ using namespace QtCharts;
 class GraphWindow : public QWidget {
 private:
     static QString getColor(const double& value);
+    static double getValue(QString text);
     static void adjustLineEditWidth(QLineEdit *lineEdit);
-    static QVector<double> getLineEditData(QHBoxLayout *layout);
+    static MathCore::VectorComp getLineEditData(QHBoxLayout *layout);
     static void updateStyleSheetProperty(QLineEdit *lineEdit, const QString &property, const QString &value);
     static void createLineEdit(const char* name, QHBoxLayout* layout, QDoubleValidator* validator);
+    static void setChart(QChart* chart, const QString& title, const QString& axisXTitle, const QString& axisXYitle);
 
     QWidget* createExpTab();
     QWidget* createNumTab();
@@ -48,35 +50,21 @@ private slots:
             // Например, вы можете прочитать файл и заполнить QVector<QPointF> points данными для построения графика
             // ...
 
-
             QLineSeries *series = new QLineSeries();
             series->setName("КЧХ выбранного сигнала");
             for (const QPointF &point : points) {
                 series->append(point);
             }
+            expChartH->addSeries(series);
 
-            chart->setTitle("Комплексно-частотная характеристика (КЧХ)");
-            chart->addSeries(series);
-            chart->createDefaultAxes();
-
-            QAbstractAxis *axisX = chart->axes(Qt::Horizontal).first();
-            QAbstractAxis *axisY = chart->axes(Qt::Vertical).first();
-
-            if (QValueAxis *axisXValue = qobject_cast<QValueAxis *>(axisX); axisXValue) {
-                axisXValue->setTitleText("Реальная ось");
-                axisXValue->setLabelFormat("%.2f"); // Формат подписи оси X
-            }
-
-            if (QValueAxis *axisYValue = qobject_cast<QValueAxis *>(axisY); axisYValue) {
-                axisYValue->setTitleText("Мнимая ось");
-                axisYValue->setLabelFormat("%.2f"); // Формат подписи оси Y
-            }
         }
     }
 
 private:
-    QChart *chart;
-    QChartView *chartView;
+    QChart *expChartH, *expChartFreqResp;
+    QChart *numChartH, *numChartFreqResp;
+    QChartView *expChartHView, *expChartFreqRespView;
+    QChartView *numChartHView, *numChartFreqRespView;
     QVector <QPointF> points; // Данные для графика
 };
 

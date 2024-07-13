@@ -10,14 +10,13 @@
 #include <valarray>
 
 class MathCore {
-private:
+public:
     using Complex       = std::complex <double>;
 
     using VectorLD      = std::vector <double>;
     using VectorComp    = std::vector <Complex>;
     using CArray        = std::valarray <Complex>;
 
-public:
     // Функция для вычисления КЧХ по передаточной функции
     static VectorComp calculateFrequencyResponse(
             const VectorComp& numeratorCoeffs,      // Коэффициенты числителя

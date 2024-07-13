@@ -33,9 +33,10 @@ QWidget* GraphWindow::createNumTab() {
 
     QPushButton *calculateButton = new QPushButton("Рассчитать");
     connect(calculateButton, &QPushButton::clicked, [this, numeratorLayout, denominatorLayout] {
-        QVector<double> numeratorData = getLineEditData(numeratorLayout);
-        QVector<double> denominatorData = getLineEditData(denominatorLayout);
+        auto numeratorData = getLineEditData(numeratorLayout);
+        auto denominatorData = getLineEditData(denominatorLayout);
         //calculateAndPlot(numeratorData, denominatorData);
+        auto x = MathCore::calculateFrequencyResponse(numeratorData, denominatorData, {});
     });
 
     QVBoxLayout *resLayout = new QVBoxLayout;

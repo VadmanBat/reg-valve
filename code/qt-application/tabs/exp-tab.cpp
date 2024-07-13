@@ -13,15 +13,31 @@ using namespace QtCharts;
 
 QWidget* GraphWindow::createExpTab() {
     QWidget *expTab = new QWidget();
-    QVBoxLayout *graphLayout = new QVBoxLayout(expTab);
+    QVBoxLayout *resLayout = new QVBoxLayout(expTab);
     QPushButton *openFileButton = new QPushButton("Открыть файл", expTab);
     connect(openFileButton, &QPushButton::clicked, this, &GraphWindow::openFile);
-    graphLayout->addWidget(openFileButton);
+    resLayout->addWidget(openFileButton);
 
-    chart = new QChart();
-    chartView = new QChartView(chart, expTab);
-    graphLayout->addWidget(chartView);
+    expChartH = new QChart();
+    expChartFreqResp = new QChart();
 
-    expTab->setLayout(graphLayout);
+    setChart(expChartH,
+             "Переходная характеристика",
+             "Ось времени", "Ось значений"
+    );
+    setChart(expChartFreqResp,
+             "Комплексно-частотная характеристика (КЧХ)",
+             "Реальная ось", "Мнимая ось"
+    );
+
+    expChartHView = new QChartView(expChartH, expTab);
+    expChartFreqRespView = new QChartView(expChartFreqResp, expTab);
+
+    QHBoxLayout* chartsLayout = new QHBoxLayout;
+    chartsLayout->addWidget(expChartHView);
+    chartsLayout->addWidget(expChartFreqRespView);
+    resLayout->addLayout(chartsLayout);
+
+    expTab->setLayout(resLayout);
     return expTab;
 }

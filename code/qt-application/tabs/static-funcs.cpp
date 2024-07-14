@@ -22,16 +22,16 @@ void GraphWindow::adjustLineEditWidth(QLineEdit* lineEdit) {
     lineEdit->setMaximumWidth(width);
 }
 
-MathCore::VectorComp GraphWindow::getLineEditData(QHBoxLayout* layout) {
-    MathCore::VectorComp data;
+MathCore::VectorLD GraphWindow::getLineEditData(QHBoxLayout* layout) {
+    MathCore::VectorLD data;
+    data.reserve(6);
     const auto count(layout->count());
     for (int i = 0; i < count; ++i) {
         QLineEdit* lineEdit = qobject_cast<QLineEdit*>(layout->itemAt(i)->widget());
-        if (lineEdit) {
-            data.emplace_back(getValue(lineEdit->text()), 0);
-        }
+        if (lineEdit)
+            data.emplace_back(getValue(lineEdit->text()));
     }
-    return data;
+    return reverseOptimize(data);
 }
 
 void GraphWindow::updateStyleSheetProperty(QLineEdit* lineEdit, const QString& property, const QString& value) {
@@ -44,6 +44,18 @@ void GraphWindow::updateStyleSheetProperty(QLineEdit* lineEdit, const QString& p
     else
         style += replacement;
     lineEdit->setStyleSheet(style);
+}
+
+QString GraphWindow::correctLine(const QString& text) {
+    if (text.isEmpty())
+        return "+0";
+    if (text.at(0) == ',')
+        return "+0" + text;
+    if (text.at(0).isDigit())
+        return '+' + text;
+    if (text.count() > 1 && text.at(1) == ',')
+        return text.at(0) + '0' + text.mid(1);
+    return "";
 }
 
 void GraphWindow::createLineEdit(const char* name, QHBoxLayout* layout, QDoubleValidator* validator) {
@@ -64,15 +76,10 @@ void GraphWindow::createLineEdit(const char* name, QHBoxLayout* layout, QDoubleV
         lineEdit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         connect(lineEdit, &QLineEdit::textChanged, [lineEdit] {
             auto text(lineEdit->text());
-            if (text.isEmpty()) {
-                lineEdit->setText("+0");
+            if (auto correctedLine(correctLine(text)); !correctedLine.isEmpty()) {
+                lineEdit->setText(correctedLine);
                 return;
             }
-            if (lineEdit->text().at(0).isDigit()) {
-                lineEdit->setText('+' + lineEdit->text());
-                return;
-            }
-
             adjustLineEditWidth(lineEdit);
             updateStyleSheetProperty(lineEdit, "color", getColor(getValue(text)));
         });
@@ -82,43 +89,4 @@ void GraphWindow::createLineEdit(const char* name, QHBoxLayout* layout, QDoubleV
         lineEdit->setValidator(validator);
     }
     layout->setAlignment(Qt::AlignLeft);
-}
-
-void GraphWindow::setChart(
-    QChart* chart,
-    const QString& title,
-    const QString& axisXTitle,
-    const QString& axisYTitle
-)
-{
-    chart->setTitle(title);
-
-    /*QLineSeries *series = new QLineSeries();
-    series->setName("КЧХ выбранного сигнала");
-    series->append(0, 0);
-    series->append(1, 1);
-    series->append(2, 4);
-    series->append(3, 9);
-    series->append(4, 16);
-    series->append(5, 25);
-    series->append(6, 36);
-    series->append(7, 49);
-    series->append(8, 64);
-    series->append(9, 81);
-    series->append(10, 100);
-    chart->addSeries(series);*/
-
-    chart->createDefaultAxes();
-
-    QAbstractAxis *axisX = chart->axes(Qt::Horizontal).first();
-    QAbstractAxis *axisY = chart->axes(Qt::Vertical).first();
-
-    //if (QValueAxis *axisXValue = qobject_cast<QValueAxis *>(axisX); axisXValue) {
-        /*axisXValue->setTitleText(axisXTitle);
-        axisXValue->setLabelFormat("%.2f");*/ // Формат подписи оси X
-    //}
-    //if (QValueAxis *axisYValue = qobject_cast<QValueAxis *>(axisY); axisYValue) {
-        /*axisYValue->setTitleText(axisYTitle);
-        axisYValue->setLabelFormat("%.2f");*/ // Формат подписи оси Y
-    //}
 }

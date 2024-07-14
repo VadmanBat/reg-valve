@@ -36,51 +36,37 @@ QWidget* GraphWindow::createNumTab() {
         auto numeratorData = getLineEditData(numeratorLayout);
         auto denominatorData = getLineEditData(denominatorLayout);
 
-        std::vector <double> time;
-        for (double t = 0.00; t < 60; t += 0.01)
-            time.push_back(t);
+        auto time(MathCore::range(0.5, 60, 0.5));
+        auto freq(MathCore::range(0, 2, 0.01));
 
-        std::vector <double> omega;
-        for (double w = 0.01; w < 60; w += 0.01)
-            omega.push_back(w);
+        auto impulseResponse = MathCore::talbotMethod(numeratorData, denominatorData, time);
+        auto frequencyResponse = MathCore::calculateFrequencyResponse(numeratorData, denominatorData, freq);
 
-        GraphWindow::addPoints(numChartH,
-                               MathCore::calculateImpulseResponse(
-                                   numeratorData,
-                                   denominatorData,
-                                   time),
-                               "Тест");
-        GraphWindow::addComplexPoints(numChartFreqResp,
-                                      MathCore::calculateFrequencyResponse(
-                                          numeratorData,
-                                          denominatorData,
-                                          omega),
-                                      "Тест");
-        /*setChart(numChartFreqResp,
-                 "Комплексно-частотная характеристика (КЧХ)",
-                 "Реальная ось", "Мнимая ось"
-        );*/
+        removeAllSeries(numChartTranResp);
+        removeAllSeries(numChartFreqResp);
+
+        GraphWindow::addPoints(numChartTranResp, impulseResponse, "Тест");
+        GraphWindow::addComplexPoints(numChartFreqResp, frequencyResponse, "Тест");
+
+        updateAxes(numChartTranResp);
+        updateAxes(numChartFreqResp);
     });
 
-    numChartH = new QChart();
+    numChartTranResp = new QChart();
     numChartFreqResp = new QChart();
 
-    setChart(numChartH,
-             "Переходная характеристика",
-             "Ось времени", "Ось значений"
-    );
-    setChart(numChartFreqResp,
-             "Комплексно-частотная характеристика (КЧХ)",
-             "Реальная ось", "Мнимая ось"
-    );
+    numChartTranResp->setTitle("Переходная характеристика");
+    numChartFreqResp->setTitle("Комплексно-частотная характеристика (КЧХ)");
+    createAxes(numChartTranResp, "Ось времени", "Ось значений");
+    createAxes(numChartFreqResp, "Реальная ось", "Мнимая ось");
 
     QWidget *numTab = new QWidget();
 
-    numChartHView = new QChartView(numChartH, numTab);
+    numChartTranRespView = new QChartView(numChartTranResp, numTab);
     numChartFreqRespView = new QChartView(numChartFreqResp, numTab);
 
     QHBoxLayout* chartsLayout = new QHBoxLayout;
-    chartsLayout->addWidget(numChartHView);
+    chartsLayout->addWidget(numChartTranRespView);
     chartsLayout->addWidget(numChartFreqRespView);
 
     QVBoxLayout *resLayout = new QVBoxLayout;

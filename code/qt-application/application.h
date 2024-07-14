@@ -22,11 +22,27 @@ private:
     static QString getColor(const double& value);
     static double getValue(QString text);
     static void adjustLineEditWidth(QLineEdit *lineEdit);
-    static MathCore::VectorComp getLineEditData(QHBoxLayout *layout);
+
+    template <class Container>
+    static Container reverseOptimize(const Container& container) {
+        auto first(container.rbegin());
+        const auto last(container.rend());
+        if (first == last)
+            return Container();
+        while (first != last && *first == 0)
+            ++first;
+        return Container(first, last);
+    }
+
+    static MathCore::VectorLD getLineEditData(QHBoxLayout *layout);
     static void updateStyleSheetProperty(QLineEdit *lineEdit, const QString &property, const QString &value);
+    static QString correctLine(const QString &text);
     static void createLineEdit(const char* name, QHBoxLayout* layout, QDoubleValidator* validator);
 
-    static void setChart(QChart* chart, const QString& title, const QString& axisXTitle, const QString& axisYTitle);
+    /// charts-funcs:
+    static void createAxes(QChart *chart, const QString &titleX, const QString &titleY);
+    static void removeAllSeries(QChart *chart);
+    static void updateAxes(QChart *chart);
 
     template <class Points>
     void addPoints(QChart* chart, const Points& points, const QString& title) {
@@ -43,6 +59,15 @@ private:
         for (const auto& point : points)
             series->append(point.real(), point.imag());
         chart->addSeries(series);
+    }
+    template <class Point>
+    void appendPoint(QChart *chart, const Point& point, int index = 0) {
+        const auto& [x, y](point);
+        static_cast<QScatterSeries*>(chart->series().at(index))->append(x, y);
+    }
+    template <class Point>
+    void appendComplexPoint(QChart *chart, const Point& point, int index = 0) {
+        static_cast<QScatterSeries*>(chart->series().at(index))->append(point.real(), point.imag());
     }
 
     QWidget* createExpTab();
@@ -72,10 +97,10 @@ private slots:
     }
 
 private:
-    QChart *expChartH, *expChartFreqResp;
-    QChart *numChartH, *numChartFreqResp;
-    QChartView *expChartHView, *expChartFreqRespView;
-    QChartView *numChartHView, *numChartFreqRespView;
+    QChart *expChartTranResp, *expChartFreqResp;
+    QChart *numChartTranResp, *numChartFreqResp;
+    QChartView *expChartTranRespView, *expChartFreqRespView;
+    QChartView *numChartTranRespView, *numChartFreqRespView;
 };
 
 #endif //REGVALVE_APPLICATION_H

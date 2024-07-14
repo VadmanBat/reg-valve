@@ -18,23 +18,19 @@ QWidget* GraphWindow::createExpTab() {
     connect(openFileButton, &QPushButton::clicked, this, &GraphWindow::openFile);
     resLayout->addWidget(openFileButton);
 
-    expChartH = new QChart();
+    expChartTranResp = new QChart();
     expChartFreqResp = new QChart();
 
-    setChart(expChartH,
-             "Переходная характеристика",
-             "Ось времени", "Ось значений"
-    );
-    setChart(expChartFreqResp,
-             "Комплексно-частотная характеристика (КЧХ)",
-             "Реальная ось", "Мнимая ось"
-    );
+    expChartTranResp->setTitle("Переходная характеристика");
+    expChartFreqResp->setTitle("Комплексно-частотная характеристика (КЧХ)");
+    createAxes(expChartTranResp, "Ось времени", "Ось значений");
+    createAxes(expChartFreqResp, "Реальная ось", "Мнимая ось");
 
-    expChartHView = new QChartView(expChartH, expTab);
+    expChartTranRespView = new QChartView(expChartTranResp, expTab);
     expChartFreqRespView = new QChartView(expChartFreqResp, expTab);
 
     QHBoxLayout* chartsLayout = new QHBoxLayout;
-    chartsLayout->addWidget(expChartHView);
+    chartsLayout->addWidget(expChartTranRespView);
     chartsLayout->addWidget(expChartFreqRespView);
     resLayout->addLayout(chartsLayout);
 

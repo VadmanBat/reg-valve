@@ -36,16 +36,20 @@ QWidget* GraphWindow::createNumTab() {
         auto numeratorData = getLineEditData(numeratorLayout);
         auto denominatorData = getLineEditData(denominatorLayout);
 
-        auto time(MathCore::range(0.5, 60, 0.5));
+        auto time(MathCore::range(0, 120, 0.5));
         auto freq(MathCore::range(0, 2, 0.01));
 
-        auto impulseResponse = MathCore::talbotMethod(numeratorData, denominatorData, time);
+        //auto impulseResponse = MathCore::talbotMethod(numeratorData, denominatorData, time);
+        auto transietResponse = MathCore::calculateTransietResponse(numeratorData, denominatorData, time);
         auto frequencyResponse = MathCore::calculateFrequencyResponse(numeratorData, denominatorData, freq);
+
+        /*for (auto [x, y] : transietResponse)
+            qDebug() << x << " - " << y << '\n';*/
 
         removeAllSeries(numChartTranResp);
         removeAllSeries(numChartFreqResp);
 
-        GraphWindow::addPoints(numChartTranResp, impulseResponse, "Тест");
+        GraphWindow::addPoints(numChartTranResp, transietResponse, "Тест");
         GraphWindow::addComplexPoints(numChartFreqResp, frequencyResponse, "Тест");
 
         updateAxes(numChartTranResp);

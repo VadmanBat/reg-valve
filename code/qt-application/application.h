@@ -34,7 +34,7 @@ private:
         return Container(first, last);
     }
 
-    static MathCore::VectorLD getLineEditData(QHBoxLayout *layout);
+    static MathCore::Vec getLineEditData(QHBoxLayout *layout);
     static void updateStyleSheetProperty(QLineEdit *lineEdit, const QString &property, const QString &value);
     static QString correctLine(const QString &text);
     static void createLineEdit(const char* name, QHBoxLayout* layout, QDoubleValidator* validator);

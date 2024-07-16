@@ -22,8 +22,8 @@ void GraphWindow::adjustLineEditWidth(QLineEdit* lineEdit) {
     lineEdit->setMaximumWidth(width);
 }
 
-MathCore::VectorLD GraphWindow::getLineEditData(QHBoxLayout* layout) {
-    MathCore::VectorLD data;
+MathCore::Vec GraphWindow::getLineEditData(QHBoxLayout* layout) {
+    MathCore::Vec data;
     data.reserve(6);
     const auto count(layout->count());
     for (int i = 0; i < count; ++i) {

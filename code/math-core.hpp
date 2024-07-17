@@ -87,10 +87,12 @@ public:
         const std::size_t n(coefficients.size());
         std::vector <Type> res(n + 1);
         res[0] = 1;
-        res[1] = coefficients[0];
-        for (std::size_t i = 1; i < n; ++i)
-            for (std::size_t j = i + 1; j >= 1; --j)
-                res[j] += coefficients[i] * res[j - 1];
+        if (n > 0) {
+            res[1] = coefficients[0];
+            for (std::size_t i = 1; i < n; ++i)
+                for (std::size_t j = i + 1; j >= 1; --j)
+                    res[j] += coefficients[i] * res[j - 1];
+        }
         return res;
     } /// N * log(N)
 
@@ -155,11 +157,6 @@ public:
     /// Решение матрицы
     template <typename Type>
     static std::vector <Type> solveMatrix(Type* matrix, std::size_t n) {
-        ///
-        for (std::size_t i = 0; i < n; ++i, std::cout << '\n')
-            for (std::size_t j = 0; j <= n; ++j)
-                std::cout << matrix[i * (n + 1) + j] << ' ';
-        ///
         for (std::size_t i = 0; i < n; ++i) {
             Type diagElement(matrix[i * (n + 1) + i]);
             for (std::size_t j = 0; j <= n; ++j)
@@ -176,11 +173,9 @@ public:
                     matrix[k * (n + 1) + j] -= factor * matrix[i * (n + 1) + j];
             }
         }
-        ///
         std::vector <Type> answers(n);
         for (std::size_t i = 0; i < n; ++i)
             answers[i] = matrix[i * (n + 1) + n];
-        ///
         return answers;
     } /// N^3
 
@@ -194,9 +189,9 @@ public:
             ContainerRoots x;
             x.reserve(n - 1);
             for (std::size_t j = 0; j < i; ++j)
-                x.push_back(roots[j]);
+                x.push_back(-roots[j]);
             for (std::size_t j = i + 1; j < n; ++j)
-                x.push_back(roots[j]);
+                x.push_back(-roots[j]);
             auto coefficients(multiplySimpleFractions(x));
             for (std::size_t j = 0; j < n; ++j)
                 matrix[j * (n + 1) + i] = coefficients[j];

@@ -15,10 +15,7 @@ find_package(Qt5 COMPONENTS Widgets Charts REQUIRED)
 
 file(GLOB_RECURSE HEADERS "code/*.h" "code/*.hpp")
 file(GLOB_RECURSE SOURCES "code/*.cpp")
-add_executable(${PROJECT_NAME} main.cpp ${HEADERS} ${SOURCES}
-        code/qt-application/tabs/num-tab.cpp
-        code/qt-application/tabs/static-funcs.cpp
-        code/qt-application/chart-funcs/static-funcs.cpp)
+add_executable(${PROJECT_NAME} main.cpp ${HEADERS} ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Charts)
 

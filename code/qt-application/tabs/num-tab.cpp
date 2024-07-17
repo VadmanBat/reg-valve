@@ -36,15 +36,20 @@ QWidget* GraphWindow::createNumTab() {
         auto numeratorData = getLineEditData(numeratorLayout);
         auto denominatorData = getLineEditData(denominatorLayout);
 
-        auto time(MathCore::range(0, 120, 0.5));
-        auto freq(MathCore::range(0, 2, 0.01));
+        if (numeratorData.size() > denominatorData.size())
+            return;
+
+        auto time(MathCore::range(0, 120, 100));
+        auto freq(MathCore::logRange(0.01, 1, 100, true));
 
         //auto impulseResponse = MathCore::talbotMethod(numeratorData, denominatorData, time);
-        auto transietResponse = MathCore::calculateTransietResponse(numeratorData, denominatorData, time);
-        auto frequencyResponse = MathCore::calculateFrequencyResponse(numeratorData, denominatorData, freq);
+        auto transietResponse = RegCore::calculateTransietResponse(numeratorData, denominatorData, time);
+        auto frequencyResponse = RegCore::calculateFrequencyResponse(numeratorData, denominatorData, freq);
 
-        /*for (auto [x, y] : transietResponse)
-            qDebug() << x << " - " << y << '\n';*/
+        /*for (auto x : frequencyResponse)
+            qDebug() << std::abs(x) << '\n';*/
+
+        qDebug() << RegCore::computeFrequencyRange(numeratorData, denominatorData, 0.1).second;
 
         removeAllSeries(numChartTranResp);
         removeAllSeries(numChartFreqResp);

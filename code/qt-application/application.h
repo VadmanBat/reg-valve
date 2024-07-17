@@ -12,8 +12,7 @@
 #include <QFileDialog>
 #include <QtCharts>
 
-#include "../code/math-core.h"
-#include "../code/convert-core.h"
+#include "../reg.core.hpp"
 
 using namespace QtCharts;
 

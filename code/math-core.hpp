@@ -81,9 +81,9 @@ public:
         return result;
     } /// N
 
-    /// Вычисление полинома при перемножении скобок (x - r1)(x - r2)
+    /// Вычисление полинома при перемножении простых скобок (x - r1)(x - r2)
     template <typename Type>
-    static std::vector <Type> multiply(const std::vector <Type>& coefficients) {
+    static std::vector <Type> multiplySimpleFractions(const std::vector <Type>& coefficients) {
         const std::size_t n(coefficients.size());
         std::vector <Type> res(n + 1);
         res[0] = 1;
@@ -155,10 +155,11 @@ public:
     /// Решение матрицы
     template <typename Type>
     static std::vector <Type> solveMatrix(Type* matrix, std::size_t n) {
+        ///
         for (std::size_t i = 0; i < n; ++i, std::cout << '\n')
             for (std::size_t j = 0; j <= n; ++j)
                 std::cout << matrix[i * (n + 1) + j] << ' ';
-
+        ///
         for (std::size_t i = 0; i < n; ++i) {
             Type diagElement(matrix[i * (n + 1) + i]);
             for (std::size_t j = 0; j <= n; ++j)
@@ -175,14 +176,16 @@ public:
                     matrix[k * (n + 1) + j] -= factor * matrix[i * (n + 1) + j];
             }
         }
+        ///
         std::vector <Type> answers(n);
         for (std::size_t i = 0; i < n; ++i)
             answers[i] = matrix[i * (n + 1) + n];
+        ///
         return answers;
     } /// N^3
 
-    template <class ContainerNumerator, class ContainerRoots>
-    static ContainerRoots computeCoefficients(const ContainerNumerator& numerator, const ContainerRoots& roots) {
+    template <class ContainerNumerator, class ContainerRoots, typename Type>
+    static ContainerRoots computeFactorsSimpleFractions(const ContainerNumerator& numerator, const ContainerRoots& roots, const Type& highestFactor = 1) {
         std::size_t n(roots.size());
         auto num(numerator);
         num.resize(n, 0);
@@ -191,15 +194,15 @@ public:
             ContainerRoots x;
             x.reserve(n - 1);
             for (std::size_t j = 0; j < i; ++j)
-                x.push_back(-roots[j]);
+                x.push_back(roots[j]);
             for (std::size_t j = i + 1; j < n; ++j)
-                x.push_back(-roots[j]);
-            auto coeffs(multiply(x));
+                x.push_back(roots[j]);
+            auto coefficients(multiplySimpleFractions(x));
             for (std::size_t j = 0; j < n; ++j)
-                matrix[j * (n + 1) + i] = coeffs[j];
+                matrix[j * (n + 1) + i] = coefficients[j];
         }
         for (std::size_t i = 0; i < n; ++i)
-            matrix[i * (n + 1) + n] = num[n - 1 - i];
+            matrix[i * (n + 1) + n] = num[n - 1 - i] / highestFactor;
         return solveMatrix(matrix, n);
     } /// N^2 * N * log(N) + N^3
 };

@@ -79,7 +79,7 @@ public:
         for (auto root : roots)
             std::cout << "root = " << root << '\n';
 
-        auto coefficients(MathCore::computeCoefficients(num, roots));
+        auto coefficients(MathCore::computeFactorsSimpleFractions(num, roots, denominator.front()));
         const std::size_t degree(roots.size());
 
         for (auto coeff : coefficients)
@@ -133,7 +133,7 @@ public:
     } /// count(frequency) * (N + M)
 };
 
-/// Класс передаточной функции
+/// Класс передаточной функции W(p)
 class TransferFunction {
 private:
     using Type      = ProjectTypes::Type;
@@ -148,10 +148,21 @@ private:
     Vec numerator, denominator;
     VecComp roots, impulse_factors, transient_factors;
 
-    bool is_settled;
-    Type settling_time, steady_state_value;
+    bool is_settled{};
+    Type settling_time{}, steady_state_value{};
 
-    void recomputeState() {
+    void recomputeFrontState() {
+        impulse_factors = MathCore::computeFactorsSimpleFractions(numerator, roots, denominator.front());
+        roots.emplace_back(0);
+        transient_factors = MathCore::computeFactorsSimpleFractions(numerator, roots, denominator.front());
+        roots.pop_back();
+        steady_state_value = transient_factors.back().real();
+        transient_factors.pop_back();
+    }
+
+    void recomputeBackState() {
+        roots = MathCore::solvePolynomialNewton(denominator);
+
         std::sort(roots.begin(), roots.end(), [](const auto& a, const auto& b){
             if (a.real() != b.real())
                 return a.real() < b.real();
@@ -160,7 +171,7 @@ private:
 
         if (roots.back().real() < 0) {
             is_settled = true;
-            settling_time = 4 / roots.front().real();
+            settling_time = -4 / roots.front().real();
             steady_state_value = -1;
         }
         else {
@@ -169,58 +180,35 @@ private:
             steady_state_value = 0;
         }
 
-        impulse_factors = MathCore::computeCoefficients(numerator, roots);
-        roots.emplace_back(0);
-        transient_factors = MathCore::computeCoefficients(numerator, roots);
-        roots.pop_back();
-        steady_state_value = transient_factors.back().real();
-        transient_factors.pop_back();
+        recomputeFrontState();
     }
 
 public:
     TransferFunction(Vec numerator, Vec denominator) :
-            numerator(std::move(numerator)), denominator(std::move(denominator)),
-            roots(MathCore::solvePolynomialNewton(denominator))
+            numerator(std::move(numerator)), denominator(std::move(denominator))
     {
-        recomputeState();
+        recomputeBackState();
     }
 
-    TransferFunction(Vec&& numerator, Vec&& denominator) :
-            numerator(std::move(numerator)), denominator(std::move(denominator)),
-            roots(MathCore::solvePolynomialNewton(denominator))
+    [[maybe_unused]] TransferFunction(Vec&& numerator, Vec&& denominator) :
+            numerator(std::move(numerator)), denominator(std::move(denominator))
     {
-        recomputeState();
+        recomputeBackState();
     }
 
-    inline bool isSettled() const {
+    [[nodiscard]] inline bool isSettled() const {
         return is_settled;
     }
 
-    inline Type settlingTime() const {
+    [[nodiscard]] inline Type settlingTime() const {
         return settling_time;
     }
 
-    inline Type steadyStateValue() const {
+    [[nodiscard]] inline Type steadyStateValue() const {
         return steady_state_value;
     }
 
-    Complex operator()(const Complex& p) const {
-        Complex num(0);
-        Complex den(0);
-
-        for (const auto& x : numerator) {
-            num *= p;
-            num += x;
-        }
-        for (const auto& x : denominator) {
-            den *= p;
-            den += x;
-        }
-
-        return num / den;
-    }
-
-    Type transientResponse(const Complex& p) const {
+    [[nodiscard]] Type transientResponse(const Complex& p) const {
         Complex num(0);
         Complex den(0);
 
@@ -236,7 +224,7 @@ public:
         return (num / den).real();
     }
 
-    Type impulseResponse(const Type& time) const {
+    [[nodiscard]] Type impulseResponse(const Type& time) const {
         Complex result(0);
         const std::size_t n(impulse_factors.size());
         for (std::size_t i = 0; i < n; ++i)
@@ -244,7 +232,7 @@ public:
         return result.real();
     }
 
-    Complex frequencyResponse(const Type& time) const {
+    [[nodiscard]] Complex frequencyResponse(const Type& time) const {
         Complex result(steady_state_value);
         const std::size_t n(transient_factors.size());
         for (std::size_t i = 0; i < n; ++i)
@@ -253,7 +241,7 @@ public:
     }
 
     template <Type tolerance = 1e-3>
-    Type binarySearchFrequency(Type min, Type max, const Type& value, const Type& epsilon = 1e-2) const {
+    [[nodiscard]] Type binarySearchFrequency(Type min, Type max, const Type& value, const Type& epsilon = 1e-2) const {
         Type mid((min + max) / 2);
         while (max - min > tolerance) {
             Type response(std::abs(frequencyResponse(mid)));
@@ -268,7 +256,7 @@ public:
         return mid;
     }
 
-    Pair computeFrequencyRange(const Type& min = 0, const Type& max = 1e2, const Type& epsilon = 1e-3) const {
+    [[nodiscard]] Pair computeFrequencyRange(const Type& min = 0, const Type& max = 1e2, const Type& epsilon = 1e-3) const {
         const Type initValue(abs(frequencyResponse(0)));
         return {
                 binarySearchFrequency(min, max, initValue, epsilon),
@@ -276,32 +264,39 @@ public:
         };
     }
 
-    Type computeLinearIntegralCriterion(const std::size_t points = 100) const {
+    [[nodiscard]] Type computeLinearIntegralCriterion(const std::size_t points = 100) const {
         Type sum(0);
         const Type step(settling_time / static_cast<Type>(points - 1));
         for (std::size_t i = 0; i < points; ++i)
-            sum += std::abs(transientResponse(i * step) - steady_state_value);
+            sum += std::abs(transientResponse(static_cast<Type>(i) * step) - steady_state_value);
         return sum * step;
     }
 
-    Type computeIntegralQuadraticCriterion(const std::size_t points = 100) const {
+    [[nodiscard]] Type computeIntegralQuadraticCriterion(const std::size_t points = 100) const {
         Type sum(0), error;
         const Type step(settling_time / static_cast<Type>(points - 1));
         for (std::size_t i = 0; i < points; ++i) {
-            error = transientResponse(i * step) - steady_state_value;
+            error = transientResponse(static_cast<Type>(i) * step) - steady_state_value;
             sum += error * error;
         }
         return sum * step;
     }
 
-    Type computeStandardDeviation(const std::size_t points = 100) const {
+    [[nodiscard]] Type computeStandardDeviation(const std::size_t points = 100) const {
         Type sum(0), error;
         const Type step(settling_time / static_cast<Type>(points - 1));
         for (std::size_t i = 0; i < points; ++i) {
-            error = transientResponse(i * step) - steady_state_value;
+            error = transientResponse(static_cast<Type>(i) * step) - steady_state_value;
             sum += error * error;
         }
         return std::sqrt(sum / static_cast<Type>(points - 1));
+    }
+
+    [[maybe_unused]] void assign(Vec newNumerator, Vec newDenominator) {
+        numerator   = std::move(newNumerator);
+        denominator = std::move(newDenominator);
+
+        recomputeBackState();
     }
 };
 

@@ -39,7 +39,12 @@ QWidget* GraphWindow::createNumTab() {
         if (numeratorData.size() > denominatorData.size())
             return;
 
-        auto time(MathCore::range(0, 120, 100));
+        TransferFunction W(numeratorData, denominatorData);
+        std::cout << "is settled: " << W.isSettled() << '\n';
+        std::cout << "settling time: " << W.settlingTime() << '\n';
+        std::cout << "steady state value: " << W.steadyStateValue() << '\n';
+
+        auto time(MathCore::range(0, W.settlingTime() * 2, 100));
 
         auto [a, b](RegCore::computeFrequencyRange(numeratorData, denominatorData, 0.01));
 

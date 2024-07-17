@@ -181,14 +181,14 @@ public:
         return answers;
     } /// N^3
 
-    template <class Container>
-    static Container computeCoefficients(const Container& numerator, const Container& roots) {
+    template <class ContainerNumerator, class ContainerRoots>
+    static ContainerRoots computeCoefficients(const ContainerNumerator& numerator, const ContainerRoots& roots) {
         std::size_t n(roots.size());
         auto num(numerator);
         num.resize(n, 0);
         Complex matrix[n * n + n];
         for (std::size_t i = 0; i < n; ++i) {
-            Container x;
+            ContainerRoots x;
             x.reserve(n - 1);
             for (std::size_t j = 0; j < i; ++j)
                 x.push_back(-roots[j]);

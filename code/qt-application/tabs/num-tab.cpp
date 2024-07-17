@@ -40,7 +40,10 @@ QWidget* GraphWindow::createNumTab() {
             return;
 
         auto time(MathCore::range(0, 120, 100));
-        auto freq(MathCore::logRange(0.01, 1, 100, true));
+
+        auto [a, b](RegCore::computeFrequencyRange(numeratorData, denominatorData, 0.01));
+
+        auto freq(MathCore::logRange(a, b, 100, true));
 
         //auto impulseResponse = MathCore::talbotMethod(numeratorData, denominatorData, time);
         auto transietResponse = RegCore::calculateTransietResponse(numeratorData, denominatorData, time);
@@ -48,8 +51,6 @@ QWidget* GraphWindow::createNumTab() {
 
         /*for (auto x : frequencyResponse)
             qDebug() << std::abs(x) << '\n';*/
-
-        qDebug() << RegCore::computeFrequencyRange(numeratorData, denominatorData, 0.1).second;
 
         removeAllSeries(numChartTranResp);
         removeAllSeries(numChartFreqResp);

@@ -26,16 +26,30 @@ public:
     using Complex   = ProjectTypes::Complex;
 
     using Vec       = std::vector <Type>;
+    using Pair      = std::pair <Type, Type>;
     using VecPair   = std::vector <std::pair <Type, Type>>;
     using VecComp   = std::vector <Complex>;
     using ValComp   = std::valarray <Complex>;
 
     template <class ContainerType = Vec>
-    static ContainerType range(/// Формирование диапазона с постоянным шагом разбиения
-        const Type& min,            /// Минимум диапазона
-        const Type& max,            /// Максимум диапазона
-        const std::size_t& points)  /// Количество точек разбиения
+    static ContainerType range(    /// Формирование диапазона с постоянным шагом разбиения
+            const Type& min,            /// Минимум диапазона
+            const Type& max,            /// Максимум диапазона
+            const std::size_t& points)  /// Количество точек разбиения
     {
+        const Type step((max - min) / static_cast<Type>(points - 1));
+        ContainerType res;
+        res.reserve(points);
+        for (int i = 0; i < points; ++i)
+            res.emplace_back(min + i * step);
+        return res;
+    } /// N
+    template <class ContainerType = Vec>
+    static ContainerType range(       /// Формирование диапазона с постоянным шагом разбиения
+            const Pair& interval,         /// Диапазон
+            const std::size_t& points)    /// Количество точек разбиения
+    {
+        const auto[min, max](interval);
         const Type step((max - min) / static_cast<Type>(points - 1));
         ContainerType res;
         res.reserve(points);
@@ -51,6 +65,32 @@ public:
             const std::size_t& points,  /// Количество точек разбиения
             bool isFromScratch = false)
     {
+        ContainerType res;
+        res.reserve(points + isFromScratch);
+
+        if (isFromScratch)
+            res.emplace_back(0);
+
+        const Type multiplier(std::pow(10,
+                                       (std::log10(max) - std::log10(min))
+                                       / static_cast<Type>(points - 1)));
+
+        Type current(min);
+        for (std::size_t i = 0; i < points; ++i) {
+            res.emplace_back(current);
+            current *= multiplier;
+        }
+
+        return res;
+    } /// N
+    template <class ContainerType = Vec>
+    static Vec logRange(        /// Формирование диапазона с логарифмическим шагом разбиения
+            const Pair& interval,       /// Диапазон
+            const std::size_t& points,  /// Количество точек разбиения
+            bool isFromScratch = false)
+    {
+        const auto& [min, max](interval);
+
         ContainerType res;
         res.reserve(points + isFromScratch);
 
@@ -110,7 +150,7 @@ public:
 
     template <int EPSILON_ORDER = 9, std::size_t MAX_ITER = 100>
     static VecComp solvePolynomialNewton(const Vec& coefficients) {
-        static const long double epsilon(std::pow(10.L, -EPSILON_ORDER));
+        static const Type epsilon(std::pow(10.L, -EPSILON_ORDER));
 
         auto coeffs(ConvertCore::toComplexVector(coefficients));
         std::size_t degree(coeffs.size() - 1);
@@ -126,7 +166,7 @@ public:
             Complex result(0);
             for (std::size_t i = 0; i < degree; ++i) {
                 result *= x;
-                result += Complex(degree - i) * coeffs[i];
+                result += Complex(static_cast<Type>(degree - i)) * coeffs[i];
             }
             return result;
         };
@@ -182,8 +222,6 @@ public:
     template <class ContainerNumerator, class ContainerRoots, typename Type>
     static ContainerRoots computeFactorsSimpleFractions(const ContainerNumerator& numerator, const ContainerRoots& roots, const Type& highestFactor = 1) {
         std::size_t n(roots.size());
-        auto num(numerator);
-        num.resize(n, 0);
         Complex matrix[n * n + n];
         for (std::size_t i = 0; i < n; ++i) {
             ContainerRoots x;
@@ -196,8 +234,8 @@ public:
             for (std::size_t j = 0; j < n; ++j)
                 matrix[j * (n + 1) + i] = coefficients[j];
         }
-        for (std::size_t i = 0; i < n; ++i)
-            matrix[i * (n + 1) + n] = num[n - 1 - i] / highestFactor;
+        for (std::size_t i = n - std::min(n, numerator.size()), j = 0; i < n; ++i, ++j)
+            matrix[i * (n + 1) + n] = numerator[j] / highestFactor;
         return solveMatrix(matrix, n);
     } /// N^2 * N * log(N) + N^3
 };

@@ -40,28 +40,16 @@ QWidget* GraphWindow::createNumTab() {
             return;
 
         TransferFunction W(numeratorData, denominatorData);
+        //W.closeLoop();
         std::cout << "is settled: " << W.isSettled() << '\n';
         std::cout << "settling time: " << W.settlingTime() << '\n';
         std::cout << "steady state value: " << W.steadyStateValue() << '\n';
 
-        auto time(MathCore::range(0, W.settlingTime() * 2, 100));
-
-        auto [a, b](RegCore::computeFrequencyRange(numeratorData, denominatorData, 0.01));
-
-        auto freq(MathCore::logRange(a, b, 100, true));
-
-        //auto impulseResponse = MathCore::talbotMethod(numeratorData, denominatorData, time);
-        auto transietResponse = RegCore::calculateTransietResponse(numeratorData, denominatorData, time);
-        auto frequencyResponse = RegCore::calculateFrequencyResponse(numeratorData, denominatorData, freq);
-
-        /*for (auto x : frequencyResponse)
-            qDebug() << std::abs(x) << '\n';*/
-
         removeAllSeries(numChartTranResp);
         removeAllSeries(numChartFreqResp);
 
-        GraphWindow::addPoints(numChartTranResp, transietResponse, "Тест");
-        GraphWindow::addComplexPoints(numChartFreqResp, frequencyResponse, "Тест");
+        GraphWindow::addPoints(numChartTranResp, W.transientResponse(), "Тест");
+        GraphWindow::addComplexPoints(numChartFreqResp, W.frequencyResponse(), "Тест");
 
         updateAxes(numChartTranResp);
         updateAxes(numChartFreqResp);

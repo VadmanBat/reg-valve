@@ -13,6 +13,7 @@
 #include <QtCharts>
 
 #include "../reg.core.hpp"
+#include "../transfer-function/transfer-function.hpp"
 
 using namespace QtCharts;
 

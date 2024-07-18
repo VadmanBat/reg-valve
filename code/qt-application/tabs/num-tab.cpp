@@ -4,7 +4,7 @@
 #include "../application.h"
 
 QWidget* GraphWindow::createNumTab() {
-    QLabel *transferFunctionLabel = new QLabel("W<sub>ОУ</sub>(p) = ");
+    QLabel *transferFunctionLabel = new QLabel("W(p) = ");
     transferFunctionLabel->setAlignment(Qt::AlignCenter);
     transferFunctionLabel->setStyleSheet("font-size: 24pt;");
 

@@ -3,6 +3,15 @@
 //
 #include "../application.h"
 
+void
+updateSliderRange(QDoubleSpinBox *minSpinBox, QDoubleSpinBox *maxSpinBox, QSpinBox *pointsSpinBox, QSlider *slider);
+
+void
+updateSliderRange(QDoubleSpinBox *minSpinBox, QDoubleSpinBox *maxSpinBox, QSpinBox *pointsSpinBox, QSlider *slider);
+
+void
+updateSliderRange(QDoubleSpinBox *minSpinBox, QDoubleSpinBox *maxSpinBox, QSpinBox *pointsSpinBox, QSlider *slider);
+
 QString GraphWindow::getColor(const double& value) {
     if (value == 0)
         return "violet";
@@ -90,4 +99,97 @@ void GraphWindow::createLineEdit(const char* name, QHBoxLayout* layout, QDoubleV
         lineEdit->setValidator(validator);
     }
     layout->setAlignment(Qt::AlignLeft);
+}
+
+void GraphWindow::updateSliderRange(QDoubleSpinBox *minSpinBox, QDoubleSpinBox *maxSpinBox, QSpinBox *pointsSpinBox, DoubleSlider *slider) {
+    double min = minSpinBox->value();
+    double max = maxSpinBox->value();
+    int points = pointsSpinBox->value();
+
+    if (min < max && points > 0) {
+        slider->setRange(min, max);
+        slider->setSingleStep((max - min) / (points - 1));
+    }
+}
+
+void GraphWindow::setSpinBox(QDoubleSpinBox* spinBox, double min, double max, double value, const char* prefix) {
+    spinBox->setRange(min, max);
+    spinBox->setDecimals(2);
+    spinBox->setValue(value);
+    spinBox->setPrefix(prefix);
+}
+
+void GraphWindow::createParameterForm(const char* name, QHBoxLayout* layout,
+                                      double lower, double upper,
+                                      double min, double max)
+{
+    auto*titleLabel = new QLabel(name);
+    titleLabel->setStyleSheet("font-size: 16pt;");
+    layout->addWidget(titleLabel);
+
+    auto enableCheckBox = new QCheckBox("Enable");
+    layout->addWidget(enableCheckBox);
+
+    auto minSpinBox = new QDoubleSpinBox;
+    auto maxSpinBox = new QDoubleSpinBox;
+    setSpinBox(minSpinBox, lower, upper, min, "min: ");
+    setSpinBox(maxSpinBox, lower, upper, max, "max: ");
+    layout->addWidget(minSpinBox);
+    layout->addWidget(maxSpinBox);
+
+    auto pointsSpinBox = new QSpinBox;
+    pointsSpinBox->setRange(10, 1000);
+    pointsSpinBox->setPrefix("Points: ");
+    pointsSpinBox->setValue(50);
+    layout->addWidget(pointsSpinBox);
+
+    auto slider = new DoubleSlider(Qt::Horizontal);
+    layout->addWidget(slider);
+
+    connect(minSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double) {
+        updateSliderRange(minSpinBox, maxSpinBox, pointsSpinBox, slider);
+        if (minSpinBox->value() > maxSpinBox->value())
+            maxSpinBox->setValue(minSpinBox->value());
+    });
+    connect(maxSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double) {
+        updateSliderRange(minSpinBox, maxSpinBox, pointsSpinBox, slider);
+        if (minSpinBox->value() > maxSpinBox->value())
+            minSpinBox->setValue(maxSpinBox->value());
+    });
+    connect(pointsSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), [=](int) {
+        updateSliderRange(minSpinBox, maxSpinBox, pointsSpinBox, slider);
+    });
+
+    connect(slider, &QSlider::valueChanged, [=](int value) {
+
+    });
+
+    updateSliderRange(minSpinBox, maxSpinBox, pointsSpinBox, slider);
+
+    connect(enableCheckBox, &QCheckBox::toggled, [=](bool checked) {
+        minSpinBox->setEnabled(checked);
+        maxSpinBox->setEnabled(checked);
+        pointsSpinBox->setEnabled(checked);
+        slider->setEnabled(checked);
+    });
+
+    enableCheckBox->setChecked(false);
+    minSpinBox->setEnabled(false);
+    maxSpinBox->setEnabled(false);
+    pointsSpinBox->setEnabled(false);
+    slider->setEnabled(false);
+}
+
+void GraphWindow::createControllerParameterForms(QVBoxLayout *layout) {
+    auto Kp = new QHBoxLayout;
+    auto Tu = new QHBoxLayout;
+    auto Td = new QHBoxLayout;
+
+    createParameterForm("K<sub>p</sub>", Kp, 0.1, 50, 1, 10);
+    createParameterForm("T<sub>u</sub>", Tu, 0.1, 2000, 1, 120);
+    createParameterForm("T<sub>d</sub>", Td, 0.1, 2000, 1, 60);
+
+    layout->addLayout(Kp);
+    layout->addLayout(Tu);
+    layout->addLayout(Td);
 }

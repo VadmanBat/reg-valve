@@ -12,6 +12,8 @@
 #include <QFileDialog>
 #include <QtCharts>
 
+#include "double-slider.hpp"
+
 #include "../reg.core.hpp"
 #include "../transfer-function/transfer-function.hpp"
 
@@ -70,6 +72,11 @@ private:
         static_cast<QScatterSeries*>(chart->series().at(index))->append(point.real(), point.imag());
     }
 
+    static void setSpinBox(QDoubleSpinBox *spinBox, double min, double max, double value, const char *prefix);
+    static void updateSliderRange(QDoubleSpinBox *minSpinBox, QDoubleSpinBox *maxSpinBox, QSpinBox *pointsSpinBox, DoubleSlider *slider);
+    static void createParameterForm(const char *name, QHBoxLayout *layout, double lower, double upper, double min, double max);
+    static void createControllerParameterForms(QVBoxLayout *layout);
+
     QWidget* createExpTab();
     QWidget* createNumTab();
     QWidget* createRegTab();
@@ -105,6 +112,7 @@ private:
     QChartView *expChartTranRespView, *expChartFreqRespView;
     QChartView *numChartTranRespView, *numChartFreqRespView;
     QChartView *regChartTranRespView, *regChartFreqRespView;
+
 };
 
 #include <QLineEdit>

@@ -31,6 +31,9 @@ QWidget* GraphWindow::createRegTab() {
     uppLayout->addWidget(transferFunctionLabel);
     uppLayout->addLayout(transferFunctionLayout);
 
+    auto parametersLayout = new QVBoxLayout;
+    createControllerParameterForms(parametersLayout);
+
     QPushButton *calculateButton = new QPushButton("Рассчитать");
     connect(calculateButton, &QPushButton::clicked, [this, numeratorLayout, denominatorLayout] {
         auto numeratorData = getLineEditData(numeratorLayout);
@@ -60,7 +63,7 @@ QWidget* GraphWindow::createRegTab() {
 
     regChartTranResp->setTitle("Переходная характеристика");
     regChartFreqResp->setTitle("Комплексно-частотная характеристика (КЧХ)");
-    createAxes(regChartTranResp, "Время t, секунды", "Параметр h(t), [ед.изм.] / %ХРО");
+    createAxes(regChartTranResp, "Время t, секунды", "h(t)");
     createAxes(regChartFreqResp, "Реальная ось", "Мнимая ось");
 
     QWidget *numTab = new QWidget();
@@ -74,6 +77,7 @@ QWidget* GraphWindow::createRegTab() {
 
     QVBoxLayout *resLayout = new QVBoxLayout;
     resLayout->addLayout(uppLayout);
+    resLayout->addLayout(parametersLayout);
     resLayout->addWidget(calculateButton); // Добавляем кнопку в макет
     resLayout->addLayout(chartsLayout);
 

@@ -236,11 +236,17 @@ public:
 
     void closeLoop() {
         const std::size_t n(numerator.size());
-        const std::size_t del(denominator.size() - n);
+        const std::size_t delta(denominator.size() - n);
         for (std::size_t i = 0; i < n; ++i)
-            denominator[del + i] += numerator[i];
-        for (auto d : denominator)
-            std::cout << d << " | ";
+            denominator[delta + i] += numerator[i];
+        recomputeBackState();
+    }
+
+    void openLoop() {
+        const std::size_t n(numerator.size());
+        const std::size_t delta(denominator.size() - n);
+        for (std::size_t i = 0; i < n; ++i)
+            denominator[delta + i] -= numerator[i];
         recomputeBackState();
     }
 

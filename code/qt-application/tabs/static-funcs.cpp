@@ -47,8 +47,6 @@ void GraphWindow::updateStyleSheetProperty(QLineEdit* lineEdit, const QString& p
 }
 
 QString GraphWindow::correctLine(const QString& text) {
-    if (text.isEmpty())
-        return "+0";
     if (text.at(0) == ',')
         return "+0" + text;
     if (text.at(0).isDigit())
@@ -64,7 +62,7 @@ void GraphWindow::createLineEdit(const char* name, QHBoxLayout* layout, QDoubleV
     int p(-1);
     QLineEdit* lineEdits[6];
     for (auto lineEdit : lineEdits) {
-        layout->addWidget(lineEdit = new QLineEdit);
+        layout->addWidget(lineEdit = new MyLineEdit);
         lineEdit->setAlignment(Qt::AlignRight);
         lineEdit->setStyleSheet("font-size: 16pt; color: violet;");
         lineEdit->setText("+0");
@@ -83,7 +81,10 @@ void GraphWindow::createLineEdit(const char* name, QHBoxLayout* layout, QDoubleV
             adjustLineEditWidth(lineEdit);
             updateStyleSheetProperty(lineEdit, "color", getColor(getValue(text)));
         });
-
+        connect(lineEdit, &QLineEdit::editingFinished, [lineEdit] {
+            if (lineEdit->text().isEmpty())
+                lineEdit->setText("+0");
+        });
         lineEdit->setMinimumWidth(36);
         lineEdit->setMaximumWidth(36);
         lineEdit->setValidator(validator);

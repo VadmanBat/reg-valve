@@ -72,6 +72,7 @@ private:
 
     QWidget* createExpTab();
     QWidget* createNumTab();
+    QWidget* createRegTab();
 
 public:
     GraphWindow(QWidget *parent = 0) : QWidget(parent) {
@@ -79,6 +80,7 @@ public:
         // Добавление вкладок в QTabWidget
         tabWidget->addTab(createExpTab(), "КЧХ по h(t)");
         tabWidget->addTab(createNumTab(), "КЧХ по W(p)");
+        tabWidget->addTab(createRegTab(), "Ручная настройка регулятора");
 
         QVBoxLayout *mainLayout = new QVBoxLayout(this);
         mainLayout->addWidget(tabWidget);
@@ -99,8 +101,24 @@ private slots:
 private:
     QChart *expChartTranResp, *expChartFreqResp;
     QChart *numChartTranResp, *numChartFreqResp;
+    QChart *regChartTranResp, *regChartFreqResp;
     QChartView *expChartTranRespView, *expChartFreqRespView;
     QChartView *numChartTranRespView, *numChartFreqRespView;
+    QChartView *regChartTranRespView, *regChartFreqRespView;
+};
+
+#include <QLineEdit>
+#include <QFocusEvent>
+
+class MyLineEdit : public QLineEdit {
+public:
+    explicit MyLineEdit(QWidget *parent = nullptr) : QLineEdit(parent) {}
+
+protected:
+    void focusOutEvent(QFocusEvent *event) override {
+        QLineEdit::focusOutEvent(event);
+        emit editingFinished(); // Явно вызываем сигнал editingFinished
+    }
 };
 
 #endif //REGVALVE_APPLICATION_H

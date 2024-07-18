@@ -1,9 +1,9 @@
 //
-// Created by Vadma on 08.07.2024.
+// Created by Vadma on 18.07.2024.
 //
 #include "../application.h"
 
-QWidget* GraphWindow::createNumTab() {
+QWidget* GraphWindow::createRegTab() {
     QLabel *transferFunctionLabel = new QLabel("W<sub>ОУ</sub>(p) = ");
     transferFunctionLabel->setAlignment(Qt::AlignCenter);
     transferFunctionLabel->setStyleSheet("font-size: 24pt;");
@@ -40,36 +40,37 @@ QWidget* GraphWindow::createNumTab() {
             return;
 
         TransferFunction W(numeratorData, denominatorData);
+        W.closeLoop();
         std::cout << "is settled: " << W.isSettled() << '\n';
         std::cout << "settling time: " << W.settlingTime() << '\n';
         std::cout << "steady state value: " << W.steadyStateValue() << '\n';
 
-        removeAllSeries(numChartTranResp);
-        removeAllSeries(numChartFreqResp);
+        removeAllSeries(regChartTranResp);
+        removeAllSeries(regChartFreqResp);
 
-        GraphWindow::addPoints(numChartTranResp, W.transientResponse(), "Тест");
-        GraphWindow::addComplexPoints(numChartFreqResp, W.frequencyResponse(), "Тест");
+        GraphWindow::addPoints(regChartTranResp, W.transientResponse(), "Тест");
+        GraphWindow::addComplexPoints(regChartFreqResp, W.frequencyResponse(), "Тест");
 
-        updateAxes(numChartTranResp);
-        updateAxes(numChartFreqResp);
+        updateAxes(regChartTranResp);
+        updateAxes(regChartFreqResp);
     });
 
-    numChartTranResp = new QChart();
-    numChartFreqResp = new QChart();
+    regChartTranResp = new QChart();
+    regChartFreqResp = new QChart();
 
-    numChartTranResp->setTitle("Переходная характеристика");
-    numChartFreqResp->setTitle("Комплексно-частотная характеристика (КЧХ)");
-    createAxes(numChartTranResp, "Время t, секунды", "Параметр h(t), [ед.изм.] / %ХРО");
-    createAxes(numChartFreqResp, "Реальная ось", "Мнимая ось");
+    regChartTranResp->setTitle("Переходная характеристика");
+    regChartFreqResp->setTitle("Комплексно-частотная характеристика (КЧХ)");
+    createAxes(regChartTranResp, "Время t, секунды", "Параметр h(t), [ед.изм.] / %ХРО");
+    createAxes(regChartFreqResp, "Реальная ось", "Мнимая ось");
 
     QWidget *numTab = new QWidget();
 
-    numChartTranRespView = new QChartView(numChartTranResp, numTab);
-    numChartFreqRespView = new QChartView(numChartFreqResp, numTab);
+    regChartTranRespView = new QChartView(regChartTranResp, numTab);
+    regChartFreqRespView = new QChartView(regChartFreqResp, numTab);
 
     QHBoxLayout* chartsLayout = new QHBoxLayout;
-    chartsLayout->addWidget(numChartTranRespView);
-    chartsLayout->addWidget(numChartFreqRespView);
+    chartsLayout->addWidget(regChartTranRespView);
+    chartsLayout->addWidget(regChartFreqRespView);
 
     QVBoxLayout *resLayout = new QVBoxLayout;
     resLayout->addLayout(uppLayout);

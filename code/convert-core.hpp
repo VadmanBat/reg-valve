@@ -5,8 +5,11 @@
 #ifndef REGVALVE_CONVERT_CORE_HPP
 #define REGVALVE_CONVERT_CORE_HPP
 
+#include <iostream>
+
 #include <vector>
 #include <complex>
+#include <valarray>
 
 #include <QVector>
 #include <QPointF>

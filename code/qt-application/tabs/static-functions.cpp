@@ -22,52 +22,26 @@ void Application::adjustLineEditWidth(QLineEdit* lineEdit) {
     lineEdit->setMaximumWidth(width);
 }
 
-MathCore::Vec Application::getLineEditData(QHBoxLayout* layout) {
-    MathCore::Vec data;
-    data.reserve(6);
-    const auto count(layout->count());
-    for (int i = 0; i < count; ++i) {
-        QLineEdit* lineEdit = qobject_cast<QLineEdit*>(layout->itemAt(i)->widget());
-        if (lineEdit)
-            data.emplace_back(getValue(lineEdit->text()));
-    }
-    return reverseOptimize(data);
+MathCore::Vec Application::getLineEditData(const std::vector <LineEdit*>& lineEdits) {
+    const auto count(lineEdits.size());
+    MathCore::Vec values(count);
+    for (int i = 0; i < count; ++i)
+        values[i] = getValue(lineEdits[i]->text());
+    return reverseOptimize(values);
 }
 
-void Application::updateStyleSheetProperty(QLineEdit* lineEdit, const QString& property, const QString& value) {
-    QString style = lineEdit->styleSheet();
-    QString replacement = QString("%1: %2;").arg(property).arg(value);
-    if (style.contains(property)) {
-        QString pattern = QString("%1: \\w+;").arg(property);
-        style = style.replace(QRegExp(pattern), replacement);
-    }
-    else
-        style += replacement;
-    lineEdit->setStyleSheet(style);
-}
-
-QString Application::correctLine(const QString& text) {
-    if (text.at(0) == ',')
-        return "+0" + text;
-    if (text.at(0).isDigit())
-        return '+' + text;
-    if (text.count() > 1 && text.at(1) == ',')
-        return text.at(0) + '0' + text.mid(1);
-    return "";
-}
-
-void Application::createLineEdit(const char* name, QHBoxLayout* layout, QDoubleValidator* validator) {
+QLayout* Application::createLineEdit(const QString& name, std::vector <LineEdit*>& lineEdits, QDoubleValidator* validator) {
+    auto layout = new QHBoxLayout;
     layout->addWidget(new QLabel(name));
 
     int p(-1);
-    QLineEdit* lineEdits[6];
-    for (auto lineEdit : lineEdits) {
-        layout->addWidget(lineEdit = new MyLineEdit);
+    for (auto& lineEdit : lineEdits) {
+        layout->addWidget(lineEdit = new LineEdit);
         lineEdit->setAlignment(Qt::AlignRight);
         lineEdit->setStyleSheet("font-size: 16pt; color: violet;");
         lineEdit->setText("+0");
 
-        QLabel *label = new QLabel(QString("p<sup>%1</sup>").arg(++p));
+        auto label = new QLabel(QString("p<sup>%1</sup>").arg(++p));
         label->setStyleSheet("font-size: 16pt;");
         layout->addWidget(label);
 
@@ -90,6 +64,58 @@ void Application::createLineEdit(const char* name, QHBoxLayout* layout, QDoubleV
         lineEdit->setValidator(validator);
     }
     layout->setAlignment(Qt::AlignLeft);
+
+    return layout;
+}
+
+QLayout* Application::createTransferFunctionForm(std::vector <LineEdit*>& numerator, std::vector <LineEdit*>& denominator,
+                                                 std::size_t n, std::size_t m, const QString& title) {
+    auto transferFunctionLabel = new QLabel(title);
+    transferFunctionLabel->setAlignment(Qt::AlignCenter);
+    transferFunctionLabel->setStyleSheet("font-size: 24pt;");
+
+    numerator.resize(n);
+    denominator.resize(m);
+    auto realNumberValidator = new QDoubleValidator;
+    realNumberValidator->setNotation(QDoubleValidator::StandardNotation);
+
+    auto line = new QFrame;
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+    line->setMidLineWidth(10);
+
+    auto transferFunctionLayout = new QVBoxLayout;
+    transferFunctionLayout->addLayout(createLineEdit("Числитель:\t", numerator, realNumberValidator));
+    transferFunctionLayout->addWidget(line);
+    transferFunctionLayout->addLayout(createLineEdit("Знаменатель:\t", denominator, realNumberValidator));
+
+    auto layout = new QHBoxLayout;
+    layout->addWidget(transferFunctionLabel);
+    layout->addLayout(transferFunctionLayout);
+
+    return layout;
+}
+
+void Application::updateStyleSheetProperty(QLineEdit* lineEdit, const QString& property, const QString& value) {
+    QString style = lineEdit->styleSheet();
+    QString replacement = QString("%1: %2;").arg(property).arg(value);
+    if (style.contains(property)) {
+        QString pattern = QString("%1: \\w+;").arg(property);
+        style = style.replace(QRegExp(pattern), replacement);
+    }
+    else
+        style += replacement;
+    lineEdit->setStyleSheet(style);
+}
+
+QString Application::correctLine(const QString& text) {
+    if (text.at(0) == ',')
+        return "+0" + text;
+    if (text.at(0).isDigit())
+        return '+' + text;
+    if (text.count() > 1 && text.at(1) == ',')
+        return text.at(0) + '0' + text.mid(1);
+    return "";
 }
 
 void Application::updateSliderRange(QDoubleSpinBox *minSpinBox, QDoubleSpinBox *maxSpinBox, QSpinBox *pointsSpinBox, DoubleSlider *slider) {

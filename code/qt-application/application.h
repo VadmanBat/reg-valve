@@ -13,6 +13,7 @@
 #include <QtCharts>
 
 #include "double-slider.hpp"
+#include "line-edit.hpp"
 
 #include "../reg.core.hpp"
 #include "../transfer-function/transfer-function.hpp"
@@ -36,10 +37,12 @@ private:
         return Container(first, last);
     }
 
-    static MathCore::Vec getLineEditData(QHBoxLayout *layout);
+    static MathCore::Vec getLineEditData(const std::vector <LineEdit*>& lineEdits);
     static void updateStyleSheetProperty(QLineEdit *lineEdit, const QString &property, const QString &value);
     static QString correctLine(const QString &text);
-    static void createLineEdit(const char* name, QHBoxLayout* layout, QDoubleValidator* validator);
+    static QLayout* createLineEdit(const QString& name, std::vector <LineEdit*>& lineEdits, QDoubleValidator* validator);
+    static QLayout* createTransferFunctionForm(std::vector <LineEdit*>& numerator, std::vector <LineEdit*>& denominator,
+                                               std::size_t n = 6, std::size_t m = 6, const QString& title = "W(p) = ");
 
     /// charts-funcs:
     static QHBoxLayout* createCharts(std::vector <std::tuple <QChart*, QString, QString, QString>> charts, QWidget* tab);
@@ -123,20 +126,9 @@ private:
             {regChartTranResp, "Переходная характеристика", "Время t, секунды", "h(t)"},
             {regChartFreqResp, "Комплексно-частотная характеристика (КЧХ)", "Реальная ось", "Мнимая ось"}
     };
-};
 
-#include <QLineEdit>
-#include <QFocusEvent>
-
-class MyLineEdit : public QLineEdit {
-public:
-    explicit MyLineEdit(QWidget *parent = nullptr) : QLineEdit(parent) {}
-
-protected:
-    void focusOutEvent(QFocusEvent *event) override {
-        QLineEdit::focusOutEvent(event);
-        emit editingFinished(); // Явно вызываем сигнал editingFinished
-    }
+    std::vector <LineEdit*> numNumerator, numDenominator;
+    std::vector <LineEdit*> regNumerator, regDenominator;
 };
 
 #endif //REGVALVE_APPLICATION_H

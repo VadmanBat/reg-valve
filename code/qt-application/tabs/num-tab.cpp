@@ -4,44 +4,19 @@
 #include "../application.h"
 
 QWidget* Application::createNumTab() {
-    QLabel *transferFunctionLabel = new QLabel("W(p) = ");
-    transferFunctionLabel->setAlignment(Qt::AlignCenter);
-    transferFunctionLabel->setStyleSheet("font-size: 24pt;");
+    auto transferFunctionLayout = createTransferFunctionForm(numNumerator, numDenominator);
 
-    QHBoxLayout *numeratorLayout = new QHBoxLayout;
-    QHBoxLayout *denominatorLayout = new QHBoxLayout;
+    auto calculateButton = new QPushButton("Рассчитать");
+    connect(calculateButton, &QPushButton::clicked, [this] {
+        auto numerator = getLineEditData(numNumerator);
+        auto denominator = getLineEditData(numDenominator);
 
-    QDoubleValidator *realNumberValidator = new QDoubleValidator(this);
-    realNumberValidator->setNotation(QDoubleValidator::StandardNotation);
-
-    createLineEdit("Числитель:\t", numeratorLayout, realNumberValidator);
-    createLineEdit("Знаменатель:\t", denominatorLayout, realNumberValidator);
-
-    QFrame *line = new QFrame();
-    line->setFrameShape(QFrame::HLine);
-    line->setFrameShadow(QFrame::Sunken);
-    line->setMidLineWidth(10);
-
-    QVBoxLayout *transferFunctionLayout = new QVBoxLayout();
-    transferFunctionLayout->addLayout(numeratorLayout);
-    transferFunctionLayout->addWidget(line);
-    transferFunctionLayout->addLayout(denominatorLayout);
-
-    QHBoxLayout *uppLayout = new QHBoxLayout;
-    uppLayout->addWidget(transferFunctionLabel);
-    uppLayout->addLayout(transferFunctionLayout);
-
-    QPushButton *calculateButton = new QPushButton("Рассчитать");
-    connect(calculateButton, &QPushButton::clicked, [this, numeratorLayout, denominatorLayout] {
-        auto numeratorData = getLineEditData(numeratorLayout);
-        auto denominatorData = getLineEditData(denominatorLayout);
-
-        if (denominatorData.empty())
+        if (denominator.empty())
             return;
-        if (numeratorData.size() > denominatorData.size())
+        if (numerator.size() > denominator.size())
             return;
 
-        TransferFunction W(numeratorData, denominatorData);
+        TransferFunction W(numerator, denominator);
         std::cout << "is settled: " << W.isSettled() << '\n';
         std::cout << "settling time: " << W.settlingTime() << '\n';
         std::cout << "steady state value: " << W.steadyStateValue() << '\n';
@@ -56,14 +31,14 @@ QWidget* Application::createNumTab() {
         updateAxes(numChartFreqResp);
     });
 
-    QWidget *numTab = new QWidget();
+    auto numTab = new QWidget;
     auto chartsLayout = createCharts(NUM_CHARTS, numTab);
 
-    QVBoxLayout *resLayout = new QVBoxLayout;
-    resLayout->addLayout(uppLayout);
-    resLayout->addWidget(calculateButton); // Добавляем кнопку в макет
-    resLayout->addLayout(chartsLayout);
+    auto layout = new QVBoxLayout;
+    layout->addLayout(transferFunctionLayout);
+    layout->addWidget(calculateButton);
+    layout->addLayout(chartsLayout);
 
-    numTab->setLayout(resLayout);
+    numTab->setLayout(layout);
     return numTab;
 }

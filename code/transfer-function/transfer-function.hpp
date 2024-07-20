@@ -299,6 +299,15 @@ public:
         settling_time       = other.settling_time;
         steady_state_value  = other.steady_state_value;
     }
+
+    TransferFunction& operator*=(const TransferFunction& other) {
+        numerator = MathCore::multiply(numerator, other.numerator);
+        denominator = MathCore::multiply(denominator, other.denominator);
+
+        recomputeBackState();
+
+        return *this;
+    }
 };
 
 #endif //REGVALVE_TRANSFER_FUNCTION_HPP

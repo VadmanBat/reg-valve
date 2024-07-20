@@ -3,7 +3,7 @@
 //
 #include "../application.h"
 
-QWidget* GraphWindow::createNumTab() {
+QWidget* Application::createNumTab() {
     QLabel *transferFunctionLabel = new QLabel("W(p) = ");
     transferFunctionLabel->setAlignment(Qt::AlignCenter);
     transferFunctionLabel->setStyleSheet("font-size: 24pt;");
@@ -36,6 +36,8 @@ QWidget* GraphWindow::createNumTab() {
         auto numeratorData = getLineEditData(numeratorLayout);
         auto denominatorData = getLineEditData(denominatorLayout);
 
+        if (denominatorData.empty())
+            return;
         if (numeratorData.size() > denominatorData.size())
             return;
 
@@ -47,29 +49,15 @@ QWidget* GraphWindow::createNumTab() {
         removeAllSeries(numChartTranResp);
         removeAllSeries(numChartFreqResp);
 
-        GraphWindow::addPoints(numChartTranResp, W.transientResponse(), "Тест");
-        GraphWindow::addComplexPoints(numChartFreqResp, W.frequencyResponse(), "Тест");
+        Application::addPoints(numChartTranResp, W.transientResponse(), "Тест");
+        Application::addComplexPoints(numChartFreqResp, W.frequencyResponse(), "Тест");
 
         updateAxes(numChartTranResp);
         updateAxes(numChartFreqResp);
     });
 
-    numChartTranResp = new QChart();
-    numChartFreqResp = new QChart();
-
-    numChartTranResp->setTitle("Переходная характеристика");
-    numChartFreqResp->setTitle("Комплексно-частотная характеристика (КЧХ)");
-    createAxes(numChartTranResp, "Время t, секунды", "Параметр h(t), [ед.изм.] / %ХРО");
-    createAxes(numChartFreqResp, "Реальная ось", "Мнимая ось");
-
     QWidget *numTab = new QWidget();
-
-    numChartTranRespView = new QChartView(numChartTranResp, numTab);
-    numChartFreqRespView = new QChartView(numChartFreqResp, numTab);
-
-    QHBoxLayout* chartsLayout = new QHBoxLayout;
-    chartsLayout->addWidget(numChartTranRespView);
-    chartsLayout->addWidget(numChartFreqRespView);
+    auto chartsLayout = createCharts(NUM_CHARTS, numTab);
 
     QVBoxLayout *resLayout = new QVBoxLayout;
     resLayout->addLayout(uppLayout);

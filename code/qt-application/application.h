@@ -19,7 +19,7 @@
 
 using namespace QtCharts;
 
-class GraphWindow : public QWidget {
+class Application : public QWidget {
 private:
     static QString getColor(const double& value);
     static double getValue(QString text);
@@ -42,6 +42,7 @@ private:
     static void createLineEdit(const char* name, QHBoxLayout* layout, QDoubleValidator* validator);
 
     /// charts-funcs:
+    static QHBoxLayout* createCharts(std::vector <std::tuple <QChart*, QString, QString, QString>> charts, QWidget* tab);
     static void createAxes(QChart *chart, const QString &titleX, const QString &titleY);
     static void removeAllSeries(QChart *chart);
     static void updateAxes(QChart *chart);
@@ -74,15 +75,15 @@ private:
 
     static void setSpinBox(QDoubleSpinBox *spinBox, double min, double max, double value, const char *prefix);
     static void updateSliderRange(QDoubleSpinBox *minSpinBox, QDoubleSpinBox *maxSpinBox, QSpinBox *pointsSpinBox, DoubleSlider *slider);
-    static void createParameterForm(const char *name, QHBoxLayout *layout, double lower, double upper, double min, double max);
-    static void createControllerParameterForms(QVBoxLayout *layout);
+    static DoubleSlider* createParameterForm(const char *name, QHBoxLayout *layout, double lower, double upper, double min, double max);
+    static std::vector <DoubleSlider*> createControllerParameterForms(QVBoxLayout *layout);
 
     QWidget* createExpTab();
     QWidget* createNumTab();
     QWidget* createRegTab();
 
 public:
-    GraphWindow(QWidget *parent = 0) : QWidget(parent) {
+    Application(QWidget *parent = 0) : QWidget(parent) {
         QTabWidget *tabWidget = new QTabWidget(this);
         // Добавление вкладок в QTabWidget
         tabWidget->addTab(createExpTab(), "КЧХ по h(t)");
@@ -106,13 +107,22 @@ private slots:
     }
 
 private:
-    QChart *expChartTranResp, *expChartFreqResp;
-    QChart *numChartTranResp, *numChartFreqResp;
-    QChart *regChartTranResp, *regChartFreqResp;
-    QChartView *expChartTranRespView, *expChartFreqRespView;
-    QChartView *numChartTranRespView, *numChartFreqRespView;
-    QChartView *regChartTranRespView, *regChartFreqRespView;
+    QChart *expChartTranResp{new QChart}, *expChartFreqResp{new QChart};
+    QChart *numChartTranResp{new QChart}, *numChartFreqResp{new QChart};
+    QChart *regChartTranResp{new QChart}, *regChartFreqResp{new QChart};
 
+    const std::vector <std::tuple <QChart*, QString, QString, QString>> EXP_CHARTS = {
+            {expChartTranResp, "Переходная характеристика", "Время t, секунды", "h(t)"},
+            {expChartFreqResp, "Комплексно-частотная характеристика (КЧХ)", "Реальная ось", "Мнимая ось"}
+    };
+    const std::vector <std::tuple <QChart*, QString, QString, QString>> NUM_CHARTS = {
+            {numChartTranResp, "Переходная характеристика", "Время t, секунды", "Параметр h(t), [ед.изм.] / %ХРО"},
+            {numChartFreqResp, "Комплексно-частотная характеристика (КЧХ)", "Реальная ось", "Мнимая ось"}
+    };
+    const std::vector <std::tuple <QChart*, QString, QString, QString>> REG_CHARTS = {
+            {regChartTranResp, "Переходная характеристика", "Время t, секунды", "h(t)"},
+            {regChartFreqResp, "Комплексно-частотная характеристика (КЧХ)", "Реальная ось", "Мнимая ось"}
+    };
 };
 
 #include <QLineEdit>

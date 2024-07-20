@@ -3,15 +3,22 @@
 //
 #include "../application.h"
 
-void GraphWindow::removeAllSeries(QChart *chart) {
+QHBoxLayout* Application::createCharts(std::vector <std::tuple <QChart*, QString, QString, QString>> charts, QWidget* tab) {
+    auto layout = new QHBoxLayout;
+    for (auto& [chart, title, titleX, titleY] : charts) {
+        chart->setTitle(title);
+        createAxes(chart, titleX, titleY);
+        layout->addWidget(new QChartView(chart, tab));
+    }
+    return layout;
+}
+
+void Application::removeAllSeries(QChart *chart) {
     chart->removeAllSeries();
     chart->update();
 }
 
-void GraphWindow::createAxes(QChart *chart,
-                             const QString& titleX,
-                             const QString& titleY)
-{
+void Application::createAxes(QChart *chart, const QString& titleX, const QString& titleY) {
     QValueAxis *axisX = new QValueAxis();
     QValueAxis *axisY = new QValueAxis();
 
@@ -22,7 +29,7 @@ void GraphWindow::createAxes(QChart *chart,
     chart->addAxis(axisY, Qt::AlignLeft);
 }
 
-void GraphWindow::updateAxes(QChart *chart) {
+void Application::updateAxes(QChart *chart) {
     QString oldAxisXTitle, oldAxisYTitle;
 
     QValueAxis *oldAxisX = qobject_cast<QValueAxis *>(chart->axes(Qt::Horizontal).first());

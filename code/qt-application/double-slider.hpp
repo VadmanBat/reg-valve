@@ -53,7 +53,8 @@ protected:
         QString valueText = QString::number(this->value(), 'f', 2);
 
         // Рисуем текст над ползунком, перекрывая его
-        QRect textRect = rect.adjusted(-rect.width() / 2, -rect.height() * 2, rect.width() / 2, -rect.height());
+        //QRect textRect = rect.adjusted(-rect.width() / 2, -rect.height() * 2, rect.width() / 2, -rect.height());
+        QRect textRect = rect.adjusted(-width() / 2, height() / 2 - 20, width() / 2, height() / 2);
         painter.drawText(textRect, Qt::AlignCenter, valueText);
 
         // Рисуем минимум и максимум

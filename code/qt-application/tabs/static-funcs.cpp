@@ -3,35 +3,26 @@
 //
 #include "../application.h"
 
-void
-updateSliderRange(QDoubleSpinBox *minSpinBox, QDoubleSpinBox *maxSpinBox, QSpinBox *pointsSpinBox, QSlider *slider);
-
-void
-updateSliderRange(QDoubleSpinBox *minSpinBox, QDoubleSpinBox *maxSpinBox, QSpinBox *pointsSpinBox, QSlider *slider);
-
-void
-updateSliderRange(QDoubleSpinBox *minSpinBox, QDoubleSpinBox *maxSpinBox, QSpinBox *pointsSpinBox, QSlider *slider);
-
-QString GraphWindow::getColor(const double& value) {
+QString Application::getColor(const double& value) {
     if (value == 0)
         return "violet";
     return value > 0 ? "blue" : "red";
 }
 
-double GraphWindow::getValue(QString text) {
+double Application::getValue(QString text) {
     text.replace(',', '.');
     if (text.count() == 1)
         text += '1';
     return text.toDouble();
 }
 
-void GraphWindow::adjustLineEditWidth(QLineEdit* lineEdit) {
+void Application::adjustLineEditWidth(QLineEdit* lineEdit) {
     int width(lineEdit->fontMetrics().horizontalAdvance(lineEdit->text()) + 10);
     lineEdit->setMinimumWidth(width);
     lineEdit->setMaximumWidth(width);
 }
 
-MathCore::Vec GraphWindow::getLineEditData(QHBoxLayout* layout) {
+MathCore::Vec Application::getLineEditData(QHBoxLayout* layout) {
     MathCore::Vec data;
     data.reserve(6);
     const auto count(layout->count());
@@ -43,7 +34,7 @@ MathCore::Vec GraphWindow::getLineEditData(QHBoxLayout* layout) {
     return reverseOptimize(data);
 }
 
-void GraphWindow::updateStyleSheetProperty(QLineEdit* lineEdit, const QString& property, const QString& value) {
+void Application::updateStyleSheetProperty(QLineEdit* lineEdit, const QString& property, const QString& value) {
     QString style = lineEdit->styleSheet();
     QString replacement = QString("%1: %2;").arg(property).arg(value);
     if (style.contains(property)) {
@@ -55,7 +46,7 @@ void GraphWindow::updateStyleSheetProperty(QLineEdit* lineEdit, const QString& p
     lineEdit->setStyleSheet(style);
 }
 
-QString GraphWindow::correctLine(const QString& text) {
+QString Application::correctLine(const QString& text) {
     if (text.at(0) == ',')
         return "+0" + text;
     if (text.at(0).isDigit())
@@ -65,7 +56,7 @@ QString GraphWindow::correctLine(const QString& text) {
     return "";
 }
 
-void GraphWindow::createLineEdit(const char* name, QHBoxLayout* layout, QDoubleValidator* validator) {
+void Application::createLineEdit(const char* name, QHBoxLayout* layout, QDoubleValidator* validator) {
     layout->addWidget(new QLabel(name));
 
     int p(-1);
@@ -101,7 +92,7 @@ void GraphWindow::createLineEdit(const char* name, QHBoxLayout* layout, QDoubleV
     layout->setAlignment(Qt::AlignLeft);
 }
 
-void GraphWindow::updateSliderRange(QDoubleSpinBox *minSpinBox, QDoubleSpinBox *maxSpinBox, QSpinBox *pointsSpinBox, DoubleSlider *slider) {
+void Application::updateSliderRange(QDoubleSpinBox *minSpinBox, QDoubleSpinBox *maxSpinBox, QSpinBox *pointsSpinBox, DoubleSlider *slider) {
     double min = minSpinBox->value();
     double max = maxSpinBox->value();
     int points = pointsSpinBox->value();
@@ -112,16 +103,16 @@ void GraphWindow::updateSliderRange(QDoubleSpinBox *minSpinBox, QDoubleSpinBox *
     }
 }
 
-void GraphWindow::setSpinBox(QDoubleSpinBox* spinBox, double min, double max, double value, const char* prefix) {
+void Application::setSpinBox(QDoubleSpinBox* spinBox, double min, double max, double value, const char* prefix) {
     spinBox->setRange(min, max);
     spinBox->setDecimals(2);
     spinBox->setValue(value);
     spinBox->setPrefix(prefix);
 }
 
-void GraphWindow::createParameterForm(const char* name, QHBoxLayout* layout,
-                                      double lower, double upper,
-                                      double min, double max)
+DoubleSlider* Application::createParameterForm(const char* name, QHBoxLayout* layout,
+                                               double lower, double upper,
+                                               double min, double max)
 {
     auto*titleLabel = new QLabel(name);
     titleLabel->setStyleSheet("font-size: 16pt;");
@@ -178,18 +169,24 @@ void GraphWindow::createParameterForm(const char* name, QHBoxLayout* layout,
     maxSpinBox->setEnabled(false);
     pointsSpinBox->setEnabled(false);
     slider->setEnabled(false);
+
+    return slider;
 }
 
-void GraphWindow::createControllerParameterForms(QVBoxLayout *layout) {
+std::vector <DoubleSlider*> Application::createControllerParameterForms(QVBoxLayout *layout) {
     auto Kp = new QHBoxLayout;
     auto Tu = new QHBoxLayout;
     auto Td = new QHBoxLayout;
 
-    createParameterForm("K<sub>p</sub>", Kp, 0.1, 50, 1, 10);
-    createParameterForm("T<sub>u</sub>", Tu, 0.1, 2000, 1, 120);
-    createParameterForm("T<sub>d</sub>", Td, 0.1, 2000, 1, 60);
+    std::vector <DoubleSlider*> result;
+
+    result.push_back(createParameterForm("K<sub>p</sub>", Kp, 0.1, 50, 1, 10));
+    result.push_back(createParameterForm("T<sub>u</sub>", Tu, 0.1, 2000, 1, 120));
+    result.push_back(createParameterForm("T<sub>d</sub>", Td, 0.1, 2000, 1, 60));
 
     layout->addLayout(Kp);
     layout->addLayout(Tu);
     layout->addLayout(Td);
+
+    return result;
 }

@@ -10,6 +10,7 @@
 /// Базовый класс с математическими операциями, включает в себя следующее:
 ///     - формирование диапазонов (постоянный, логарифмический шаг);
 ///     - вычисление значения полинома в определённом точке;
+///     - перемножении двух полиномов;
 ///     - перемножение полиномов первого порядка;
 ///     - дефляция полинома при известном корне;
 ///     - вычисление корней полинома методом Ньютона;
@@ -28,11 +29,7 @@ public:
     using ValComp   = std::valarray <Complex>;
 
     template <class ContainerType = Vec>
-    static ContainerType range(    /// Формирование диапазона с постоянным шагом разбиения
-            const Type& min,            /// Минимум диапазона
-            const Type& max,            /// Максимум диапазона
-            const std::size_t& points)  /// Количество точек разбиения
-    {
+    static ContainerType range(const Type& min, const Type& max, const std::size_t& points) {
         const Type step((max - min) / static_cast<Type>(points - 1));
         ContainerType res;
         res.reserve(points);
@@ -41,10 +38,7 @@ public:
         return res;
     } /// N
     template <class ContainerType = Vec>
-    static ContainerType range(       /// Формирование диапазона с постоянным шагом разбиения
-            const Pair& interval,         /// Диапазон
-            const std::size_t& points)    /// Количество точек разбиения
-    {
+    static ContainerType range(const Pair& interval, const std::size_t& points) {
         const auto[min, max](interval);
         const Type step((max - min) / static_cast<Type>(points - 1));
         ContainerType res;
@@ -55,12 +49,7 @@ public:
     } /// N
 
     template <class ContainerType = Vec>
-    static Vec logRange(        /// Формирование диапазона с логарифмическим шагом разбиения
-            const Type& min,            /// Минимум диапазона
-            const Type& max,            /// Максимум диапазона
-            const std::size_t& points,  /// Количество точек разбиения
-            bool isFromScratch = false)
-    {
+    static Vec logRange(const Type& min,const Type& max, const std::size_t& points, bool isFromScratch = false) {
         ContainerType res;
         res.reserve(points + isFromScratch);
 
@@ -80,11 +69,7 @@ public:
         return res;
     } /// N
     template <class ContainerType = Vec>
-    static Vec logRange(        /// Формирование диапазона с логарифмическим шагом разбиения
-            const Pair& interval,       /// Диапазон
-            const std::size_t& points,  /// Количество точек разбиения
-            bool isFromScratch = false)
-    {
+    static Vec logRange(const Pair& interval, const std::size_t& points, bool isFromScratch = false) {
         const auto& [min, max](interval);
 
         ContainerType res;
@@ -116,6 +101,17 @@ public:
         }
         return result;
     } /// N
+
+    /// Вычисление полинома при перемножении двух полиномов
+    template <typename Container>
+    static Container multiply(const Container& a, const Container& b) {
+        const std::size_t n(a.size()), m(b.size());
+        Container result(n + m - 1, 0);
+        for (std::size_t i = 0; i < n; ++i)
+            for (std::size_t j = 0; j < m; ++j)
+                result[i + j] += a[i] * b[j];
+        return result;
+    } /// N * log(N)
 
     /// Вычисление полинома при перемножении простых скобок (x - r1)(x - r2)
     template <typename Type>
@@ -193,31 +189,32 @@ public:
     /// Решение матрицы
     template <typename Type>
     static std::vector <Type> solveMatrix(Type* matrix, std::size_t n) {
+        const std::size_t cols(n + 1);
         for (std::size_t i = 0; i < n; ++i) {
-            Type diagElement(matrix[i * (n + 1) + i]);
-            for (std::size_t j = 0; j <= n; ++j)
-                matrix[i * (n + 1) + j] /= diagElement;
+            Type diagElement(matrix[i * cols + i]);
+            for (std::size_t j = 0; j < cols; ++j)
+                matrix[i * cols + j] /= diagElement;
 
             for (std::size_t k = 0; k < i; ++k) {
-                Type factor(matrix[k * (n + 1) + i]);
-                for (std::size_t j = 0; j <= n; ++j)
-                    matrix[k * (n + 1) + j] -= factor * matrix[i * (n + 1) + j];
+                Type factor(matrix[k * cols + i]);
+                for (std::size_t j = 0; j < cols; ++j)
+                    matrix[k * cols + j] -= factor * matrix[i * cols + j];
             }
             for (std::size_t k = i + 1; k < n; ++k) {
-                Type factor(matrix[k * (n + 1) + i]);
-                for (std::size_t j = 0; j <= n; ++j)
-                    matrix[k * (n + 1) + j] -= factor * matrix[i * (n + 1) + j];
+                Type factor(matrix[k * cols + i]);
+                for (std::size_t j = 0; j < cols; ++j)
+                    matrix[k * cols + j] -= factor * matrix[i * cols + j];
             }
         }
         std::vector <Type> answers(n);
         for (std::size_t i = 0; i < n; ++i)
-            answers[i] = matrix[i * (n + 1) + n];
+            answers[i] = matrix[i * cols + n];
         return answers;
     } /// N^3
 
     template <class ContainerNumerator, class ContainerRoots, typename Type>
     static ContainerRoots computeFactorsSimpleFractions(const ContainerNumerator& numerator, const ContainerRoots& roots, const Type& highestFactor = 1) {
-        std::size_t n(roots.size());
+        const std::size_t n(roots.size()), cols(n + 1);
         Complex matrix[n * n + n];
         for (std::size_t i = 0; i < n; ++i) {
             ContainerRoots x;
@@ -228,10 +225,10 @@ public:
                 x.push_back(-roots[j]);
             auto coefficients(multiplySimpleFractions(x));
             for (std::size_t j = 0; j < n; ++j)
-                matrix[j * (n + 1) + i] = coefficients[j];
+                matrix[j * cols + i] = coefficients[j];
         }
         for (std::size_t i = n - std::min(n, numerator.size()), j = 0; i < n; ++i, ++j)
-            matrix[i * (n + 1) + n] = numerator[j] / highestFactor;
+            matrix[i * cols + n] = numerator[j] / highestFactor;
         return solveMatrix(matrix, n);
     } /// N^2 * N * log(N) + N^3
 };

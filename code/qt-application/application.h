@@ -27,9 +27,12 @@ private:
     using SliderData = std::tuple <QString, double, double, double, double>;
     using SlidersDataset = std::vector <SliderData>;
 
+    /// update css-field:
+    static void updateStyleSheetProperty(QLineEdit *lineEdit, const QString& property, const QString& value);
+
     static QString getColor(const double& value);
     static double getValue(QString text);
-    static void adjustLineEditWidth(QLineEdit *lineEdit);
+    static void adjustLineEditWidth(QLineEdit* lineEdit);
 
     template <class Container>
     static Container reverseOptimize(const Container& container) {
@@ -43,46 +46,45 @@ private:
     }
 
     static MathCore::Vec getLineEditData(const std::vector <LineEdit*>& lineEdits);
-    static void updateStyleSheetProperty(QLineEdit *lineEdit, const QString &property, const QString &value);
-    static QString correctLine(const QString &text);
-    static QLayout* createLineEdit(const QString& name, std::vector <LineEdit*>& lineEdits, QDoubleValidator* validator);
+    static QString correctLine(const QString& text);
+    static QLayout* createLineEdit(const QString& title, std::vector <LineEdit*>& lineEdits, QDoubleValidator* validator);
     static QLayout* createTransferFunctionForm(std::vector <LineEdit*>& numerator, std::vector <LineEdit*>& denominator,
                                                std::size_t n = 6, std::size_t m = 6, const QString& title = "W(p) = ");
 
-    /// charts-funcs:
+    /// charts functions:
     static QLayout* createCharts(ChartsDataset charts, QWidget* tab);
-    static void createAxes(QChart *chart, const QString &titleX, const QString &titleY);
-    static void eraseLastSeries(QChart *chart);
-    static void removeAllSeries(QChart *chart);
-    static void updateAxes(QChart *chart);
+    static void createAxes(QChart* chart, const QString &titleX, const QString &titleY);
+    static void eraseLastSeries(QChart* chart);
+    static void removeAllSeries(QChart* chart);
+    static void updateAxes(QChart* chart);
 
     template <class Points>
-    void addPoints(QChart* chart, const Points& points, const QString& title) {
-        QLineSeries *series = new QLineSeries();
+    static void addPoints(QChart* chart, const Points& points, const QString& title) {
+        auto series = new QLineSeries();
         series->setName(title);
         for (const auto& [x, y] : points)
             series->append(x, y);
         chart->addSeries(series);
     }
     template <class Points>
-    void addComplexPoints(QChart* chart, const Points& points, const QString& title) {
-        QLineSeries *series = new QLineSeries();
+    static void addComplexPoints(QChart* chart, const Points& points, const QString& title) {
+        auto series = new QLineSeries();
         series->setName(title);
         for (const auto& point : points)
             series->append(point.real(), point.imag());
         chart->addSeries(series);
     }
     template <class Point>
-    void appendPoint(QChart *chart, const Point& point, int index = 0) {
+    static void appendPoint(QChart* chart, const Point& point, int index = 0) {
         const auto& [x, y](point);
-        static_cast<QScatterSeries*>(chart->series().at(index))->append(x, y);
+        dynamic_cast<QScatterSeries*>(chart->series().at(index))->append(x, y);
     }
     template <class Point>
-    void appendComplexPoint(QChart *chart, const Point& point, int index = 0) {
-        static_cast<QScatterSeries*>(chart->series().at(index))->append(point.real(), point.imag());
+    static void appendComplexPoint(QChart* chart, const Point& point, int index = 0) {
+        dynamic_cast<QScatterSeries*>(chart->series().at(index))->append(point.real(), point.imag());
     }
 
-    static void setSpinBox(QDoubleSpinBox *spinBox, double min, double max, double value, const char *prefix);
+    static void setSpinBox(QDoubleSpinBox* spinBox, double min, double max, double value, const char* prefix);
     static void updateSliderRange(QDoubleSpinBox *minSpinBox, QDoubleSpinBox *maxSpinBox, QSpinBox *pointsSpinBox, DoubleSlider *slider);
     static std::pair <DoubleSlider*, QLayout*> createSliderForm(const SliderData& data);
     static QLayout* createSlidersForm(std::vector <DoubleSlider*>& sliders, const SlidersDataset& data);

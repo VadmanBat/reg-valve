@@ -13,21 +13,22 @@ QLayout* Application::createCharts(ChartsDataset charts, QWidget* tab) {
     return layout;
 }
 
-void Application::eraseLastSeries(QChart *chart) {
+void Application::eraseLastSeries(QChart* chart) {
     if (chart->series().empty())
         return;
 
     chart->removeSeries(chart->series().back());
+    chart->update();
 }
 
-void Application::removeAllSeries(QChart *chart) {
+void Application::removeAllSeries(QChart* chart) {
     chart->removeAllSeries();
     chart->update();
 }
 
-void Application::createAxes(QChart *chart, const QString& titleX, const QString& titleY) {
-    QValueAxis *axisX = new QValueAxis();
-    QValueAxis *axisY = new QValueAxis();
+void Application::createAxes(QChart*chart, const QString& titleX, const QString& titleY) {
+    auto axisX = new QValueAxis();
+    auto axisY = new QValueAxis();
 
     axisX->setTitleText(titleX);
     axisY->setTitleText(titleY);
@@ -36,11 +37,11 @@ void Application::createAxes(QChart *chart, const QString& titleX, const QString
     chart->addAxis(axisY, Qt::AlignLeft);
 }
 
-void Application::updateAxes(QChart *chart) {
+void Application::updateAxes(QChart* chart) {
     QString oldAxisXTitle, oldAxisYTitle;
 
-    QValueAxis *oldAxisX = qobject_cast<QValueAxis *>(chart->axes(Qt::Horizontal).first());
-    QValueAxis *oldAxisY = qobject_cast<QValueAxis *>(chart->axes(Qt::Vertical).first());
+    auto oldAxisX = qobject_cast<QValueAxis *>(chart->axes(Qt::Horizontal).first());
+    auto oldAxisY = qobject_cast<QValueAxis *>(chart->axes(Qt::Vertical).first());
 
     if (oldAxisX) {
         oldAxisXTitle = oldAxisX->titleText();
@@ -53,8 +54,8 @@ void Application::updateAxes(QChart *chart) {
 
     chart->createDefaultAxes();
 
-    QValueAxis *newAxisX = qobject_cast<QValueAxis *>(chart->axes(Qt::Horizontal).first());
-    QValueAxis *newAxisY = qobject_cast<QValueAxis *>(chart->axes(Qt::Vertical).first());
+    auto newAxisX = qobject_cast<QValueAxis *>(chart->axes(Qt::Horizontal).first());
+    auto newAxisY = qobject_cast<QValueAxis *>(chart->axes(Qt::Vertical).first());
 
     if (newAxisX)
         newAxisX->setTitleText(oldAxisXTitle);

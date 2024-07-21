@@ -7,15 +7,15 @@
 using namespace QtCharts;
 
 QWidget* Application::createExpTab() {
-    QWidget *expTab = new QWidget();
-    QVBoxLayout *resLayout = new QVBoxLayout(expTab);
-    QPushButton *openFileButton = new QPushButton("Открыть файл", expTab);
-    connect(openFileButton, &QPushButton::clicked, this, &Application::openFile);
-    resLayout->addWidget(openFileButton);
+    auto expTab = new QWidget;
+    auto layout = new QVBoxLayout(expTab);
 
-    QHBoxLayout* chartsLayout = createCharts(EXP_CHARTS, expTab);
-    resLayout->addLayout(chartsLayout);
+    auto openFileButton = new QPushButton("Открыть файл", expTab);
+    connect(openFileButton, &QPushButton::clicked, this, &Application::expOpenFile);
 
-    expTab->setLayout(resLayout);
+    layout->addWidget(openFileButton);
+    layout->addLayout(createCharts(EXP_CHARTS, expTab));
+
+    expTab->setLayout(layout);
     return expTab;
 }

@@ -3,7 +3,7 @@
 //
 #include "../application.h"
 
-QHBoxLayout* Application::createCharts(std::vector <std::tuple <QChart*, QString, QString, QString>> charts, QWidget* tab) {
+QLayout* Application::createCharts(ChartsDataset charts, QWidget* tab) {
     auto layout = new QHBoxLayout;
     for (auto& [chart, title, titleX, titleY] : charts) {
         chart->setTitle(title);
@@ -11,6 +11,13 @@ QHBoxLayout* Application::createCharts(std::vector <std::tuple <QChart*, QString
         layout->addWidget(new QChartView(chart, tab));
     }
     return layout;
+}
+
+void Application::eraseLastSeries(QChart *chart) {
+    if (chart->series().empty())
+        return;
+
+    chart->removeSeries(chart->series().back());
 }
 
 void Application::removeAllSeries(QChart *chart) {

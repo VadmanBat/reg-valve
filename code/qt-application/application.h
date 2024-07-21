@@ -15,13 +15,18 @@
 #include "double-slider.hpp"
 #include "line-edit.hpp"
 
-#include "../reg.core.hpp"
 #include "../transfer-function/transfer-function.hpp"
 
 using namespace QtCharts;
 
 class Application : public QWidget {
 private:
+    using ChartData = std::tuple <QChart*, QString, QString, QString>;
+    using ChartsDataset = std::vector <ChartData>;
+
+    using SliderData = std::tuple <QString, double, double, double, double>;
+    using SlidersDataset = std::vector <SliderData>;
+
     static QString getColor(const double& value);
     static double getValue(QString text);
     static void adjustLineEditWidth(QLineEdit *lineEdit);
@@ -45,8 +50,9 @@ private:
                                                std::size_t n = 6, std::size_t m = 6, const QString& title = "W(p) = ");
 
     /// charts-funcs:
-    static QHBoxLayout* createCharts(std::vector <std::tuple <QChart*, QString, QString, QString>> charts, QWidget* tab);
+    static QLayout* createCharts(ChartsDataset charts, QWidget* tab);
     static void createAxes(QChart *chart, const QString &titleX, const QString &titleY);
+    static void eraseLastSeries(QChart *chart);
     static void removeAllSeries(QChart *chart);
     static void updateAxes(QChart *chart);
 
@@ -78,57 +84,64 @@ private:
 
     static void setSpinBox(QDoubleSpinBox *spinBox, double min, double max, double value, const char *prefix);
     static void updateSliderRange(QDoubleSpinBox *minSpinBox, QDoubleSpinBox *maxSpinBox, QSpinBox *pointsSpinBox, DoubleSlider *slider);
-    static DoubleSlider* createParameterForm(const char *name, QHBoxLayout *layout, double lower, double upper, double min, double max);
-    static std::vector <DoubleSlider*> createControllerParameterForms(QVBoxLayout *layout);
+    static std::pair <DoubleSlider*, QLayout*> createSliderForm(const SliderData& data);
+    static QLayout* createSlidersForm(std::vector <DoubleSlider*>& sliders, const SlidersDataset& data);
 
     QWidget* createExpTab();
     QWidget* createNumTab();
     QWidget* createRegTab();
 
 public:
-    Application(QWidget *parent = 0) : QWidget(parent) {
-        QTabWidget *tabWidget = new QTabWidget(this);
-        // Добавление вкладок в QTabWidget
+    explicit Application(QWidget* parent = nullptr) : QWidget(parent) {
+        auto tabWidget = new QTabWidget(this);
         tabWidget->addTab(createExpTab(), "КЧХ по h(t)");
         tabWidget->addTab(createNumTab(), "КЧХ по W(p)");
         tabWidget->addTab(createRegTab(), "Ручная настройка регулятора");
 
-        QVBoxLayout *mainLayout = new QVBoxLayout(this);
+        auto mainLayout = new QVBoxLayout(this);
         mainLayout->addWidget(tabWidget);
         setLayout(mainLayout);
     }
 
 private slots:
-    void openFile() {
-        QString fileName = QFileDialog::getOpenFileName(this, "Открыть файл", "", "Файлы данных (*.txt *.csv)");
-        if (!fileName.isEmpty()) {
-            // Здесь должен быть ваш код для чтения файла и построения данных
-            // Например, вы можете прочитать файл и заполнить QVector<QPointF> points данными для построения графика
-            // ...
+    void expOpenFile();
 
-        }
-    }
+    void numAddTransferFunction();
+    void numReplaceTransferFunction();
+    void numClearCharts();
+
+    void regAddTransferFunction();
+    void regReplaceTransferFunction();
+    void regClearCharts();
 
 private:
     QChart *expChartTranResp{new QChart}, *expChartFreqResp{new QChart};
     QChart *numChartTranResp{new QChart}, *numChartFreqResp{new QChart};
     QChart *regChartTranResp{new QChart}, *regChartFreqResp{new QChart};
 
-    const std::vector <std::tuple <QChart*, QString, QString, QString>> EXP_CHARTS = {
+    const ChartsDataset EXP_CHARTS = {
             {expChartTranResp, "Переходная характеристика", "Время t, секунды", "h(t)"},
             {expChartFreqResp, "Комплексно-частотная характеристика (КЧХ)", "Реальная ось", "Мнимая ось"}
     };
-    const std::vector <std::tuple <QChart*, QString, QString, QString>> NUM_CHARTS = {
+    const ChartsDataset NUM_CHARTS = {
             {numChartTranResp, "Переходная характеристика", "Время t, секунды", "Параметр h(t), [ед.изм.] / %ХРО"},
             {numChartFreqResp, "Комплексно-частотная характеристика (КЧХ)", "Реальная ось", "Мнимая ось"}
     };
-    const std::vector <std::tuple <QChart*, QString, QString, QString>> REG_CHARTS = {
+    const ChartsDataset REG_CHARTS = {
             {regChartTranResp, "Переходная характеристика", "Время t, секунды", "h(t)"},
             {regChartFreqResp, "Комплексно-частотная характеристика (КЧХ)", "Реальная ось", "Мнимая ось"}
     };
 
+    const SlidersDataset REG_SLIDERS = {
+            {"K<sub>p</sub>", 0.1, 50, 1, 10},
+            {"T<sub>u</sub>", 0.1, 2000, 1, 120},
+            {"T<sub>d</sub>", 0.1, 2000, 1, 60}
+    };
+
     std::vector <LineEdit*> numNumerator, numDenominator;
     std::vector <LineEdit*> regNumerator, regDenominator;
+
+    std::vector <DoubleSlider*> regSliders;
 };
 
 #endif //REGVALVE_APPLICATION_H

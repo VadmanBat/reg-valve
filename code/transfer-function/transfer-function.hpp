@@ -69,6 +69,13 @@ public:
         recomputeBackState();
     }
 
+    TransferFunction(const Vec& objectNum, const Vec& objectDen, const Vec& regNum, const Vec& regDen) :
+            numerator(MathCore::multiply(regNum, objectNum)),
+            denominator(MathCore::multiply(regDen, objectDen))
+    {
+        closeLoop();
+    }
+
     [[nodiscard]] inline bool isSettled() const {
         return is_settled;
     }
@@ -236,17 +243,17 @@ public:
 
     void closeLoop() {
         const std::size_t n(numerator.size());
-        const std::size_t delta(denominator.size() - n);
-        for (std::size_t i = 0; i < n; ++i)
-            denominator[delta + i] += numerator[i];
-        recomputeBackState();
-    }
-
-    void openLoop() {
-        const std::size_t n(numerator.size());
-        const std::size_t delta(denominator.size() - n);
-        for (std::size_t i = 0; i < n; ++i)
-            denominator[delta + i] -= numerator[i];
+        const std::size_t m(denominator.size());
+        if (n >= m) {
+            denominator.resize(n, 0);
+            for (std::size_t i = 0; i < n; ++i)
+                denominator[i] += numerator[i];
+        }
+        else {
+            const std::size_t delta(denominator.size() - n);
+            for (std::size_t i = 0; i < n; ++i)
+                denominator[delta + i] += numerator[i];
+        }
         recomputeBackState();
     }
 
@@ -287,7 +294,27 @@ public:
         recomputeBackState();
     }
 
+    void assign(Vec&& newNumerator, Vec&& newDenominator) {
+        numerator   = std::move(newNumerator);
+        denominator = std::move(newDenominator);
+
+        recomputeBackState();
+    }
+
     void assign(TransferFunction other) {
+        numerator   = std::move(other.numerator);
+        denominator = std::move(other.denominator);
+
+        roots               = std::move(other.roots);
+        impulse_factors     = std::move(other.impulse_factors);
+        transient_factors   = std::move(other.transient_factors);
+
+        is_settled          = other.is_settled;
+        settling_time       = other.settling_time;
+        steady_state_value  = other.steady_state_value;
+    }
+
+    void assign(TransferFunction&& other) {
         numerator   = std::move(other.numerator);
         denominator = std::move(other.denominator);
 

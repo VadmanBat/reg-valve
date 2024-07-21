@@ -136,11 +136,11 @@ void Application::setSpinBox(QDoubleSpinBox* spinBox, double min, double max, do
     spinBox->setPrefix(prefix);
 }
 
-DoubleSlider* Application::createParameterForm(const char* name, QHBoxLayout* layout,
-                                               double lower, double upper,
-                                               double min, double max)
-{
-    auto*titleLabel = new QLabel(name);
+std::pair <DoubleSlider*, QLayout*> Application::createSliderForm(const SliderData& data) {
+    const auto [title, lower, upper, min, max] = data;
+
+    auto layout = new QHBoxLayout;
+    auto titleLabel = new QLabel(title);
     titleLabel->setStyleSheet("font-size: 16pt;");
     layout->addWidget(titleLabel);
 
@@ -196,23 +196,16 @@ DoubleSlider* Application::createParameterForm(const char* name, QHBoxLayout* la
     pointsSpinBox->setEnabled(false);
     slider->setEnabled(false);
 
-    return slider;
+    return {slider, layout};
 }
 
-std::vector <DoubleSlider*> Application::createControllerParameterForms(QVBoxLayout *layout) {
-    auto Kp = new QHBoxLayout;
-    auto Tu = new QHBoxLayout;
-    auto Td = new QHBoxLayout;
-
-    std::vector <DoubleSlider*> result;
-
-    result.push_back(createParameterForm("K<sub>p</sub>", Kp, 0.1, 50, 1, 10));
-    result.push_back(createParameterForm("T<sub>u</sub>", Tu, 0.1, 2000, 1, 120));
-    result.push_back(createParameterForm("T<sub>d</sub>", Td, 0.1, 2000, 1, 60));
-
-    layout->addLayout(Kp);
-    layout->addLayout(Tu);
-    layout->addLayout(Td);
-
-    return result;
+QLayout* Application::createSlidersForm(std::vector <DoubleSlider*>& sliders, const SlidersDataset& dataset) {
+    sliders.reserve(dataset.size());
+    auto layout = new QVBoxLayout;
+    for (const auto& sliderData : dataset) {
+        auto [slider, sliderLayout](createSliderForm(sliderData));
+        sliders.emplace_back(slider);
+        layout->addLayout(sliderLayout);
+    }
+    return layout;
 }

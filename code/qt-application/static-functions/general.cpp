@@ -14,3 +14,17 @@ void Application::updateStyleSheetProperty(QLineEdit* lineEdit, const QString& p
         style += replacement;
     lineEdit->setStyleSheet(style);
 }
+
+#include <QMessageBox>
+
+void Application::showError(const QString& errorMessage) {
+    QMessageBox msgBox;
+    msgBox.setIcon(QMessageBox::Critical);
+
+    msgBox.setText("Произошла ошибка ввода...");
+    msgBox.setInformativeText(errorMessage);
+
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    msgBox.exec();
+}

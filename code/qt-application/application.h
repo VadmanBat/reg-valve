@@ -27,6 +27,7 @@ private:
     using SliderData = std::tuple <QString, double, double, double, double>;
     using SlidersDataset = std::vector <SliderData>;
 
+    static void showError(const QString& errorMessage);
     /// update css-field:
     static void updateStyleSheetProperty(QLineEdit *lineEdit, const QString& property, const QString& value);
 
@@ -104,6 +105,9 @@ public:
         mainLayout->addWidget(tabWidget);
         setLayout(mainLayout);
     }
+
+private:
+    static bool numIsValidInput(const MathCore::Vec &num, const MathCore::Vec &den);
 
 private slots:
     void expOpenFile();

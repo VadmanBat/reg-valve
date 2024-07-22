@@ -8,9 +8,10 @@ void Application::updateSliderRange(QDoubleSpinBox *minSpinBox, QDoubleSpinBox *
     double max = maxSpinBox->value();
     int points = pointsSpinBox->value();
 
-    if (min < max && points > 0) {
-        slider->setRange(min, max);
-        slider->setSingleStep((max - min) / (points - 1));
+    if (min < max && points > 1) {
+        auto value(slider->value());
+        slider->setRange(min, max, points);
+        slider->setValue(value);
     }
 }
 
@@ -29,41 +30,41 @@ std::pair <DoubleSlider*, QLayout*> Application::createSliderForm(const SliderDa
     titleLabel->setStyleSheet("font-size: 16pt;");
     layout->addWidget(titleLabel);
 
-    auto enableCheckBox = new QCheckBox("Enable");
+    auto enableCheckBox = new QCheckBox("включить");
     layout->addWidget(enableCheckBox);
 
     auto minSpinBox = new QDoubleSpinBox;
     auto maxSpinBox = new QDoubleSpinBox;
-    setSpinBox(minSpinBox, lower, upper, min, "min: ");
-    setSpinBox(maxSpinBox, lower, upper, max, "max: ");
+    setSpinBox(minSpinBox, lower, upper, min, "от: ");
+    setSpinBox(maxSpinBox, lower, upper, max, "до: ");
     layout->addWidget(minSpinBox);
     layout->addWidget(maxSpinBox);
 
     auto pointsSpinBox = new QSpinBox;
     pointsSpinBox->setRange(10, 1000);
-    pointsSpinBox->setPrefix("Points: ");
-    pointsSpinBox->setValue(50);
+    pointsSpinBox->setPrefix("точки: ");
+    pointsSpinBox->setValue(100);
     layout->addWidget(pointsSpinBox);
+
+    minSpinBox->setFixedSize(100, 30);
+    maxSpinBox->setFixedSize(100, 30);
+    pointsSpinBox->setFixedSize(100, 30);
 
     auto slider = new DoubleSlider(Qt::Horizontal);
     layout->addWidget(slider);
 
-    connect(minSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double) {
+    connect(minSpinBox, &QDoubleSpinBox::editingFinished, [=]() {
         updateSliderRange(minSpinBox, maxSpinBox, pointsSpinBox, slider);
         if (minSpinBox->value() > maxSpinBox->value())
             maxSpinBox->setValue(minSpinBox->value());
     });
-    connect(maxSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double) {
+    connect(maxSpinBox, &QDoubleSpinBox::editingFinished, [=]() {
         updateSliderRange(minSpinBox, maxSpinBox, pointsSpinBox, slider);
         if (minSpinBox->value() > maxSpinBox->value())
             minSpinBox->setValue(maxSpinBox->value());
     });
-    connect(pointsSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), [=](int) {
+    connect(pointsSpinBox, &QSpinBox::editingFinished, [=]() {
         updateSliderRange(minSpinBox, maxSpinBox, pointsSpinBox, slider);
-    });
-
-    connect(slider, &QSlider::valueChanged, [=](int value) {
-
     });
 
     updateSliderRange(minSpinBox, maxSpinBox, pointsSpinBox, slider);

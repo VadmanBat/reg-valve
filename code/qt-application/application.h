@@ -29,7 +29,43 @@ private:
 
     static void showError(const QString& errorMessage);
     /// update css-field:
-    static void updateStyleSheetProperty(QLineEdit *lineEdit, const QString& property, const QString& value);
+    template <typename T>
+    static void updateStyleSheetProperty(T* widget, const QString& property, const QString& value) {
+        static_assert(std::is_base_of<QWidget, T>::value, "T must be a QWidget or derived class");
+
+        QString style = widget->styleSheet();
+        QString replacement = QString("%1: %2;").arg(property,value);
+        if (style.contains(property)) {
+            QString pattern = QString("%1: \\w+;").arg(property);
+            style = style.replace(QRegExp(pattern), replacement);
+        } else {
+            style += replacement;
+        }
+        widget->setStyleSheet(style);
+    }
+    template <typename T>
+    static void updateStyleSheetProperty(T* widget, const QString& selector, const QString& property, const QString& value) {
+        static_assert(std::is_base_of<QWidget, T>::value, "T must be a QWidget or derived class");
+
+        QString style = widget->styleSheet();
+        QString replacement = QString("%1: %2;").arg(property, value);
+        QString pattern = QString("(%1\\s*\\{[^}]*)(%2\\s*:\\s*[^;]+;)([^}]*\\})").arg(selector, property);
+
+        QRegExp regex(pattern);
+        if (regex.indexIn(style) != -1) {
+            style.replace(regex, QString("\\1%1\\3").arg(replacement));
+        } else {
+            QString selectorPattern = QString("(%1\\s*\\{[^}]*)(\\})").arg(selector);
+            QRegExp selectorRegex(selectorPattern);
+            if (selectorRegex.indexIn(style) != -1) {
+                style.replace(selectorRegex, QString("\\1 %2 \\2").arg(replacement));
+            } else {
+                style += QString("%1 { %2 }").arg(selector, replacement);
+            }
+        }
+
+        widget->setStyleSheet(style);
+    }
 
     static QString getColor(const double& value);
     static double getValue(QString text);
@@ -104,6 +140,8 @@ public:
         auto mainLayout = new QVBoxLayout(this);
         mainLayout->addWidget(tabWidget);
         setLayout(mainLayout);
+
+        applyStyles();
     }
 
 private:
@@ -148,6 +186,8 @@ private:
     std::vector <LineEdit*> regNumerator, regDenominator;
 
     std::vector <DoubleSlider*> regSliders;
+
+    void applyStyles();
 };
 
 #endif //REGVALVE_APPLICATION_H

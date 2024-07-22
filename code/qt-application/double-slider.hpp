@@ -11,29 +11,29 @@
 class DoubleSlider : public QSlider {
 public:
     explicit DoubleSlider(Qt::Orientation orientation, QWidget *parent = nullptr) :
-            QSlider(orientation, parent), m_min(0.0), m_max(1.0), m_singleStep(0.01)
+            QSlider(orientation, parent), m_min(0.0), m_max(1.0), m_intervals(1000)
     {
+        m_singleStep = (m_max - m_min) / m_intervals;
         connect(this, &QSlider::valueChanged, this, &DoubleSlider::onValueChanged);
     }
 
-    void setRange(double min, double max) {
+    void setRange(double min, double max, int points) {
         m_min = min;
         m_max = max;
-        QSlider::setRange(0, 1000);
+
+        int new_value = static_cast<int>(double(QSlider::value()) / m_intervals * (points - 1));
+        QSlider::setRange(0, m_intervals = points - 1);
+        m_singleStep = (m_max - m_min) / m_intervals;
+        QSlider::setValue(new_value);
     }
 
-    void setSingleStep(double step) {
-        m_singleStep = step;
-        QSlider::setSingleStep(static_cast<int>(step * 1000 / (m_max - m_min)));
-    }
-
-    double value() const {
-        return QSlider::value() * (m_max - m_min) / 1000.0 + m_min;
+    [[nodiscard]] double value() const {
+        return m_min + QSlider::value() * m_singleStep;
     }
 
 public slots:
     void setValue(double value) {
-        QSlider::setValue(static_cast<int>((value - m_min) * 1000 / (m_max - m_min)));
+        QSlider::setValue(static_cast<int>((value - m_min) * m_intervals / (m_max - m_min)));
     }
 
 signals:
@@ -42,7 +42,7 @@ signals:
     };
 
 protected:
-    void paintEvent(QPaintEvent *event) override {
+    void paintEvent(QPaintEvent* event) override {
         QSlider::paintEvent(event);
 
         QStyleOptionSlider opt;
@@ -50,29 +50,12 @@ protected:
 
         QPainter painter(this);
         QRect rect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, this);
-        QString valueText = QString::number(this->value(), 'f', 2);
+        QRect textRect = rect.adjusted(-width() / 2, -55, width() / 2, height() / 2);
+        painter.drawText(textRect, Qt::AlignCenter, QString::number(this->value(), 'f', 2));
 
-        // Рисуем текст над ползунком, перекрывая его
-        //QRect textRect = rect.adjusted(-rect.width() / 2, -rect.height() * 2, rect.width() / 2, -rect.height());
-        QRect textRect = rect.adjusted(-width() / 2, height() / 2 - 20, width() / 2, height() / 2);
-        painter.drawText(textRect, Qt::AlignCenter, valueText);
-
-        // Рисуем минимум и максимум
-        QString minText = QString::number(m_min, 'f', 2);
-        QString maxText = QString::number(m_max, 'f', 2);
-        QRect minRect = rect.adjusted(-width() / 2, height() / 2, -width() / 2 + 50, height() / 2 + 20);
-        QRect maxRect = rect.adjusted(width() / 2 - 50, height() / 2, width() / 2, height() / 2 + 20);
-        painter.drawText(minRect, Qt::AlignLeft, minText);
-        painter.drawText(maxRect, Qt::AlignRight, maxText);
-
-        // Рисуем засечки
-        int tickInterval = this->tickInterval();
-        if (tickInterval > 0) {
-            for (int i = 0; i <= this->maximum(); i += tickInterval) {
-                int x = QStyle::sliderPositionFromValue(this->minimum(), this->maximum(), i, this->width());
-                painter.drawLine(x, rect.bottom() + 5, x, rect.bottom() + 15);
-            }
-        }
+        QRect limitRect = QRect(0, 30, width(), height());
+        painter.drawText(limitRect, Qt::AlignLeft, QString::number(m_min, 'f', 2));
+        painter.drawText(limitRect, Qt::AlignRight, QString::number(m_max, 'f', 2));
     }
 
 private slots:
@@ -84,6 +67,8 @@ private:
     double m_min;
     double m_max;
     double m_singleStep;
+
+    int m_intervals;
 };
 
 #endif //REGVALVE_DOUBLESLIDER_HPP

@@ -14,11 +14,12 @@ void Application::regAddTransferFunction() {
 
     std::vector <double> num, den;
 
-    double Kp = regSliders[0]->value();
-    double Tu = regSliders[1]->value();
-    double Td = regSliders[2]->value();
-
-    bool f1(regSliders[0]->isEnabled()), f2(regSliders[1]->isEnabled()), f3(regSliders[2]->isEnabled());
+    double Kp = regParameters[0]->getSlider()->value();
+    double Tu = regParameters[1]->getSlider()->value();
+    double Td = regParameters[2]->getSlider()->value();
+    bool f1(regParameters[0]->getSlider()->isEnabled());
+    bool f2(regParameters[1]->getSlider()->isEnabled());
+    bool f3(regParameters[2]->getSlider()->isEnabled());
 
     if (!f1)
         Kp = 1;
@@ -48,9 +49,9 @@ void Application::regAddTransferFunction() {
     std::cout << "settling time: " << W.settlingTime() << '\n';
     std::cout << "steady state value: " << W.steadyStateValue() << '\n';
 
-    std::cout << "Kp = " << regSliders[0]->value() << '\n';
-    std::cout << "Tu = " << regSliders[1]->value() << '\n';
-    std::cout << "Td = " << regSliders[2]->value() << '\n';
+    std::cout << "Kp = " << regParameters[0]->getSlider()->value() << '\n';
+    std::cout << "Tu = " << regParameters[1]->getSlider()->value() << '\n';
+    std::cout << "Td = " << regParameters[2]->getSlider()->value() << '\n';
 
     std::stringstream stream;
     stream << "(" << Kp << ", " << Tu << ", " << Td << ")";

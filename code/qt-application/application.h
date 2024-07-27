@@ -12,8 +12,8 @@
 #include <QFileDialog>
 #include <QtCharts>
 
-#include "code/qt-application/structures/double-slider.hpp"
 #include "code/qt-application/structures/line-edit.hpp"
+#include "code/qt-application/structures/reg-parameter.h"
 
 #include "../transfer-function/transfer-function.hpp"
 
@@ -23,9 +23,6 @@ class Application : public QWidget {
 private:
     using ChartData = std::tuple <QChart*, QString, QString, QString>;
     using ChartsDataset = std::vector <ChartData>;
-
-    using SliderData = std::tuple <QString, double, double, double, double>;
-    using SlidersDataset = std::vector <SliderData>;
 
     static void showError(const QString& errorMessage);
     /// update css-field:
@@ -121,11 +118,6 @@ private:
         dynamic_cast<QScatterSeries*>(chart->series().at(index))->append(point.real(), point.imag());
     }
 
-    static void setSpinBox(QDoubleSpinBox* spinBox, double min, double max, double value, const char* prefix);
-    static void updateSliderRange(QDoubleSpinBox *minSpinBox, QDoubleSpinBox *maxSpinBox, QSpinBox *pointsSpinBox, DoubleSlider *slider);
-    static std::pair <DoubleSlider*, QLayout*> createSliderForm(const SliderData& data);
-    static QLayout* createSlidersForm(std::vector <DoubleSlider*>& sliders, const SlidersDataset& data);
-
     QWidget* createExpTab();
     QWidget* createNumTab();
     QWidget* createRegTab();
@@ -176,16 +168,10 @@ private:
             {regChartFreqResp, "Комплексно-частотная характеристика (КЧХ)", "Реальная ось", "Мнимая ось"}
     };
 
-    const SlidersDataset REG_SLIDERS = {
-            {"K<sub>p</sub>", 0.1, 50, 1, 10},
-            {"T<sub>u</sub>", 0.1, 2000, 1, 120},
-            {"T<sub>d</sub>", 0.1, 2000, 1, 60}
-    };
-
     std::vector <LineEdit*> numNumerator, numDenominator;
     std::vector <LineEdit*> regNumerator, regDenominator;
 
-    std::vector <DoubleSlider*> regSliders;
+    std::vector <RegParameter*> regParameters;
 
     void applyStyles();
 };

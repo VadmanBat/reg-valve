@@ -8,14 +8,15 @@
 #include <QLabel>
 #include <QCheckBox>
 #include <QSpinBox>
-#include "double-slider.hpp"
 #include <QHBoxLayout>
 #include <QObject>
+
+#include "double-slider.hpp"
 
 class RegParameter : public QObject {
 private:
     QLabel* label;
-    QCheckBox* enableCheckBox;
+    QCheckBox* checkBox;
     QDoubleSpinBox *minSpinBox, *maxSpinBox;
     QSpinBox* intervalsSpinBox;
     DoubleSlider* slider;
@@ -48,10 +49,21 @@ private:
         slider->setEnabled(checked);
     }
 
+    void applyDefaultStyle() {
+        label->setStyleSheet("font-size: 16pt;");
+        minSpinBox->setStyleSheet("font-size: 9pt;");
+        maxSpinBox->setStyleSheet("font-size: 9pt;");
+        intervalsSpinBox->setStyleSheet("font-size: 9pt;");
+
+        minSpinBox->setFixedSize(100, 30);
+        maxSpinBox->setFixedSize(100, 30);
+        intervalsSpinBox->setFixedSize(100, 30);
+    }
+
 public:
     RegParameter(const QString& title, double min, double max, double minValue, double maxValue) :
             label(new QLabel(title)),
-            enableCheckBox(new QCheckBox),
+            checkBox(new QCheckBox),
             minSpinBox(new QDoubleSpinBox), maxSpinBox(new QDoubleSpinBox), intervalsSpinBox(new QSpinBox),
             slider(new DoubleSlider(Qt::Orientation::Horizontal)),
             layout(new QHBoxLayout)
@@ -78,23 +90,21 @@ public:
                 updateSliderRange();
         });
         connect(intervalsSpinBox, &QSpinBox::editingFinished, this, &RegParameter::updateSliderRange);
-        connect(enableCheckBox, &QCheckBox::toggled, this, &RegParameter::enable);
+        connect(checkBox, &QCheckBox::toggled, this, &RegParameter::enable);
 
         layout->addWidget(label);
-        layout->addWidget(enableCheckBox);
+        layout->addWidget(checkBox);
         layout->addWidget(minSpinBox);
         layout->addWidget(maxSpinBox);
         layout->addWidget(intervalsSpinBox);
         layout->addWidget(slider);
+
+        applyDefaultStyle();
     }
 
-    [[nodiscard]] QLayout* getLayout() const {
-        return layout;
-    }
-
-    [[nodiscard]] DoubleSlider* getSlider() const {
-        return slider;
-    }
+    [[nodiscard]] QLayout* getLayout() const { return layout; }
+    [[nodiscard]] QCheckBox* getCheckBox() const { return checkBox; }
+    [[nodiscard]] DoubleSlider* getSlider() const { return slider; }
 };
 
 #endif //REGVALVE_REG_PARAMETER_H

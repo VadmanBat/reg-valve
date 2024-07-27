@@ -145,7 +145,7 @@ const char* blueSliderStyle =
 )";
 
 void Application::applyStyles() {
-    regSliders[0]->setStyleSheet(redSliderStyle);
-    regSliders[1]->setStyleSheet(greenSliderStyle);
-    regSliders[2]->setStyleSheet(blueSliderStyle);
+    regParameters[0]->getSlider()->setStyleSheet(redSliderStyle);
+    regParameters[1]->getSlider()->setStyleSheet(greenSliderStyle);
+    regParameters[2]->getSlider()->setStyleSheet(blueSliderStyle);
 }

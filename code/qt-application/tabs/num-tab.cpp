@@ -4,7 +4,7 @@
 #include "../application.h"
 
 QWidget* Application::createNumTab() {
-    auto numTab = new QWidget;
+    auto numTab = new QWidget(this);
     auto layout = new QVBoxLayout(numTab);
 
     auto transferFunctionLayout = createTransferFunctionForm(numNumerator, numDenominator);

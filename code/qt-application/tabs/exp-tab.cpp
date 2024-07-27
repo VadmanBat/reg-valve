@@ -7,7 +7,7 @@
 using namespace QtCharts;
 
 QWidget* Application::createExpTab() {
-    auto expTab = new QWidget;
+    auto expTab = new QWidget(this);
     auto layout = new QVBoxLayout(expTab);
 
     auto openFileButton = new QPushButton("Открыть файл", expTab);

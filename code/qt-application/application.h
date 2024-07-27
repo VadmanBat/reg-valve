@@ -12,8 +12,8 @@
 #include <QFileDialog>
 #include <QtCharts>
 
-#include "double-slider.hpp"
-#include "line-edit.hpp"
+#include "code/qt-application/structures/double-slider.hpp"
+#include "code/qt-application/structures/line-edit.hpp"
 
 #include "../transfer-function/transfer-function.hpp"
 
@@ -89,7 +89,7 @@ private:
                                                std::size_t n = 6, std::size_t m = 6, const QString& title = "W(p) = ");
 
     /// charts functions:
-    static QLayout* createCharts(ChartsDataset charts, QWidget* tab);
+    static QLayout* createCharts(const ChartsDataset& charts, QWidget* tab);
     static void createAxes(QChart* chart, const QString &titleX, const QString &titleY);
     static void eraseLastSeries(QChart* chart);
     static void removeAllSeries(QChart* chart);

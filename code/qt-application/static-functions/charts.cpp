@@ -3,7 +3,7 @@
 //
 #include "../application.h"
 
-QLayout* Application::createCharts(ChartsDataset charts, QWidget* tab) {
+QLayout* Application::createCharts(const ChartsDataset& charts, QWidget* tab) {
     auto layout = new QHBoxLayout;
     for (auto& [chart, title, titleX, titleY] : charts) {
         chart->setTitle(title);
@@ -26,9 +26,9 @@ void Application::removeAllSeries(QChart* chart) {
     chart->update();
 }
 
-void Application::createAxes(QChart*chart, const QString& titleX, const QString& titleY) {
-    auto axisX = new QValueAxis();
-    auto axisY = new QValueAxis();
+void Application::createAxes(QChart* chart, const QString& titleX, const QString& titleY) {
+    auto axisX = new QValueAxis(chart);
+    auto axisY = new QValueAxis(chart);
 
     axisX->setTitleText(titleX);
     axisY->setTitleText(titleY);

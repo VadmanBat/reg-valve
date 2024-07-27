@@ -14,7 +14,7 @@ QWidget* Application::createRegTab() {
     auto addButton = new QPushButton("Добавить");
     connect(addButton, &QPushButton::clicked, this, &Application::regAddTransferFunction);
 
-    auto regTab = new QWidget;
+    auto regTab = new QWidget(this);
 
     auto chartsLayout = createCharts(REG_CHARTS, regTab);
 

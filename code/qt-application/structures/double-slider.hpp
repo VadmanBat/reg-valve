@@ -7,22 +7,25 @@
 
 #include <QApplication>
 #include <QWidget>
+#include <QSlider>
+#include <QPainter>
+#include <QStyleOptionSlider>
 
 class DoubleSlider : public QSlider {
 public:
-    explicit DoubleSlider(Qt::Orientation orientation, QWidget *parent = nullptr) :
-            QSlider(orientation, parent), m_min(0.0), m_max(1.0), m_intervals(1000)
+    explicit DoubleSlider(Qt::Orientation orientation, QWidget* parent = nullptr) :
+            QSlider(orientation, parent), m_min(0.0), m_max(1.0), m_intervals(100)
     {
         m_singleStep = (m_max - m_min) / m_intervals;
         connect(this, &QSlider::valueChanged, this, &DoubleSlider::onValueChanged);
     }
 
-    void setRange(double min, double max, int points) {
+    void setRange(double min, double max, int intervals) {
         m_min = min;
         m_max = max;
 
-        int new_value = static_cast<int>(double(QSlider::value()) / m_intervals * (points - 1));
-        QSlider::setRange(0, m_intervals = points - 1);
+        int new_value = static_cast<int>(double(QSlider::value()) / m_intervals * intervals);
+        QSlider::setRange(0, m_intervals = intervals);
         m_singleStep = (m_max - m_min) / m_intervals;
         QSlider::setValue(new_value);
     }

@@ -14,6 +14,7 @@
 ///     - перемножение полиномов первого порядка;
 ///     - дефляция полинома при известном корне;
 ///     - вычисление корней полинома методом Ньютона;
+///     - уточнение корней полинома методом Ньютона;
 ///     - решение матрицы (методом Гаусса-Жордана);
 ///     - вычисление коэффициентов простых слагаемых для разложения дробию.
 
@@ -182,6 +183,40 @@ public:
 
         for (auto& root : roots)
             root = ConvertCore::normalize(root, epsilon);
+
+        return roots;
+    } /// N * log(M)
+    template <int EPSILON_ORDER = 9, std::size_t MAX_ITER = 100>
+    static VecComp clarifyPolynomialNewton(const Vec& coefficients, VecComp& roots) {
+        static const Type epsilon(std::pow(10.L, -EPSILON_ORDER));
+
+        auto coeffs(ConvertCore::toComplexVector(coefficients));
+        std::size_t degree(coeffs.size() - 1);
+        auto f = [&coeffs, &degree](const Complex& x) {
+            Complex result(0);
+            for (std::size_t i = 0; i <= degree; ++i) {
+                result *= x;
+                result += coeffs[i];
+            }
+            return result;
+        };
+        auto df = [&coeffs, &degree](const Complex& x) {
+            Complex result(0);
+            for (std::size_t i = 0; i < degree; ++i) {
+                result *= x;
+                result += Complex(static_cast<Type>(degree - i)) * coeffs[i];
+            }
+            return result;
+        };
+
+        for (auto& root : roots)
+            for (std::size_t i = 0; i < MAX_ITER; ++i) {
+                const Complex fx(f(root));
+                const Complex dfx(df(root));
+                if (std::abs(fx) < epsilon)
+                    break;
+                root -= fx / dfx;
+            }
 
         return roots;
     } /// N * log(M)

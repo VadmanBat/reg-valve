@@ -6,44 +6,44 @@
 const char* redSliderStyle =
         R"(
     QSlider::groove:horizontal {
-        border: 1px solid #ff0000;
+        border: 1px solid #ff4d4d;
         height: 8px;
-        background: #ffcccc;
+        background: #ffe6e6;
         margin: 2px 0;
         border-radius: 4px;
     }
     QSlider::handle:horizontal {
-        background: #ff4d4d;
-        border: 1px solid #cc0000;
+        background: #ff6666;
+        border: 1px solid #ff4d4d;
         width: 18px;
         height: 18px;
         border-radius: 9px;
         margin: -5px 0;
     }
     QSlider::sub-page:horizontal {
-        background: #ff6666;
-        border: 1px solid #cc0000;
+        background: #ff9999;
+        border: 1px solid #ff4d4d;
         height: 8px;
         border-radius: 4px;
     }
     QSlider::add-page:horizontal {
-        background: #ffcccc;
-        border: 1px solid #cc0000;
+        background: #ffe6e6;
+        border: 1px solid #ff4d4d;
         height: 8px;
         border-radius: 4px;
     }
     QSlider::handle:horizontal:disabled {
-        background: #ff9999;
-        border: 1px solid #cc0000;
+        background: #ffcccc;
+        border: 1px solid #ff4d4d;
     }
     QSlider::groove:horizontal:disabled {
-        background: #ffe6e6;
+        background: #fff2f2;
     }
     QSlider::sub-page:horizontal:disabled {
-        background: #ffcccc;
+        background: #ffe6e6;
     }
     QSlider::add-page:horizontal:disabled {
-        background: #ffe6e6;
+        background: #fff2f2;
     }
     QSlider {
         margin: 10px;
@@ -53,44 +53,44 @@ const char* redSliderStyle =
 const char* greenSliderStyle =
         R"(
     QSlider::groove:horizontal {
-        border: 1px solid #00ff00;
+        border: 1px solid #66cc66;
         height: 8px;
-        background: #ccffcc;
+        background: #e6ffe6;
         margin: 2px 0;
         border-radius: 4px;
     }
     QSlider::handle:horizontal {
-        background: #33cc33;
-        border: 1px solid #00cc00;
+        background: #66ff66;
+        border: 1px solid #66cc66;
         width: 18px;
         height: 18px;
         border-radius: 9px;
         margin: -5px 0;
     }
     QSlider::sub-page:horizontal {
-        background: #66ff66;
-        border: 1px solid #00cc00;
+        background: #99ff99;
+        border: 1px solid #66cc66;
         height: 8px;
         border-radius: 4px;
     }
     QSlider::add-page:horizontal {
-        background: #ccffcc;
-        border: 1px solid #00cc00;
+        background: #e6ffe6;
+        border: 1px solid #66cc66;
         height: 8px;
         border-radius: 4px;
     }
     QSlider::handle:horizontal:disabled {
-        background: #99e699;
-        border: 1px solid #00cc00;
+        background: #ccffcc;
+        border: 1px solid #66cc66;
     }
     QSlider::groove:horizontal:disabled {
-        background: #e6ffe6;
+        background: #f2fff2;
     }
     QSlider::sub-page:horizontal:disabled {
-        background: #ccffcc;
+        background: #e6ffe6;
     }
     QSlider::add-page:horizontal:disabled {
-        background: #e6ffe6;
+        background: #f2fff2;
     }
     QSlider {
         margin: 10px;
@@ -100,44 +100,44 @@ const char* greenSliderStyle =
 const char* blueSliderStyle =
         R"(
     QSlider::groove:horizontal {
-        border: 1px solid #0000ff;
+        border: 1px solid #6666cc;
         height: 8px;
-        background: #ccccff;
+        background: #e6e6ff;
         margin: 2px 0;
         border-radius: 4px;
     }
     QSlider::handle:horizontal {
-        background: #4d4dff;
-        border: 1px solid #0000cc;
+        background: #6666ff;
+        border: 1px solid #6666cc;
         width: 18px;
         height: 18px;
         border-radius: 9px;
         margin: -5px 0;
     }
     QSlider::sub-page:horizontal {
-        background: #6666ff;
-        border: 1px solid #0000cc;
+        background: #9999ff;
+        border: 1px solid #6666cc;
         height: 8px;
         border-radius: 4px;
     }
     QSlider::add-page:horizontal {
-        background: #ccccff;
-        border: 1px solid #0000cc;
+        background: #e6e6ff;
+        border: 1px solid #6666cc;
         height: 8px;
         border-radius: 4px;
     }
     QSlider::handle:horizontal:disabled {
-        background: #9999ff;
-        border: 1px solid #0000cc;
+        background: #ccccff;
+        border: 1px solid #6666cc;
     }
     QSlider::groove:horizontal:disabled {
-        background: #e6e6ff;
+        background: #f2f2ff;
     }
     QSlider::sub-page:horizontal:disabled {
-        background: #ccccff;
+        background: #e6e6ff;
     }
     QSlider::add-page:horizontal:disabled {
-        background: #e6e6ff;
+        background: #f2f2ff;
     }
     QSlider {
         margin: 10px;

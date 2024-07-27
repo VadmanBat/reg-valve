@@ -30,7 +30,7 @@ std::pair <DoubleSlider*, QLayout*> Application::createSliderForm(const SliderDa
     titleLabel->setStyleSheet("font-size: 16pt;");
     layout->addWidget(titleLabel);
 
-    auto enableCheckBox = new QCheckBox("включить");
+    auto enableCheckBox = new QCheckBox;
     layout->addWidget(enableCheckBox);
 
     auto minSpinBox = new QDoubleSpinBox;
@@ -49,6 +49,9 @@ std::pair <DoubleSlider*, QLayout*> Application::createSliderForm(const SliderDa
     minSpinBox->setFixedSize(100, 30);
     maxSpinBox->setFixedSize(100, 30);
     pointsSpinBox->setFixedSize(100, 30);
+    minSpinBox->setStyleSheet("font-size: 9pt;");
+    maxSpinBox->setStyleSheet("font-size: 9pt;");
+    pointsSpinBox->setStyleSheet("font-size: 9pt;");
 
     auto slider = new DoubleSlider(Qt::Horizontal);
     layout->addWidget(slider);

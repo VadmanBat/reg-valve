@@ -53,6 +53,14 @@ void Application::regAddTransferFunction() {
     std::cout << "Tu = " << regParameters[1]->getSlider()->value() << '\n';
     std::cout << "Td = " << regParameters[2]->getSlider()->value() << '\n';
 
+    if (W.isSettled()) {
+        regWidget->updateValues(true, W.settlingTime(), W.steadyStateValue(),
+                                W.computeLinearIntegralCriterion(), W.computeIntegralQuadraticCriterion(), W.computeStandardDeviation());
+    }
+    else {
+        regWidget->updateValues(false, -1, -1,-1, -1, -1);
+    }
+
     std::stringstream stream;
     stream << "(" << Kp << ", " << Tu << ", " << Td << ")";
     auto string (stream.str());

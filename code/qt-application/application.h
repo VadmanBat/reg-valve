@@ -13,7 +13,8 @@
 #include <QtCharts>
 
 #include "code/qt-application/structures/line-edit.hpp"
-#include "code/qt-application/structures/reg-parameter.h"
+#include "code/qt-application/structures/reg-parameter.hpp"
+#include "code/qt-application/structures/reg-widget.hpp"
 
 #include "../transfer-function/transfer-function.hpp"
 
@@ -172,6 +173,7 @@ private:
     std::vector <LineEdit*> regNumerator, regDenominator;
 
     std::vector <RegParameter*> regParameters;
+    RegulationWidget* regWidget{new RegulationWidget};
 
     void applyStyles();
 };

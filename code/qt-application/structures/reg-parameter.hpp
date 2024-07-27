@@ -2,8 +2,8 @@
 // Created by Vadma on 23.07.2024.
 //
 
-#ifndef REGVALVE_REG_PARAMETER_H
-#define REGVALVE_REG_PARAMETER_H
+#ifndef REGVALVE_REG_PARAMETER_HPP
+#define REGVALVE_REG_PARAMETER_HPP
 
 #include <QLabel>
 #include <QCheckBox>
@@ -107,4 +107,4 @@ public:
     [[nodiscard]] DoubleSlider* getSlider() const { return slider; }
 };
 
-#endif //REGVALVE_REG_PARAMETER_H
+#endif //REGVALVE_REG_PARAMETER_HPP

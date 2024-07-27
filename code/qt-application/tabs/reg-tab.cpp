@@ -13,24 +13,28 @@ QWidget* Application::createRegTab() {
                                  new RegParameter("T<sub>u</sub>", 0.1, 2000, 1, 120),
                                  new RegParameter("T<sub>d</sub>", 0.1, 2000, 1, 60)
                          });
-    auto slidersLayout = new QVBoxLayout;
+    auto parametersLayout = new QVBoxLayout;
     for (auto parameter : regParameters) {
-        slidersLayout->addLayout(parameter->getLayout());
+        parametersLayout->addLayout(parameter->getLayout());
         connect(parameter->getCheckBox(), &QCheckBox::stateChanged, this, &Application::regReplaceTransferFunction);
         connect(parameter->getSlider(), &QSlider::valueChanged, this, &Application::regReplaceTransferFunction);
     }
+
+    auto uppLayout = new QHBoxLayout;
+    uppLayout->addLayout(transferFunctionLayout);
+    uppLayout->addWidget(regWidget);
 
     auto addButton = new QPushButton("Добавить");
     connect(addButton, &QPushButton::clicked, this, &Application::regAddTransferFunction);
 
     auto regTab = new QWidget(this);
 
-    auto resLayout = new QVBoxLayout;
-    resLayout->addLayout(transferFunctionLayout);
-    resLayout->addLayout(slidersLayout);
-    resLayout->addWidget(addButton);
-    resLayout->addLayout(createCharts(REG_CHARTS, regTab));
+    auto layout = new QVBoxLayout;
+    layout->addLayout(uppLayout);
+    layout->addLayout(parametersLayout);
+    layout->addWidget(addButton);
+    layout->addLayout(createCharts(REG_CHARTS, regTab));
 
-    regTab->setLayout(resLayout);
+    regTab->setLayout(layout);
     return regTab;
 }

@@ -12,6 +12,8 @@
 #include <QFileDialog>
 #include <QtCharts>
 
+#include "../style-core.hpp"
+
 #include "code/qt-application/structures/line-edit.hpp"
 #include "code/qt-application/structures/reg-parameter.hpp"
 #include "code/qt-application/structures/reg-widget.hpp"
@@ -26,44 +28,6 @@ private:
     using ChartsDataset = std::vector <ChartData>;
 
     static void showError(const QString& errorMessage);
-    /// update css-field:
-    template <typename T>
-    static void updateStyleSheetProperty(T* widget, const QString& property, const QString& value) {
-        static_assert(std::is_base_of<QWidget, T>::value, "T must be a QWidget or derived class");
-
-        QString style = widget->styleSheet();
-        QString replacement = QString("%1: %2;").arg(property,value);
-        if (style.contains(property)) {
-            QString pattern = QString("%1: \\w+;").arg(property);
-            style = style.replace(QRegExp(pattern), replacement);
-        } else {
-            style += replacement;
-        }
-        widget->setStyleSheet(style);
-    }
-    template <typename T>
-    static void updateStyleSheetProperty(T* widget, const QString& selector, const QString& property, const QString& value) {
-        static_assert(std::is_base_of<QWidget, T>::value, "T must be a QWidget or derived class");
-
-        QString style = widget->styleSheet();
-        QString replacement = QString("%1: %2;").arg(property, value);
-        QString pattern = QString("(%1\\s*\\{[^}]*)(%2\\s*:\\s*[^;]+;)([^}]*\\})").arg(selector, property);
-
-        QRegExp regex(pattern);
-        if (regex.indexIn(style) != -1) {
-            style.replace(regex, QString("\\1%1\\3").arg(replacement));
-        } else {
-            QString selectorPattern = QString("(%1\\s*\\{[^}]*)(\\})").arg(selector);
-            QRegExp selectorRegex(selectorPattern);
-            if (selectorRegex.indexIn(style) != -1) {
-                style.replace(selectorRegex, QString("\\1 %2 \\2").arg(replacement));
-            } else {
-                style += QString("%1 { %2 }").arg(selector, replacement);
-            }
-        }
-
-        widget->setStyleSheet(style);
-    }
 
     static QString getColor(const double& value);
     static double getValue(QString text);
@@ -82,7 +46,7 @@ private:
 
     static MathCore::Vec getLineEditData(const std::vector <LineEdit*>& lineEdits);
     static QString correctLine(const QString& text);
-    static QLayout* createLineEdit(const QString& title, std::vector <LineEdit*>& lineEdits, QDoubleValidator* validator);
+    static QLayout* createLineEdit(std::vector <LineEdit*>& lineEdits, QDoubleValidator* validator);
     static QLayout* createTransferFunctionForm(std::vector <LineEdit*>& numerator, std::vector <LineEdit*>& denominator,
                                                std::size_t n = 6, std::size_t m = 6, const QString& title = "W(p) = ");
 
@@ -173,7 +137,9 @@ private:
     std::vector <LineEdit*> regNumerator, regDenominator;
 
     std::vector <RegParameter*> regParameters;
-    RegulationWidget* regWidget{new RegulationWidget};
+
+    RegulationWidget* numWidget{new RegulationWidget(3, 2)};
+    RegulationWidget* regWidget{new RegulationWidget(3, 4)};
 
     void applyStyles();
 };

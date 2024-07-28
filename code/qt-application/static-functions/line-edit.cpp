@@ -40,10 +40,8 @@ QString Application::correctLine(const QString& text) {
     return "";
 }
 
-QLayout* Application::createLineEdit(const QString& title, std::vector <LineEdit*>& lineEdits, QDoubleValidator* validator) {
+QLayout* Application::createLineEdit(std::vector <LineEdit*>& lineEdits, QDoubleValidator* validator) {
     auto layout = new QHBoxLayout;
-    layout->addWidget(new QLabel(title));
-
     int p(-1);
     for (auto& lineEdit : lineEdits) {
         layout->addWidget(lineEdit = new LineEdit);
@@ -63,7 +61,7 @@ QLayout* Application::createLineEdit(const QString& title, std::vector <LineEdit
                 return;
             }
             adjustLineEditWidth(lineEdit);
-            updateStyleSheetProperty(lineEdit, "color", getColor(getValue(text)));
+            StyleCore::updateStyleSheetProperty(lineEdit, "color", getColor(getValue(text)));
         });
         connect(lineEdit, &QLineEdit::editingFinished, [lineEdit] {
             if (lineEdit->text().isEmpty())
@@ -89,15 +87,18 @@ QLayout* Application::createTransferFunctionForm(std::vector <LineEdit*>& numera
     auto realNumberValidator = new QDoubleValidator;
     realNumberValidator->setNotation(QDoubleValidator::StandardNotation);
 
+    /*auto numLayout = createLineEdit(numerator, realNumberValidator);
+    auto denLayout = createLineEdit(denominator, realNumberValidator);*/
+
     auto line = new QFrame;
     line->setFrameShape(QFrame::HLine);
     line->setFrameShadow(QFrame::Sunken);
     line->setMidLineWidth(10);
 
     auto transferFunctionLayout = new QVBoxLayout;
-    transferFunctionLayout->addLayout(createLineEdit("Числитель:\t", numerator, realNumberValidator));
+    transferFunctionLayout->addLayout(createLineEdit(numerator, realNumberValidator));
     transferFunctionLayout->addWidget(line);
-    transferFunctionLayout->addLayout(createLineEdit("Знаменатель:\t", denominator, realNumberValidator));
+    transferFunctionLayout->addLayout(createLineEdit(denominator, realNumberValidator));
 
     auto layout = new QHBoxLayout;
     layout->addWidget(transferFunctionLabel);

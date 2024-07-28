@@ -144,8 +144,23 @@ const char* blueSliderStyle =
     }
 )";
 
+const char* checkBoxStyle =
+        R"(
+    QCheckBox::indicator {
+        width: 20;
+        height: 20px;
+    }
+    QCheckBox {
+        font-size: 16px;
+    }
+)";
+
 void Application::applyStyles() {
     regParameters[0]->getSlider()->setStyleSheet(redSliderStyle);
     regParameters[1]->getSlider()->setStyleSheet(greenSliderStyle);
     regParameters[2]->getSlider()->setStyleSheet(blueSliderStyle);
+
+    regParameters[0]->getCheckBox()->setStyleSheet(checkBoxStyle);
+    regParameters[1]->getCheckBox()->setStyleSheet(checkBoxStyle);
+    regParameters[2]->getCheckBox()->setStyleSheet(checkBoxStyle);
 }

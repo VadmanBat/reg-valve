@@ -14,15 +14,20 @@
 
 #include <iomanip>
 #include <sstream>
+#include <algorithm>
+
+#include "../../style-core.hpp"
 
 class RegulationWidget : public QWidget {
 private:
-    QCheckBox* regulationCheckBox;
-    QLineEdit* timeRegLineEdit;
-    QLineEdit* setValueLineEdit;
-    QLineEdit* likLineEdit;
-    QLineEdit* ikkLineEdit;
-    QLineEdit* skoLineEdit;
+    QGridLayout* layout;
+    std::vector <QLabel*> labels;
+    std::vector <QLineEdit*> lineEdits;
+    std::vector <double> lastValues;
+    std::vector <int> precisions;
+    std::vector <std::pair <int, int>> colors;
+
+    const QString palette[3] = {"white", "#90ee90", "#ffb6c1"};
 
     static inline QString formatDouble(double value, int precision) {
         std::ostringstream out;
@@ -30,65 +35,98 @@ private:
         return QString::fromStdString(out.str());
     }
 
-    static void applyDefaultStyle(QGridLayout* layout) {
-        const auto rows(layout->rowCount());
-        const auto cols(layout->columnCount());
+    void applyDefaultStyle() {
+        for (auto label : labels) {
+            label->setAlignment(Qt::AlignRight);
+            label->setStyleSheet("font-size: 14pt;");
+            label->setFixedSize(48, 24);
+        }
+        for (auto lineEdit : lineEdits) {
+            lineEdit->setStyleSheet("font-size: 14pt;");
+            lineEdit->setMinimumSize(80, 24);
+            lineEdit->setReadOnly(true);
+        }
+    }
 
-        for (int i = 0; i < rows; ++i)
-            for (int j = 0; j < cols; j += 2)
-                if (auto label = qobject_cast<QLabel*>(layout->itemAtPosition(i, j)->widget()); label) {
-                    label->setStyleSheet("font-size: 14pt;");
-                    label->setFixedSize(50, 25);
-                }
-        for (int i = 0; i < rows; ++i)
-            for (int j = 1; j < cols; j += 2)
-                if (auto lineEdit = qobject_cast<QLineEdit*>(layout->itemAtPosition(i, j)->widget()); lineEdit) {
-                    lineEdit->setStyleSheet("font-size: 14pt;");
-                    lineEdit->setFixedSize(100, 25);
-                    lineEdit->setReadOnly(true);
-                }
+    inline int getColorIndex(int index, double oldValue, double newValue) {
+        if (oldValue == -1)
+            return 0;
+        if (newValue < oldValue)
+            return colors[index].first;
+        if (newValue > oldValue)
+            return colors[index].second;
+        return 0;
+    }
+
+    void updateCellStyle(int index, double newValue) {
+        QString currentStyle = lineEdits[index]->styleSheet();
+        const int colorIndex = getColorIndex(index, lastValues[index], newValue);
+        QString newStyle = QString("background-color: %1;").arg(palette[colorIndex]);
+
+        static QRegularExpression regex("background-color: [^;]+;");
+        if (regex.match(currentStyle).hasMatch())
+            currentStyle.replace(regex, newStyle);
+        else
+            currentStyle += newStyle;
+
+        lineEdits[index]->setStyleSheet(currentStyle);
     }
 
 public:
-    explicit RegulationWidget(QWidget* parent = nullptr) : QWidget(parent) {
-        auto layout = new QGridLayout(this);
-
-        regulationCheckBox  = new QCheckBox(this);
-        timeRegLineEdit     = new QLineEdit(this);
-        setValueLineEdit    = new QLineEdit(this);
-        likLineEdit         = new QLineEdit(this);
-        ikkLineEdit         = new QLineEdit(this);
-        skoLineEdit         = new QLineEdit(this);
-
-        layout->addWidget(new QLabel("a<sub>рег</sub>:", this), 0, 0);
-        layout->addWidget(regulationCheckBox, 0, 1);
-
-        layout->addWidget(new QLabel("t<sub>рег</sub>:", this), 1, 0);
-        layout->addWidget(timeRegLineEdit, 1, 1);
-
-        layout->addWidget(new QLabel("y<sub>уст</sub>:", this), 2, 0);
-        layout->addWidget(setValueLineEdit, 2, 1);
-
-        layout->addWidget(new QLabel("ЛИК:", this), 0, 2);
-        layout->addWidget(likLineEdit, 0, 3);
-
-        layout->addWidget(new QLabel("ИКК:", this), 1, 2);
-        layout->addWidget(ikkLineEdit, 1, 3);
-
-        layout->addWidget(new QLabel("СКО:", this), 2, 2);
-        layout->addWidget(skoLineEdit, 2, 3);
-
-        setLayout(layout);
-        applyDefaultStyle(layout);
+    explicit RegulationWidget(int rows, int cols, QWidget* parent = nullptr) : QWidget(parent) {
+        setLayout(layout = new QGridLayout(this));
+        const auto size(rows * cols);
+        labels.reserve(size);
+        lineEdits.reserve(size);
+        lastValues.assign(size, -1);
+        precisions.assign(size, 2);
+        colors.assign(size, {1, 2});
+        for (int i = 0; i < rows; ++i)
+            for (int j = 0; j < cols; ++j) {
+                auto label = new QLabel(this);
+                auto lineEdit = new QLineEdit(this);
+                labels.push_back(label);
+                lineEdits.push_back(lineEdit);
+                layout->addWidget(label, i, j * 2);
+                layout->addWidget(lineEdit, i, j * 2 + 1);
+            }
+        applyDefaultStyle();
     }
 
-    void updateValues(bool regulation, double timeReg, double setValue, double lik, double ikk, double sko) {
-        regulationCheckBox->setChecked(regulation);
-        timeRegLineEdit->setText(formatDouble(timeReg, 2));
-        setValueLineEdit->setText(formatDouble(setValue, 2));
-        likLineEdit->setText(formatDouble(lik, 4));
-        ikkLineEdit->setText(formatDouble(ikk, 4));
-        skoLineEdit->setText(formatDouble(sko, 4));
+    void setLabels(const std::vector <QString>& labelNames) {
+        const auto n(std::min(labels.size(), labelNames.size()));
+        for (int i = 0; i < n; ++i)
+            labels[i]->setText(labelNames[i]);
+    }
+
+    void setPrecisions(const std::vector <int>& valuePrecisions) {
+        const auto n(std::min(labels.size(), valuePrecisions.size()));
+        for (int i = 0; i < n; ++i)
+            precisions[i] = valuePrecisions[i];
+    }
+
+    void setColors(const std::vector <std::pair <int, int>>& valueColors) {
+        const auto n(std::min(labels.size(), valueColors.size()));
+        for (int i = 0; i < n; ++i)
+            colors[i] = valueColors[i];
+    }
+
+    void updateValues(const std::vector <double>& values) {
+        if (values.empty()) {
+            const auto n(lineEdits.size());
+            for (int i = 0; i < n; ++i) {
+                lineEdits[i]->setText("");
+                lastValues[i] = -1;
+            }
+            return;
+        }
+
+        const auto n(std::min(lineEdits.size(), values.size()));
+        for (int i = 0; i < n; ++i) {
+            updateCellStyle(i, values[i]);
+            lineEdits[i]->setText(formatDouble(values[i], precisions[i]));
+            lastValues[i] = values[i];
+        }
     }
 };
 

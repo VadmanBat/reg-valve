@@ -23,7 +23,9 @@ private:
     VecComp roots, impulse_factors, transient_factors;
 
     bool is_settled{};
-    Type settling_time{}, steady_state_value{};
+    Type steady_state_value{};
+    Type settling_time{}, rise_time{}, peak_time{};
+    Type omega_n{}, omega_c{}, zeta{}, overshoot{};
 
     void recomputeFrontState() {
         impulse_factors = MathCore::computeFactorsSimpleFractions(numerator, roots, denominator.front());
@@ -32,6 +34,8 @@ private:
         roots.pop_back();
         steady_state_value = transient_factors.back().real();
         transient_factors.pop_back();
+
+        overshoot = std::abs(transientResponse(peak_time) - steady_state_value) / steady_state_value * 100;
     }
 
     void recomputeBackState() {
@@ -46,11 +50,22 @@ private:
         if (auto max_root = roots.back().real(); max_root < 0) {
             is_settled      = true;
             settling_time   = -4 / max_root;
+
+            auto dominant_pole = *std::max_element(roots.begin(), roots.end(),
+                                                   [](const auto& a, const auto& b){
+                                                       return a.imag() < b.imag();
+                                                   });
+
+            omega_n         = std::abs(dominant_pole);
+            zeta            = -dominant_pole.real() / omega_n;
+            Type zeta_sq    = zeta * zeta;
+            rise_time       = 1.8 / omega_n;
+            peak_time       = M_PI / (omega_n * std::sqrt(1 - zeta_sq));
+            omega_c         = omega_n * std::sqrt(1 - 2 * zeta_sq + std::sqrt(4 * zeta_sq * (zeta_sq - 1) + 2));
         }
         else {
-            is_settled          = false;
-            settling_time       = 0;
-            steady_state_value  = 0;
+            is_settled = false;
+            peak_time = 0;
         }
 
         recomputeFrontState();
@@ -79,13 +94,29 @@ public:
     [[nodiscard]] inline bool isSettled() const {
         return is_settled;
     }
-
+    [[nodiscard]] inline Type steadyStateValue() const {
+        return steady_state_value;
+    }
     [[nodiscard]] inline Type settlingTime() const {
         return settling_time;
     }
-
-    [[nodiscard]] inline Type steadyStateValue() const {
-        return steady_state_value;
+    [[nodiscard]] inline Type peakTime() const {
+        return peak_time;
+    }
+    [[nodiscard]] inline Type riseTime() const {
+        return rise_time;
+    }
+    [[nodiscard]] inline Type naturalFrequency() const {
+        return omega_n;
+    }
+    [[nodiscard]] inline Type cutFrequency() const {
+        return omega_c;
+    }
+    [[nodiscard]] inline Type dampingRation() const {
+        return zeta;
+    }
+    [[nodiscard]] inline Type overShoot() const {
+        return overshoot;
     }
 
     [[nodiscard]] inline Vec getNumerator() const {

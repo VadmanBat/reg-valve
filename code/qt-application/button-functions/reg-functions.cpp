@@ -45,21 +45,11 @@ void Application::regAddTransferFunction() {
 
     TransferFunction W(numerator, denominator, num, den);
 
-    std::cout << "is settled: " << W.isSettled() << '\n';
-    std::cout << "settling time: " << W.settlingTime() << '\n';
-    std::cout << "steady state value: " << W.steadyStateValue() << '\n';
-
-    std::cout << "Kp = " << regParameters[0]->getSlider()->value() << '\n';
-    std::cout << "Tu = " << regParameters[1]->getSlider()->value() << '\n';
-    std::cout << "Td = " << regParameters[2]->getSlider()->value() << '\n';
-
-    if (W.isSettled()) {
-        regWidget->updateValues(true, W.settlingTime(), W.steadyStateValue(),
-                                W.computeLinearIntegralCriterion(), W.computeIntegralQuadraticCriterion(), W.computeStandardDeviation());
-    }
-    else {
-        regWidget->updateValues(false, -1, -1,-1, -1, -1);
-    }
+    regWidget->updateValues(W.isSettled() ? std::vector <double>{
+            W.settlingTime(), W.naturalFrequency(), W.steadyStateValue(),  W.computeLinearIntegralCriterion(),
+            W.riseTime(), W.cutFrequency(), 1 - W.steadyStateValue(), W.computeIntegralQuadraticCriterion(),
+            W.peakTime(), W.dampingRation(), W.overShoot(), W.computeStandardDeviation()
+    } : std::vector <double>{});
 
     std::stringstream stream;
     stream << "(" << Kp << ", " << Tu << ", " << Td << ")";

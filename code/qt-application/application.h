@@ -115,6 +115,16 @@ private slots:
     void regReplaceTransferFunction();
     void regClearCharts();
 
+    void toggleFullScreen(QChartView* view) {
+        if (view->isFullScreen()) {
+            view->setParent(this);
+            view->showNormal();
+        } else {
+            view->setParent(nullptr);
+            view->showFullScreen();
+        }
+    }
+
 private:
     QChart *expChartTranResp{new QChart}, *expChartFreqResp{new QChart};
     QChart *numChartTranResp{new QChart}, *numChartFreqResp{new QChart};

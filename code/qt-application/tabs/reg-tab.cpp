@@ -44,11 +44,20 @@ QWidget* Application::createRegTab() {
 
     auto addButton = new QPushButton("Добавить", regWidget);
     connect(addButton, &QPushButton::clicked, this, &Application::regAddTransferFunction);
+    /*QPushButton *fullScreenButton = new QPushButton("Full Screen", regWidget);
+
+    auto x = createCharts(REG_CHARTS, regTab);
+    auto y = qobject_cast<QChartView*>(x->itemAt(0)->widget());
+
+    connect(fullScreenButton, &QPushButton::clicked, [=, this](){
+        toggleFullScreen(y);
+    });*/
 
     layout->addLayout(uppLayout);
     layout->addLayout(parametersLayout);
     layout->addWidget(addButton);
-    layout->addLayout(createCharts(REG_CHARTS, regTab));
+    //layout->addWidget(fullScreenButton);
+    layout->addLayout(x);
 
     regTab->setLayout(layout);
     return regTab;

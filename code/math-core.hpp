@@ -9,14 +9,14 @@
 
 /// Базовый класс с математическими операциями, включает в себя следующее:
 ///     - формирование диапазонов (постоянный, логарифмический шаг);
-///     - вычисление значения полинома в определённом точке;
+///     - вычисление значения полинома в определённой точке схемой Горнера;
 ///     - перемножении двух полиномов;
-///     - перемножение полиномов первого порядка;
-///     - дефляция полинома при известном корне;
-///     - вычисление корней полинома методом Ньютона;
-///     - уточнение корней полинома методом Ньютона;
-///     - решение матрицы (методом Гаусса-Жордана);
-///     - вычисление коэффициентов простых слагаемых для разложения дробию.
+///     - перемножение биномов;
+///     - дефляция полинома при известном корне методом Горнера;
+///     - вычисление корней полинома численным методом Ньютона;
+///     - уточнение корней полинома численным методом Ньютона;
+///     - решение матрицы аналитическим методом Гаусса-Жордана;
+///     - вычисление коэффициентов простейших для разложения рациональной дроби методом Д’Аламбера.
 
 class MathCore {
 public:
@@ -114,9 +114,9 @@ public:
         return result;
     } /// N * log(N)
 
-    /// Вычисление полинома при перемножении простых скобок (x - r1)(x - r2)
+    /// Вычисление полинома при перемножении биномов (x - r1)(x - r2)
     template <typename Type>
-    static std::vector <Type> multiplySimpleFractions(const std::vector <Type>& coefficients) {
+    static std::vector <Type> multiplyBinomials(const std::vector <Type>& coefficients) {
         const std::size_t n(coefficients.size());
         std::vector <Type> res(n + 1);
         res[0] = 1;
@@ -248,7 +248,7 @@ public:
     } /// N^3
 
     template <class ContainerNumerator, class ContainerRoots, typename Type>
-    static ContainerRoots computeFactorsSimpleFractions(const ContainerNumerator& numerator, const ContainerRoots& roots, const Type& highestFactor = 1) {
+    static ContainerRoots decomposeFraction(const ContainerNumerator& numerator, const ContainerRoots& roots, const Type& highestFactor = 1) {
         const std::size_t n(roots.size()), cols(n + 1);
         Complex matrix[n * n + n];
         for (std::size_t i = 0; i < n; ++i) {
@@ -258,7 +258,7 @@ public:
                 x.push_back(-roots[j]);
             for (std::size_t j = i + 1; j < n; ++j)
                 x.push_back(-roots[j]);
-            auto coefficients(multiplySimpleFractions(x));
+            auto coefficients(multiplyBinomials(x));
             for (std::size_t j = 0; j < n; ++j)
                 matrix[j * cols + i] = coefficients[j];
         }

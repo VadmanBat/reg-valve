@@ -12,7 +12,7 @@ QWidget* Application::createNumTab() {
     numWidget->setLabels({
                                  "t<sub>р</sub>:", "ω<sub>n</sub>:",
                                  "t<sub>н</sub>:", "ω<sub>c</sub>:",
-                                 "ζ:", "y<sub>уст</sub>:"
+                                 "ζ:", "h<sub>уст</sub>:"
                          });
     numWidget->setPrecisions({
                                      2, 4,

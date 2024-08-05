@@ -23,7 +23,7 @@ QWidget* Application::createRegTab() {
         connect(parameter->getSlider(), &QSlider::valueChanged, this, &Application::regReplaceTransferFunction);
     }
     regWidget->setLabels({
-                                 "t<sub>р</sub>:", "ω<sub>n</sub>:", "y<sub>уст</sub>:", "ЛИК:",
+                                 "t<sub>р</sub>:", "ω<sub>n</sub>:", "h<sub>уст</sub>:", "ЛИК:",
                                  "t<sub>н</sub>:", "ω<sub>c</sub>:", "σ<sub>ст</sub>:", "ИКК:",
                                  "t<sub>п</sub>:", "ζ:", "σ<sub>пр</sub>:", "СКО:"
                          });
@@ -57,7 +57,7 @@ QWidget* Application::createRegTab() {
     layout->addLayout(parametersLayout);
     layout->addWidget(addButton);
     //layout->addWidget(fullScreenButton);
-    layout->addLayout(x);
+    layout->addLayout(createCharts(REG_CHARTS, regTab));
 
     regTab->setLayout(layout);
     return regTab;

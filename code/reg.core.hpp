@@ -79,7 +79,7 @@ public:
         for (auto root : roots)
             std::cout << "root = " << root << '\n';
 
-        auto coefficients(MathCore::computeFactorsSimpleFractions(num, roots, denominator.front()));
+        auto coefficients(MathCore::decomposeFraction(num, roots, denominator.front()));
         const std::size_t degree(roots.size());
 
         for (auto coeff : coefficients)

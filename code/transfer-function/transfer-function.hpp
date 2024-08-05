@@ -28,9 +28,9 @@ private:
     Type omega_n{}, omega_c{}, zeta{}, overshoot{};
 
     void recomputeFrontState() {
-        impulse_factors = MathCore::computeFactorsSimpleFractions(numerator, roots, denominator.front());
+        impulse_factors = MathCore::decomposeFraction(numerator, roots, denominator.front());
         roots.emplace_back(0);
-        transient_factors = MathCore::computeFactorsSimpleFractions(numerator, roots, denominator.front());
+        transient_factors = MathCore::decomposeFraction(numerator, roots, denominator.front());
         roots.pop_back();
         steady_state_value = transient_factors.back().real();
         transient_factors.pop_back();

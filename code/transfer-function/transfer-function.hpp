@@ -25,7 +25,7 @@ private:
     bool is_settled{};
     Type steady_state_value{};
     Type settling_time{}, rise_time{}, peak_time{};
-    Type omega_n{}, omega_c{}, zeta{}, overshoot{};
+    Type omega_n{}, omega_c{}, zeta{}, m_overshoot{};
 
     void recomputeFrontState() {
         impulse_factors = MathCore::decomposeFraction(numerator, roots, denominator.front());
@@ -35,7 +35,7 @@ private:
         steady_state_value = transient_factors.back().real();
         transient_factors.pop_back();
 
-        overshoot = std::abs(transientResponse(peak_time) - steady_state_value) / steady_state_value * 100;
+        m_overshoot = std::abs(transientResponse(peak_time) - steady_state_value) / steady_state_value * 100;
     }
 
     void recomputeBackState() {
@@ -100,11 +100,11 @@ public:
     [[nodiscard]] inline Type settlingTime() const {
         return settling_time;
     }
-    [[nodiscard]] inline Type peakTime() const {
-        return peak_time;
-    }
     [[nodiscard]] inline Type riseTime() const {
         return rise_time;
+    }
+    [[nodiscard]] inline Type peakTime() const {
+        return peak_time;
     }
     [[nodiscard]] inline Type naturalFrequency() const {
         return omega_n;
@@ -115,8 +115,8 @@ public:
     [[nodiscard]] inline Type dampingRation() const {
         return zeta;
     }
-    [[nodiscard]] inline Type overShoot() const {
-        return overshoot;
+    [[nodiscard]] inline Type overshoot() const {
+        return m_overshoot;
     }
 
     [[nodiscard]] inline Vec getNumerator() const {

@@ -112,7 +112,7 @@ public:
             for (std::size_t j = 0; j < m; ++j)
                 result[i + j] += a[i] * b[j];
         return result;
-    } /// N * log(N)
+    } /// N * M
 
     /// Вычисление полинома при перемножении биномов (x - r1)(x - r2)
     template <typename Type>
@@ -127,7 +127,7 @@ public:
                     res[j] += coefficients[i] * res[j - 1];
         }
         return res;
-    } /// N * log(N)
+    } /// N^2 / 2
 
     template <typename Type>
     static std::vector <Type> deflatePolynomial(const std::vector <Type>& coefficients, const Type& root) {
@@ -168,8 +168,8 @@ public:
         while (degree > 1) {
             Complex x(1, 1);
             for (std::size_t i = 0; i < MAX_ITER; ++i) {
-                Complex fx(f(x));
-                Complex dfx(df(x));
+                const Complex fx(f(x));
+                const Complex dfx(df(x));
                 if (std::abs(fx) < epsilon)
                     break;
                 x -= fx / dfx;
@@ -185,7 +185,7 @@ public:
             root = ConvertCore::normalize(root, epsilon);
 
         return roots;
-    } /// N * log(M)
+    } /// N * log(log((r - x) / epsilon))
     template <int EPSILON_ORDER = 9, std::size_t MAX_ITER = 100>
     static VecComp clarifyPolynomialNewton(const Vec& coefficients, VecComp& roots) {
         static const Type epsilon(std::pow(10.L, -EPSILON_ORDER));
@@ -219,7 +219,7 @@ public:
             }
 
         return roots;
-    } /// N * log(M)
+    } /// N * log(log((r - x) / epsilon))
 
     /// Решение матрицы
     template <typename Type>
@@ -265,7 +265,7 @@ public:
         for (std::size_t i = n - std::min(n, numerator.size()), j = 0; i < n; ++i, ++j)
             matrix[i * cols + n] = numerator[j] / highestFactor;
         return solveMatrix(matrix, n);
-    } /// N^2 * N * log(N) + N^3
+    } /// N^2 * N^2 + N^3
 };
 
 #endif //REGVALVE_MATH_CORE_HPP

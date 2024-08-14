@@ -41,23 +41,19 @@ private:
     void recomputeBackState() {
         roots = MathCore::solvePolynomialNewton(denominator);
 
-        std::sort(roots.begin(), roots.end(), [](const auto& a, const auto& b){
-            if (a.real() != b.real())
-                return a.real() < b.real();
-            return a.imag() < b.imag();
-        });
+        Complex dominant_real(roots[0]), dominant_imag(dominant_real);
+        for (const auto root : roots) {
+            if (root.real() > dominant_real.real())
+                dominant_real = root;
+            if (root.imag() > dominant_imag.imag())
+                dominant_imag = root;
+        }
 
-        if (auto max_root = roots.back().real(); max_root < 0) {
+        if (dominant_real.real() < 0) {
             is_settled      = true;
-            settling_time   = -4 / max_root;
-
-            auto dominant_pole = *std::max_element(roots.begin(), roots.end(),
-                                                   [](const auto& a, const auto& b){
-                                                       return a.imag() < b.imag();
-                                                   });
-
-            omega_n         = std::abs(dominant_pole);
-            zeta            = -dominant_pole.real() / omega_n;
+            settling_time   = -4 / dominant_real.real();
+            omega_n         = std::abs(dominant_imag);
+            zeta            = -dominant_imag.real() / omega_n;
             Type zeta_sq    = zeta * zeta;
             rise_time       = 1.8 / omega_n;
             peak_time       = M_PI / (omega_n * std::sqrt(1 - zeta_sq));

@@ -266,6 +266,20 @@ public:
             matrix[i * cols + n] = numerator[j] / highestFactor;
         return solveMatrix(matrix, n);
     } /// N^2 * N^2 + N^3
+
+    template <class Container>
+    static std::pair <Container, Container> squareExponentialSum(const Container& coefficients, const Container& exponents) {
+        const auto n(std::min(coefficients.size(), exponents.size()));
+        Container newCoefficients, newExponents;
+        newCoefficients.reserve(n * n);
+        newExponents.reserve(n * n);
+        for (std::size_t i = 0; i < n; ++i)
+            for (std::size_t j = 0; j < n; ++j) {
+                newCoefficients.emplace_back(coefficients[i] * coefficients[j]);
+                newExponents.emplace_back(exponents[i] + exponents[j]);
+            }
+        return {newCoefficients, newExponents};
+    } /// 2 * N^2
 };
 
 #endif //REGVALVE_MATH_CORE_HPP

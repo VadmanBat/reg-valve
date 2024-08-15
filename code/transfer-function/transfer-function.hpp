@@ -248,7 +248,15 @@ public:
         return sum * step;
     } /// N
 
-    [[nodiscard]] Type computeIntegralQuadraticCriterion(const std::size_t points = 100) const {
+    [[nodiscard]] Type computeIntegralQuadraticCriterion() const {
+        const auto [coefficients, exponents](MathCore::squareExponentialSum(transient_factors, roots));
+        const auto n(coefficients.size());
+        Complex sum;
+        for (int i = 0; i < n; ++i)
+            sum += coefficients[i] / exponents[i] * (std::exp(exponents[i] * settling_time) - Complex(1));
+        return sum.real();
+
+        /*
         Type sum(0), error;
         const Type step(settling_time / static_cast<Type>(points - 1));
         for (std::size_t i = 0; i < points; ++i) {
@@ -256,7 +264,8 @@ public:
             sum += error * error;
         }
         return sum * step;
-    } /// N
+        */
+    } /// size(roots)^2
 
     [[nodiscard]] Type computeStandardDeviation(const std::size_t points = 100) const {
         Type sum(0), error;

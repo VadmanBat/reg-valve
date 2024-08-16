@@ -242,9 +242,19 @@ public:
 
     [[nodiscard]] Type computeLinearIntegralCriterion(const std::size_t points = 100) const {
         Type sum(0);
-        const Type step(settling_time / static_cast<Type>(points - 1));
-        for (std::size_t i = 0; i < points; ++i)
+        const Type step(settling_time / static_cast<Type>(points + 1));
+        for (std::size_t i = 1; i <= points; ++i)
             sum += std::abs(transientResponse(static_cast<Type>(i) * step) - steady_state_value);
+        return sum * step;
+    } /// N
+
+    [[nodiscard]] Type computeIntegralQuadraticCriterion(const std::size_t points) const {
+        Type sum(0), error;
+        const Type step(settling_time / static_cast<Type>(points + 1));
+        for (std::size_t i = 1; i <= points; ++i) {
+            error = transientResponse(static_cast<Type>(i) * step) - steady_state_value;
+            sum += error * error;
+        }
         return sum * step;
     } /// N
 
@@ -255,16 +265,6 @@ public:
         for (int i = 0; i < n; ++i)
             sum += coefficients[i] / exponents[i] * (std::exp(exponents[i] * settling_time) - Complex(1));
         return sum.real();
-
-        /*
-        Type sum(0), error;
-        const Type step(settling_time / static_cast<Type>(points - 1));
-        for (std::size_t i = 0; i < points; ++i) {
-            error = transientResponse(static_cast<Type>(i) * step) - steady_state_value;
-            sum += error * error;
-        }
-        return sum * step;
-        */
     } /// size(roots)^2
 
     [[nodiscard]] Type computeStandardDeviation(const std::size_t points = 100) const {

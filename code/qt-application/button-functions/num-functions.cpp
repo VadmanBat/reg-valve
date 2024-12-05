@@ -33,15 +33,28 @@ void Application::numAddTransferFunction() {
         std::cout << "settling time: " << W.settlingTime() << '\n';
         std::cout << "steady state value: " << W.steadyStateValue() << '\n';
 
-        Application::addPoints(numChartTranResp, W.transientResponse(), "Тест");
-        Application::addComplexPoints(numChartFreqResp, W.frequencyResponse(), "Тест");
+        numTranRespSeries.push_back(Series(W.transientResponse()));
+        numFreqRespSeries.push_back(W.frequencyResponse());
 
-        updateAxes(numChartTranResp);
-        updateAxes(numChartFreqResp);
+        Application::addPoints(numChartTranResp, numTranRespSeries.back().original(), "Тест");
+        Application::addComplexPoints(numChartFreqResp, numFreqRespSeries.back().original(), "Тест");
+
+        updateAxes(
+                regChartTranResp,
+                {numTranRespSeries.min_x(), numTranRespSeries.max_x()},
+                computeAxesRange(numTranRespSeries.min_y(), numTranRespSeries.max_y())
+        );
+        updateAxes(
+                regChartFreqResp,
+                computeAxesRange(numFreqRespSeries.min_x(), numFreqRespSeries.max_x()),
+                computeAxesRange(numFreqRespSeries.min_y(), numFreqRespSeries.max_y())
+        );
     }
 }
 
 void Application::numReplaceTransferFunction() {
+    if (!numTranRespSeries.empty())
+        numTranRespSeries.pop_back();
     eraseLastSeries(numChartTranResp);
     eraseLastSeries(numChartFreqResp);
 

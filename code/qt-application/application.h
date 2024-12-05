@@ -20,12 +20,18 @@
 
 #include "../transfer-function/transfer-function.hpp"
 
+#include "../series/series.hpp"
+#include "../series/complex-series.hpp"
+#include "../series/set-series.hpp"
+
 using namespace QtCharts;
 
 class Application : public QWidget {
 private:
     using ChartData = std::tuple <QChart*, QString, QString, QString>;
     using ChartsDataset = std::vector <ChartData>;
+
+    using Pair = std::pair <double, double>;
 
     static void showError(const QString& errorMessage);
 
@@ -55,7 +61,8 @@ private:
     static void createAxes(QChart* chart, const QString &titleX, const QString &titleY);
     static void eraseLastSeries(QChart* chart);
     static void removeAllSeries(QChart* chart);
-    static void updateAxes(QChart* chart);
+    static std::pair <double, double> computeAxesRange(double min, double max);
+    static void updateAxes(QChart* chart, const Pair& range_x, const Pair& range_y);
 
     template <class Points>
     static void addPoints(QChart* chart, const Points& points, const QString& title) {
@@ -129,6 +136,9 @@ private:
     QChart *expChartTranResp{new QChart}, *expChartFreqResp{new QChart};
     QChart *numChartTranResp{new QChart}, *numChartFreqResp{new QChart};
     QChart *regChartTranResp{new QChart}, *regChartFreqResp{new QChart};
+
+    SetSeries <Series> numTranRespSeries, regTranRespSeries;
+    SetSeries <ComplexSeries> numFreqRespSeries, regFreqRespSeries;
 
     const ChartsDataset EXP_CHARTS = {
             {expChartTranResp, "Переходная характеристика", "Время t, секунды", "h(t)"},

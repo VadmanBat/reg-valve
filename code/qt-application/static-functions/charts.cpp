@@ -37,7 +37,20 @@ void Application::createAxes(QChart* chart, const QString& titleX, const QString
     chart->addAxis(axisY, Qt::AlignLeft);
 }
 
-void Application::updateAxes(QChart* chart) {
+Application::Pair Application::computeAxesRange(double min, double max) {
+    const double range = max - min;
+    std::cout << min << ' ';
+    std::cout << max << " = ";
+    std::cout << (std::abs(min) < 1e-3 * range ? 0 : min - 0.05 * range) << ' ';
+    std::cout << (std::abs(max) < 1e-3 * range ? 0 : max + 0.05 * range) << '\n';
+    return {
+        std::abs(min) < 1e-3 * range ? 0 : min - 0.05 * range,
+        std::abs(max) < 1e-3 * range ? 0 : max + 0.05 * range
+    };
+
+}
+
+void Application::updateAxes(QChart* chart, const Pair& range_x, const Pair& range_y) {
     QString oldAxisXTitle, oldAxisYTitle;
 
     auto oldAxisX = qobject_cast<QValueAxis *>(chart->axes(Qt::Horizontal).first());
@@ -57,22 +70,12 @@ void Application::updateAxes(QChart* chart) {
     auto newAxisX = qobject_cast<QValueAxis *>(chart->axes(Qt::Horizontal).first());
     auto newAxisY = qobject_cast<QValueAxis *>(chart->axes(Qt::Vertical).first());
 
-    if (newAxisX)
+    if (newAxisX) {
         newAxisX->setTitleText(oldAxisXTitle);
+        newAxisX->setRange(range_x.first, range_x.second);
+    }
     if (newAxisY) {
         newAxisY->setTitleText(oldAxisYTitle);
-
-        qreal minY = newAxisY->min();
-        qreal maxY = newAxisY->max();
-        qreal range = maxY - minY;
-        qreal newMinY = minY - 0.05 * range;
-        qreal newMaxY = maxY + 0.05 * range;
-
-        /*const int order = std::floor(std::log10((minY + maxY) / 2));
-        qreal scale = std::pow(10, order - 1);
-        qreal roundedMinY = std::ceil(newMinY / scale) * scale;
-        qreal roundedMaxY = std::ceil(newMaxY / scale) * scale;*/
-
-        newAxisY->setRange(newMinY, newMaxY);
+        newAxisY->setRange(range_y.first, range_y.second);
     }
 }

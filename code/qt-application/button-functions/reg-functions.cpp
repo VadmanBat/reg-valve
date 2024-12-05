@@ -68,14 +68,30 @@ void Application::regAddTransferFunction() {
     stream << "(" << Kp << ", " << Tu << ", " << Td << ")";
     auto string (stream.str());
 
-    Application::addPoints(regChartTranResp, W.isSettled() ? W.transientResponse() : W.transientResponse({0, 1000}), string.c_str());
-    Application::addComplexPoints(regChartFreqResp, W.frequencyResponse(), string.c_str());
+    regTranRespSeries.push_back(W.isSettled() ? W.transientResponse() : W.transientResponse({0, 1000}));
+    regFreqRespSeries.push_back(W.frequencyResponse());
+    std::cout << regFreqRespSeries.back().original().size() << ' ' << regFreqRespSeries.back().optimal().size() << '\n';
 
-    updateAxes(regChartTranResp);
-    updateAxes(regChartFreqResp);
+    Application::addPoints(regChartTranResp, regTranRespSeries.back().original(), string.c_str());
+    Application::addComplexPoints(regChartFreqResp, regFreqRespSeries.back().original(), string.c_str());
+
+    updateAxes(
+            regChartTranResp,
+            {regTranRespSeries.min_x(), regTranRespSeries.max_x()},
+            computeAxesRange(regTranRespSeries.min_y(), regTranRespSeries.max_y())
+    );
+    updateAxes(
+            regChartFreqResp,
+            computeAxesRange(regFreqRespSeries.min_x(), regFreqRespSeries.max_x()),
+            computeAxesRange(regFreqRespSeries.min_y(), regFreqRespSeries.max_y())
+    );
 }
 
 void Application::regReplaceTransferFunction() {
+    if (!regTranRespSeries.empty())
+        regTranRespSeries.pop_back();
+    if (!regFreqRespSeries.empty())
+        regFreqRespSeries.pop_back();
     eraseLastSeries(regChartTranResp);
     eraseLastSeries(regChartFreqResp);
 

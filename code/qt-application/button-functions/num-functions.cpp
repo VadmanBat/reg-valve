@@ -33,19 +33,27 @@ void Application::numAddTransferFunction() {
         std::cout << "settling time: " << W.settlingTime() << '\n';
         std::cout << "steady state value: " << W.steadyStateValue() << '\n';
 
+        numWidget->updateValues(W.isSettled() ? std::vector <double>{
+                W.settlingTime(), W.naturalFrequency(),
+                W.riseTime(), W.cutFrequency(),
+                W.dampingRation(), W.steadyStateValue()
+        } : std::vector <double>{});
+
         numTranRespSeries.push_back(Series(W.transientResponse()));
         numFreqRespSeries.push_back(W.frequencyResponse());
 
-        Application::addPoints(numChartTranResp, numTranRespSeries.back().original(), "Тест");
-        Application::addComplexPoints(numChartFreqResp, numFreqRespSeries.back().original(), "Тест");
+        Application::addPoints(numChartTranResp, numTranRespSeries.back().original(), "Тест", numSize);
+        Application::addComplexPoints(numChartFreqResp, numFreqRespSeries.back().original(), "Тест", numSize);
+
+        ++numSize;
 
         updateAxes(
-                regChartTranResp,
+                numChartTranResp,
                 {numTranRespSeries.min_x(), numTranRespSeries.max_x()},
                 computeAxesRange(numTranRespSeries.min_y(), numTranRespSeries.max_y())
         );
         updateAxes(
-                regChartFreqResp,
+                numChartFreqResp,
                 computeAxesRange(numFreqRespSeries.min_x(), numFreqRespSeries.max_x()),
                 computeAxesRange(numFreqRespSeries.min_y(), numFreqRespSeries.max_y())
         );
@@ -53,10 +61,15 @@ void Application::numAddTransferFunction() {
 }
 
 void Application::numReplaceTransferFunction() {
-    if (!numTranRespSeries.empty())
+    if (!numTranRespSeries.empty()) {
+        eraseLastSeries(numChartTranResp);
         numTranRespSeries.pop_back();
-    eraseLastSeries(numChartTranResp);
-    eraseLastSeries(numChartFreqResp);
+        --numSize;
+    }
+    if (!numFreqRespSeries.empty()) {
+        eraseLastSeries(numChartFreqResp);
+        numFreqRespSeries.pop_back();
+    }
 
     numAddTransferFunction();
 }
@@ -64,4 +77,8 @@ void Application::numReplaceTransferFunction() {
 void Application::numClearCharts() {
     removeAllSeries(numChartTranResp);
     removeAllSeries(numChartFreqResp);
+    numTranRespSeries.clear();
+    numFreqRespSeries.clear();
+
+    numSize = 0;
 }

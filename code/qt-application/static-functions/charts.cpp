@@ -8,9 +8,40 @@ QLayout* Application::createCharts(const ChartsDataset& charts, QWidget* tab) {
     for (auto& [chart, title, titleX, titleY] : charts) {
         chart->setTitle(title);
         createAxes(chart, titleX, titleY);
-        layout->addWidget(new QChartView(chart, tab));
+        auto chartView = new QChartView(chart, tab);
+        chartView->setRenderHint(QPainter::Antialiasing);
+        createChartContextMenu(chartView);
+        layout->addWidget(chartView);
     }
     return layout;
+}
+
+void Application::createChartContextMenu(QChartView* chartView) {
+    auto contextMenu = new QMenu(chartView);
+
+    auto saveAction = new QAction(tr("Сохранить как PNG"), chartView);
+    connect(saveAction, &QAction::triggered, [chartView]() {
+        QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Сохранить график"), "", tr("Рисунок в формате PNG (*.png);;Все файлы (*)"));
+        if (!fileName.isEmpty()) {
+            QPixmap pixmap = chartView->grab();
+            if (!pixmap.save(fileName, "png"))
+                QMessageBox::warning(nullptr, tr("Ошибка"), tr("Не удалось сохранить график!"));
+        }
+    });
+    contextMenu->addAction(saveAction);
+
+    auto copyAction = new QAction(tr("Копировать в буфер обмена"), chartView);
+    connect(copyAction, &QAction::triggered, [chartView]() {
+        QPixmap pixmap = chartView->grab();
+        QClipboard* clipboard = QApplication::clipboard();
+        clipboard->setImage(pixmap.toImage());
+    });
+    contextMenu->addAction(copyAction);
+
+    chartView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(chartView, &QChartView::customContextMenuRequested, [contextMenu, chartView](const QPoint& pos) {
+        contextMenu->exec(chartView->mapToGlobal(pos));
+    });
 }
 
 void Application::eraseLastSeries(QChart* chart) {
@@ -39,10 +70,6 @@ void Application::createAxes(QChart* chart, const QString& titleX, const QString
 
 Application::Pair Application::computeAxesRange(double min, double max) {
     const double range = max - min;
-    std::cout << min << ' ';
-    std::cout << max << " = ";
-    std::cout << (std::abs(min) < 1e-3 * range ? 0 : min - 0.05 * range) << ' ';
-    std::cout << (std::abs(max) < 1e-3 * range ? 0 : max + 0.05 * range) << '\n';
     return {
         std::abs(min) < 1e-3 * range ? 0 : min - 0.05 * range,
         std::abs(max) < 1e-3 * range ? 0 : max + 0.05 * range
@@ -52,7 +79,6 @@ Application::Pair Application::computeAxesRange(double min, double max) {
 
 void Application::updateAxes(QChart* chart, const Pair& range_x, const Pair& range_y) {
     QString oldAxisXTitle, oldAxisYTitle;
-
     auto oldAxisX = qobject_cast<QValueAxis *>(chart->axes(Qt::Horizontal).first());
     auto oldAxisY = qobject_cast<QValueAxis *>(chart->axes(Qt::Vertical).first());
 
@@ -66,7 +92,6 @@ void Application::updateAxes(QChart* chart, const Pair& range_x, const Pair& ran
     }
 
     chart->createDefaultAxes();
-
     auto newAxisX = qobject_cast<QValueAxis *>(chart->axes(Qt::Horizontal).first());
     auto newAxisY = qobject_cast<QValueAxis *>(chart->axes(Qt::Vertical).first());
 

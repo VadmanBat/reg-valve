@@ -60,5 +60,6 @@ QWidget* Application::createRegTab() {
     layout->addLayout(createCharts(REG_CHARTS, regTab));
 
     regTab->setLayout(layout);
+
     return regTab;
 }

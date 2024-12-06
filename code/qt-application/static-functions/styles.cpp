@@ -155,6 +155,15 @@ const char* checkBoxStyle =
     }
 )";
 
+QColor colors[6] = {
+        "#FF0000", /// Красный
+        "#003366", /// Синий
+        "#009933", /// Зелёный
+        "#9900CC", /// Фиолетовый
+        "#FF8C00", /// Оранжевый
+        "#3399CC"  /// Голубой
+};
+
 void Application::applyStyles() {
     regParameters[0]->getSlider()->setStyleSheet(redSliderStyle);
     regParameters[1]->getSlider()->setStyleSheet(greenSliderStyle);
@@ -163,4 +172,13 @@ void Application::applyStyles() {
     regParameters[0]->getCheckBox()->setStyleSheet(checkBoxStyle);
     regParameters[1]->getCheckBox()->setStyleSheet(checkBoxStyle);
     regParameters[2]->getCheckBox()->setStyleSheet(checkBoxStyle);
+
+    for (std::size_t i = 0; i < 6; ++i) {
+        pens[i].setColor(colors[i]);
+        pens[i].setWidth(2);
+        pens[i].setStyle(Qt::SolidLine);
+        pens[i].setCapStyle(Qt::RoundCap);
+        pens[i].setJoinStyle(Qt::MiterJoin);
+        pens[i].setJoinStyle(Qt::RoundJoin);
+    }
 }

@@ -58,6 +58,7 @@ private:
 
     /// charts functions:
     static QLayout* createCharts(const ChartsDataset& charts, QWidget* tab);
+    static void createChartContextMenu(QChartView* chartView);
     static void createAxes(QChart* chart, const QString &titleX, const QString &titleY);
     static void eraseLastSeries(QChart* chart);
     static void removeAllSeries(QChart* chart);
@@ -65,17 +66,19 @@ private:
     static void updateAxes(QChart* chart, const Pair& range_x, const Pair& range_y);
 
     template <class Points>
-    static void addPoints(QChart* chart, const Points& points, const QString& title) {
+    static void addPoints(QChart* chart, const Points& points, const QString& title, std::size_t index) {
         auto series = new QLineSeries();
         series->setName(title);
+        series->setPen(pens[index % 6]);
         for (const auto& [x, y] : points)
             series->append(x, y);
         chart->addSeries(series);
     }
     template <class Points>
-    static void addComplexPoints(QChart* chart, const Points& points, const QString& title) {
+    static void addComplexPoints(QChart* chart, const Points& points, const QString& title, std::size_t index) {
         auto series = new QLineSeries();
         series->setName(title);
+        series->setPen(pens[index % 6]);
         for (const auto& point : points)
             series->append(point.real(), point.imag());
         chart->addSeries(series);
@@ -104,6 +107,9 @@ public:
         auto mainLayout = new QVBoxLayout(this);
         mainLayout->addWidget(tabWidget);
         setLayout(mainLayout);
+
+        numSize = 0;
+        regSize = 0;
 
         applyStyles();
     }
@@ -140,6 +146,8 @@ private:
     SetSeries <Series> numTranRespSeries, regTranRespSeries;
     SetSeries <ComplexSeries> numFreqRespSeries, regFreqRespSeries;
 
+    std::size_t numSize, regSize;
+
     const ChartsDataset EXP_CHARTS = {
             {expChartTranResp, "Переходная характеристика", "Время t, секунды", "h(t)"},
             {expChartFreqResp, "Комплексно-частотная характеристика (КЧХ)", "Реальная ось", "Мнимая ось"}
@@ -161,6 +169,7 @@ private:
     RegulationWidget* numWidget{new RegulationWidget(3, 2)};
     RegulationWidget* regWidget{new RegulationWidget(3, 4)};
 
+    inline static QPen pens[6];
     void applyStyles();
 };
 

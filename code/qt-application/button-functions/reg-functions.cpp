@@ -14,45 +14,56 @@ void Application::regAddTransferFunction() {
 
     std::vector <double> num, den;
 
-    double Kp = regParameters[0]->getSlider()->value();
-    double Tu = regParameters[1]->getSlider()->value();
-    double Td = regParameters[2]->getSlider()->value();
-    bool f1(regParameters[0]->getSlider()->isEnabled());
-    bool f2(regParameters[1]->getSlider()->isEnabled());
-    bool f3(regParameters[2]->getSlider()->isEnabled());
+    const double Kp = regParameters[0]->getSlider()->value();
+    const double Tu = regParameters[1]->getSlider()->value();
+    const double Td = regParameters[2]->getSlider()->value();
+    const bool P = regParameters[0]->getSlider()->isEnabled();
+    const bool I = regParameters[1]->getSlider()->isEnabled();
+    const bool D = regParameters[2]->getSlider()->isEnabled();
+    const int reg_id = P + 2 * I + 4 * D;
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(2);
 
-    switch (4 * f3 + 2 * f2 + f1) {
+    switch (reg_id) {
         case 0: /// 1
             num = {1};
             den = {1};
+            stream << "1";
             break;
         case 1: /// P: Kp
             num = {Kp};
             den = {1};
+            stream << "P(" << Kp << ")";
             break;
         case 2: /// I: 1 / (Tu * p)
             num = {1};
             den = {Tu, 0};
+            stream << "I(" << Tu << ")";
             break;
         case 3: /// PI: (Kp * p + Kp / Tu) / p
             num = {Kp, Kp / Tu};
             den = {1, 0};
+            stream << "PI(" << Kp << ", " << Tu << ")";
             break;
         case 4: /// D: Td * p
             num = {Td, 0};
             den = {1};
+            stream << "D(" << Td << ")";
             break;
         case 5: /// PD: Kp * Td * p + Kp
             num = {Kp * Td, Kp};
             den = {1};
+            stream << "PD(" << Kp << ", " << Td << ")";
             break;
         case 6: /// ID: (Td * p^2 + 1 / Tu) / (p)
             num = {Td, 0, 1 / Tu};
             den = {1, 0};
+            stream << "ID(" << Tu << ", " << Td << ")";
             break;
         case 7: /// PID: (Kp * Td * p^2 + Kp * p + kp / Tu) / p
             num = {Kp * Td, Kp, Kp / Tu};
             den = {1, 0};
+            stream << "PID(" << Kp << ", " << Tu << ", " << Td << ")";
             break;
     }
 
@@ -64,16 +75,15 @@ void Application::regAddTransferFunction() {
             W.peakTime(), W.dampingRation(), W.overshoot(), W.computeStandardDeviation()
     } : std::vector <double>{});
 
-    std::stringstream stream;
-    stream << "(" << Kp << ", " << Tu << ", " << Td << ")";
-    auto string (stream.str());
-
     regTranRespSeries.push_back(W.isSettled() ? W.transientResponse() : W.transientResponse({0, 1000}));
     regFreqRespSeries.push_back(W.frequencyResponse());
     std::cout << regFreqRespSeries.back().original().size() << ' ' << regFreqRespSeries.back().optimal().size() << '\n';
 
-    Application::addPoints(regChartTranResp, regTranRespSeries.back().original(), string.c_str());
-    Application::addComplexPoints(regChartFreqResp, regFreqRespSeries.back().original(), string.c_str());
+    const auto title  = stream.str();
+    Application::addPoints(regChartTranResp, regTranRespSeries.back().original(), title.c_str(), regSize);
+    Application::addComplexPoints(regChartFreqResp, regFreqRespSeries.back().original(), title.c_str(), regSize);
+
+    ++regSize;
 
     updateAxes(
             regChartTranResp,
@@ -88,12 +98,15 @@ void Application::regAddTransferFunction() {
 }
 
 void Application::regReplaceTransferFunction() {
-    if (!regTranRespSeries.empty())
+    if (!regTranRespSeries.empty()) {
+        eraseLastSeries(regChartTranResp);
         regTranRespSeries.pop_back();
-    if (!regFreqRespSeries.empty())
+        --regSize;
+    }
+    if (!regFreqRespSeries.empty()) {
+        eraseLastSeries(regChartFreqResp);
         regFreqRespSeries.pop_back();
-    eraseLastSeries(regChartTranResp);
-    eraseLastSeries(regChartFreqResp);
+    }
 
     regAddTransferFunction();
 }
@@ -101,4 +114,8 @@ void Application::regReplaceTransferFunction() {
 void Application::regClearCharts() {
     removeAllSeries(regChartTranResp);
     removeAllSeries(regChartFreqResp);
+    regTranRespSeries.clear();
+    regFreqRespSeries.clear();
+
+    regSize = 0;
 }

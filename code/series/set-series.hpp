@@ -38,7 +38,7 @@ public:
         return series.back();
     }
 
-    inline bool empty() const {
+    [[nodiscard]] inline bool empty() const {
         return series.empty();
     }
 
@@ -56,6 +56,14 @@ public:
 
     [[nodiscard]] double max_y() const {
         return *m_max_y.rbegin();
+    }
+
+    void clear() {
+        m_min_x.clear();
+        m_max_x.clear();
+        m_min_y.clear();
+        m_max_y.clear();
+        series.clear();
     }
 };
 

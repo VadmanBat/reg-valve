@@ -178,7 +178,6 @@ void Application::applyStyles() {
         pens[i].setWidth(2);
         pens[i].setStyle(Qt::SolidLine);
         pens[i].setCapStyle(Qt::RoundCap);
-        pens[i].setJoinStyle(Qt::MiterJoin);
         pens[i].setJoinStyle(Qt::RoundJoin);
     }
 }

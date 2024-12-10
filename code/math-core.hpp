@@ -148,6 +148,22 @@ public:
 
         auto coeffs(ConvertCore::toComplexVector(coefficients));
         std::size_t degree(coeffs.size() - 1);
+        auto f_init = [=](const Complex& x) {
+            Complex result(0);
+            for (std::size_t i = 0; i <= degree; ++i) {
+                result *= x;
+                result += coeffs[i];
+            }
+            return result;
+        };
+        auto df_init = [=](const Complex& x) {
+            Complex result(0);
+            for (std::size_t i = 0; i < degree; ++i) {
+                result *= x;
+                result += Complex(static_cast<Type>(degree - i)) * coeffs[i];
+            }
+            return result;
+        };
         auto f = [&coeffs, &degree](const Complex& x) {
             Complex result(0);
             for (std::size_t i = 0; i <= degree; ++i) {
@@ -171,8 +187,12 @@ public:
             for (std::size_t i = 0; i < MAX_ITER; ++i) {
                 const Complex fx(f(x));
                 const Complex dfx(df(x));
-                if (std::abs(fx) < epsilon)
+                if (std::abs(fx) < epsilon) {
+                    x -= f_init(x) / df_init(x);
+                    x -= f_init(x) / df_init(x);
+                    x -= f_init(x) / df_init(x);
                     break;
+                }
                 x -= fx / dfx;
             }
 
@@ -182,8 +202,10 @@ public:
         }
         roots.push_back(-coeffs[1] / coeffs[0]);
 
-        for (auto& root : roots)
+        for (auto& root : roots) {
+            std::cout << root.real() << ' ' << root.imag() << '\n';
             root = ConvertCore::normalize(root, epsilon);
+        }
 
         return roots;
     } /// N * log(log((r - x) / epsilon))

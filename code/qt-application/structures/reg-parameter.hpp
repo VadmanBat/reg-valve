@@ -70,9 +70,9 @@ public:
     {
         setSpinBox(minSpinBox, min, max, minValue, "от: ");
         setSpinBox(maxSpinBox, min, max, maxValue, "до: ");
-        intervalsSpinBox->setRange(10, 1000);
+        intervalsSpinBox->setRange(10, 2000);
         intervalsSpinBox->setPrefix("точки: ");
-        intervalsSpinBox->setValue(100);
+        intervalsSpinBox->setValue(1000);
 
         updateSliderRange();
         enable(false);

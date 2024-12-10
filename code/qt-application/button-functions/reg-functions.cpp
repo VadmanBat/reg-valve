@@ -75,7 +75,7 @@ void Application::regAddTransferFunction() {
             W.peakTime(), W.dampingRation(), W.overshoot(), W.computeStandardDeviation()
     } : std::vector <double>{});
 
-    regTranRespSeries.push_back(W.isSettled() ? W.transientResponse() : W.transientResponse({0, 1000}));
+    regTranRespSeries.push_back(W.isSettled() ? W.transientResponse() : W.transientResponse({0, 200}, 200));
     regFreqRespSeries.push_back(W.frequencyResponse());
     std::cout << regFreqRespSeries.back().original().size() << ' ' << regFreqRespSeries.back().optimal().size() << '\n';
 

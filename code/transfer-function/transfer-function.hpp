@@ -193,8 +193,28 @@ public:
     [[nodiscard]] VecComp frequencyResponse() const {
         VecComp response;
         response.reserve(POINTS);
-        for (const auto& omega : MathCore::logRange(computeFrequencyRange(), POINTS, true))
-            response.emplace_back(frequencyResponse(Complex(0, omega)));
+        const std::size_t m = POINTS / 2;
+        const std::size_t n = m + 1;
+        const auto a = MathCore::logRange(computeFrequencyRange(), m, true);
+        const auto b = MathCore::logRange(Pair(omega_c / 4, omega_c), m, false);
+        int i = 0, j = 0;
+        while (i < n && j < m)
+            if (a[i] < b[j]) {
+                response.emplace_back(frequencyResponse(Complex(0, a[i])));
+                ++i;
+            }
+            else {
+                response.emplace_back(frequencyResponse(Complex(0, b[j])));
+                ++j;
+            }
+        while (i < n) {
+            response.emplace_back(frequencyResponse(Complex(0, a[i])));
+            ++i;
+        }
+        while (j < m) {
+            response.emplace_back(frequencyResponse(Complex(0, b[j])));
+            ++j;
+        }
         return response;
     } /// N
 

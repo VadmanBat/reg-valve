@@ -15,7 +15,8 @@ find_package(Qt5 COMPONENTS Widgets Charts REQUIRED)
 
 file(GLOB_RECURSE HEADERS "code/*.h" "code/*.hpp" "code/*.hxx")
 file(GLOB_RECURSE SOURCES "code/*.cpp")
-add_executable(${PROJECT_NAME} main.cpp ${HEADERS} ${SOURCES})
+add_executable(${PROJECT_NAME} main.cpp ${HEADERS} ${SOURCES}
+        code/qt-application/structures/chart-properties-dialog.hpp)
 
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Charts)
 

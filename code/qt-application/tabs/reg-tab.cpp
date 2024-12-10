@@ -12,7 +12,7 @@ QWidget* Application::createRegTab() {
     );
 
     regParameters.assign({
-                                 new RegParameter("K<sub>p</sub>", 0.05, 50, 1, 10),
+                                 new RegParameter("K<sub>p</sub>", 0.05, 50, 0.05, 5),
                                  new RegParameter("T<sub>u</sub>", 0.05, 2000, 1, 120),
                                  new RegParameter("T<sub>d</sub>", 0.05, 2000, 1, 60)
                          });

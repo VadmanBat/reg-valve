@@ -22,7 +22,7 @@ void Application::adjustLineEditWidth(QLineEdit* lineEdit) {
     lineEdit->setMaximumWidth(width);
 }
 
-MathCore::Vec Application::getLineEditData(const std::vector <LineEdit*>& lineEdits) {
+MathCore::Vec Application::getLineEditData(const VecLine& lineEdits) {
     const auto count(lineEdits.size());
     MathCore::Vec values(count);
     for (int i = 0; i < count; ++i)
@@ -40,7 +40,7 @@ QString Application::correctLine(const QString& text) {
     return "";
 }
 
-QLayout* Application::createLineEdit(std::vector <LineEdit*>& lineEdits, QDoubleValidator* validator) {
+QLayout* Application::createLineEdit(VecLine& lineEdits, QDoubleValidator* validator) {
     auto layout = new QHBoxLayout;
     int p(-1);
     for (auto& lineEdit : lineEdits) {
@@ -50,22 +50,28 @@ QLayout* Application::createLineEdit(std::vector <LineEdit*>& lineEdits, QDouble
         lineEdit->setText("+0");
 
         auto label = new QLabel(QString("p<sup>%1</sup>").arg(++p));
-        label->setStyleSheet("font-size: 16pt;");
+        label->setStyleSheet("font-size: 16pt; color: rgba(0, 0, 0, 64);");
         layout->addWidget(label);
 
         lineEdit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        connect(lineEdit, &QLineEdit::textChanged, [lineEdit] {
-            auto text(lineEdit->text());
-            if (auto correctedLine(correctLine(text)); !correctedLine.isEmpty()) {
+        connect(lineEdit, &QLineEdit::textChanged, [lineEdit, label] {
+            auto text= lineEdit->text();
+            if (auto correctedLine= correctLine(text); !correctedLine.isEmpty()) {
                 lineEdit->setText(correctedLine);
                 return;
             }
+            StyleCore::updateStyle(
+                    label, "color",
+                    getValue(lineEdit->text()) == 0 ? "rgba(0, 0, 0, 64)" : "rgba(0, 0, 0, 255)"
+            );
             adjustLineEditWidth(lineEdit);
-            StyleCore::updateStyleSheetProperty(lineEdit, "color", getColor(getValue(text)));
+            StyleCore::updateStyle(lineEdit, "color", getColor(getValue(text)));
         });
-        connect(lineEdit, &QLineEdit::editingFinished, [lineEdit] {
-            if (lineEdit->text().isEmpty())
+        connect(lineEdit, &QLineEdit::editingFinished, [lineEdit, label] {
+            if (lineEdit->text().isEmpty()) {
                 lineEdit->setText("+0");
+                StyleCore::updateStyle(label, "color", "rgba(0, 0, 0, 64)");
+            }
         });
         lineEdit->setMinimumWidth(36);
         lineEdit->setMaximumWidth(36);
@@ -76,7 +82,7 @@ QLayout* Application::createLineEdit(std::vector <LineEdit*>& lineEdits, QDouble
     return layout;
 }
 
-QLayout* Application::createTransferFunctionForm(std::vector <LineEdit*>& numerator, std::vector <LineEdit*>& denominator,
+QLayout* Application::createTransferFunctionForm(VecLine& numerator, VecLine& denominator,
                                                  std::size_t n, std::size_t m, const QString& title) {
     auto transferFunctionLabel = new QLabel(title);
     transferFunctionLabel->setAlignment(Qt::AlignCenter);

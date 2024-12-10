@@ -12,7 +12,7 @@
 class StyleCore {
 public:
     template <typename T>
-    static void updateStyleSheetProperty(T* widget, const QString& property, const QString& value) {
+    static void updateStyle(T* widget, const QString& property, const QString& value) {
         static_assert(std::is_base_of<QWidget, T>::value, "T must be a QWidget or derived class");
 
         QString style = widget->styleSheet();

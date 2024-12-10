@@ -32,6 +32,8 @@ private:
     using ChartsDataset = std::vector <ChartData>;
 
     using Pair = std::pair <double, double>;
+    using VecPair = std::vector <Pair>;
+    using VecLine = std::vector <LineEdit*>;
 
     static void showError(const QString& errorMessage);
 
@@ -50,20 +52,21 @@ private:
         return Container(first, last);
     }
 
-    static MathCore::Vec getLineEditData(const std::vector <LineEdit*>& lineEdits);
+    static MathCore::Vec getLineEditData(const VecLine& lineEdits);
     static QString correctLine(const QString& text);
-    static QLayout* createLineEdit(std::vector <LineEdit*>& lineEdits, QDoubleValidator* validator);
-    static QLayout* createTransferFunctionForm(std::vector <LineEdit*>& numerator, std::vector <LineEdit*>& denominator,
+    static QLayout* createLineEdit(VecLine& lineEdits, QDoubleValidator* validator);
+    static QLayout* createTransferFunctionForm(VecLine& numerator, VecLine& denominator,
                                                std::size_t n = 6, std::size_t m = 6, const QString& title = "W(p) = ");
 
     /// charts functions:
-    static QLayout* createCharts(const ChartsDataset& charts, QWidget* tab);
-    static void createChartContextMenu(QChartView* chartView);
+    QLayout* createCharts(const ChartsDataset& charts, QWidget* tab);
+    void createChartContextMenu(QChartView* chartView);
     static void createAxes(QChart* chart, const QString &titleX, const QString &titleY);
     static void eraseLastSeries(QChart* chart);
     static void removeAllSeries(QChart* chart);
     static std::pair <double, double> computeAxesRange(double min, double max);
     static void updateAxes(QChart* chart, const Pair& range_x, const Pair& range_y);
+    static bool saveChartToFile(const QString& fileName, QChart* chart);
 
     template <class Points>
     static void addPoints(QChart* chart, const Points& points, const QString& title, std::size_t index) {
@@ -97,6 +100,8 @@ private:
     QWidget* createNumTab();
     QWidget* createRegTab();
 
+    QStackedLayout* mainLayout;
+
 public:
     explicit Application(QWidget* parent = nullptr) : QWidget(parent) {
         auto tabWidget = new QTabWidget(this);
@@ -104,7 +109,7 @@ public:
         tabWidget->addTab(createNumTab(), "КЧХ по W(p)");
         tabWidget->addTab(createRegTab(), "Ручная настройка регулятора");
 
-        auto mainLayout = new QVBoxLayout(this);
+        mainLayout = new QStackedLayout(this);
         mainLayout->addWidget(tabWidget);
         setLayout(mainLayout);
 
@@ -127,16 +132,6 @@ private slots:
     void regAddTransferFunction();
     void regReplaceTransferFunction();
     void regClearCharts();
-
-    void toggleFullScreen(QChartView* view) {
-        if (view->isFullScreen()) {
-            view->setParent(this);
-            view->showNormal();
-        } else {
-            view->setParent(nullptr);
-            view->showFullScreen();
-        }
-    }
 
 private:
     QChart *expChartTranResp{new QChart}, *expChartFreqResp{new QChart};
@@ -161,8 +156,8 @@ private:
             {regChartFreqResp, "Комплексно-частотная характеристика (КЧХ)", "Реальная ось", "Мнимая ось"}
     };
 
-    std::vector <LineEdit*> numNumerator, numDenominator;
-    std::vector <LineEdit*> regNumerator, regDenominator;
+    VecLine numNumerator, numDenominator;
+    VecLine regNumerator, regDenominator;
 
     std::vector <RegParameter*> regParameters;
 

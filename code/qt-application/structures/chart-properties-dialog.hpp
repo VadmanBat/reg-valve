@@ -30,8 +30,8 @@ public:
         if (auto axis = getAxis(Qt::Vertical))
             yAxisLabelEdit->setText(axis->titleText());
 
-        auto applyButton = new QPushButton(tr("Применить"));
-        auto cancelButton = new QPushButton(tr("Отменить"));
+        auto applyButton    = new QPushButton(tr("Применить"));
+        auto cancelButton   = new QPushButton(tr("Отменить"));
 
         connect(applyButton, &QPushButton::clicked, this, &ChartPropertiesDialog::updateChart);
         connect(cancelButton, &QPushButton::clicked, this, &ChartPropertiesDialog::restoreChart);
@@ -104,13 +104,13 @@ private:
 
         for (int i = 0; i < series_size; ++i) {
             auto lineSeries = qobject_cast<QLineSeries*>(series[i]);
-            if (!lineSeries)
+            if (!lineSeries || lineSeries->name() == "hor-line" || lineSeries->name() == "ver-line")
                 continue;
 
-            auto nameEdit = new QLineEdit(lineSeries->name());
-            auto colorButton = new QPushButton;
-            auto widthSpinBox = new QSpinBox;
-            auto styleComboBox = new QComboBox;
+            auto nameEdit       = new QLineEdit(lineSeries->name());
+            auto colorButton    = new QPushButton;
+            auto widthSpinBox   = new QSpinBox;
+            auto styleComboBox  = new QComboBox;
 
             colorButton->setStyleSheet(QString("background-color: %1").arg(lineSeries->pen().color().name()));
 
@@ -141,6 +141,7 @@ private:
             lineSeriesPointers.append(lineSeries);
             initPens.append(lineSeries->pen());
         }
+        series_size = lineSeriesPointers.size();
         currentPens = initPens;
         return layout;
     }

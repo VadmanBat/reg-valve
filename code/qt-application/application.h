@@ -73,7 +73,7 @@ private:
 
     template <class Points>
     static void addPoints(QChart* chart, const Points& points, const QString& title, std::size_t index = 0) {
-        auto series = new QLineSeries();
+        auto series = new QLineSeries;
         series->setName(title);
         series->setPen(pens[index % 6]);
         for (const auto& [x, y] : points)
@@ -82,7 +82,7 @@ private:
     }
     template <class Points>
     static void addComplexPoints(QChart* chart, const Points& points, const QString& title, std::size_t index = 0) {
-        auto series = new QLineSeries();
+        auto series = new QLineSeries;
         series->setName(title);
         series->setPen(pens[index % 6]);
         for (const auto& point : points)

@@ -77,6 +77,7 @@ void Application::numReplaceTransferFunction() {
 void Application::numClearCharts() {
     removeAllSeries(numChartTranResp);
     removeAllSeries(numChartFreqResp);
+
     numTranRespSeries.clear();
     numFreqRespSeries.clear();
 

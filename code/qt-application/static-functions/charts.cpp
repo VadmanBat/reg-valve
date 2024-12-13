@@ -84,7 +84,13 @@ void Application::eraseLastSeries(QChart* chart) {
 }
 
 void Application::removeAllSeries(QChart* chart) {
-    chart->removeAllSeries();
+    for (auto series : chart->series()) {
+        const auto name = series->name();
+        if (name == "hor-line" || name == "ver-line")
+            continue;
+        chart->removeSeries(series);
+        delete series;
+    }
     chart->update();
 }
 
@@ -129,7 +135,7 @@ void Application::addHorLine(QChart* chart, qreal value, const QPen& pen) {
 
     if (!axisX || !axisY) return;
 
-    auto line = new QLineSeries();
+    auto line = new QLineSeries;
     line->setName("hor-line");
     line->setPen(pen);
     chart->addSeries(line);
@@ -153,7 +159,7 @@ void Application::addVerLine(QChart* chart, qreal value, const QPen& pen) {
 
     if (!axisX || !axisY) return;
 
-    auto line = new QLineSeries();
+    auto line = new QLineSeries;
     line->setName("ver-line");
     line->setPen(pen);
     chart->addSeries(line);

@@ -59,14 +59,16 @@ private:
                                                std::size_t n = 6, std::size_t m = 6, const QString& title = "W(p) = ");
 
     /// charts functions:
-    QLayout* createCharts(const ChartsDataset& charts, QWidget* tab);
-    void createChartContextMenu(QChartView* chartView);
+    static QLayout* createCharts(const ChartsDataset& charts, QWidget* tab);
+    static void createChartContextMenu(QChartView* chartView);
     static void createAxes(QChart* chart, const QString &titleX, const QString &titleY);
     static void eraseLastSeries(QChart* chart);
     static void removeAllSeries(QChart* chart);
     static std::pair <double, double> computeAxesRange(double min, double max);
     static void updateAxes(QChart* chart, const Pair& range_x, const Pair& range_y);
     static bool saveChartToFile(const QString& fileName, QChart* chart);
+    static void addHorLine(QChart* chart, qreal value, const QPen& pen = QPen(Qt::black, 2));
+    static void addVerLine(QChart* chart, qreal value, const QPen& pen = QPen(Qt::black, 2));
 
     template <class Points>
     static void addPoints(QChart* chart, const Points& points, const QString& title, std::size_t index) {

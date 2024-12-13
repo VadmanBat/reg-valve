@@ -165,6 +165,18 @@ QColor colors[6] = {
 };
 
 void Application::applyStyles() {
+    addHorLine(expChartFreqResp, 0);
+    addVerLine(expChartFreqResp, 0);
+    addHorLine(numChartFreqResp, 0);
+    addVerLine(numChartFreqResp, 0);
+    addHorLine(regChartFreqResp, 0);
+    addVerLine(regChartFreqResp, 0);
+
+    QPen pen = Qt::DashLine;
+    pen.setColor(QColor(0, 128, 0));
+    addHorLine(regChartTranResp, 1.05, pen);
+    addHorLine(regChartTranResp, 0.95, pen);
+
     regParameters[0]->getSlider()->setStyleSheet(redSliderStyle);
     regParameters[1]->getSlider()->setStyleSheet(greenSliderStyle);
     regParameters[2]->getSlider()->setStyleSheet(blueSliderStyle);

@@ -24,10 +24,10 @@ void Application::createChartContextMenu(QChartView* chartView) {
     QIcon copyIcon = style->standardIcon(QStyle::QStyle::SP_FileIcon);
     QIcon settingsIcon = style->standardIcon(QStyle::SP_DialogApplyButton);
 
-    auto saveImageAction = new QAction(saveIcon, tr("Сохранить как PNG"), chartView);
-    auto saveTextAction = new QAction(saveIcon, tr("Сохранить как TXT"), chartView);
-    auto copyAction = new QAction(copyIcon, tr("Копировать в буфер обмена"), chartView);
-    auto propertiesAction = new QAction(settingsIcon, tr("Свойства"), chartView);
+    auto saveImageAction    = new QAction(saveIcon, tr("Сохранить как PNG"), chartView);
+    auto saveTextAction     = new QAction(saveIcon, tr("Сохранить как TXT"), chartView);
+    auto copyAction         = new QAction(copyIcon, tr("Копировать в буфер обмена"), chartView);
+    auto propertiesAction   = new QAction(settingsIcon, tr("Свойства"), chartView);
 
     auto chart = chartView->chart();
 
@@ -77,7 +77,9 @@ void Application::eraseLastSeries(QChart* chart) {
     if (chart->series().empty())
         return;
 
-    chart->removeSeries(chart->series().back());
+    auto series = chart->series().back();
+    chart->removeSeries(series);
+    delete series;
     chart->update();
 }
 
@@ -107,30 +109,17 @@ Application::Pair Application::computeAxesRange(double min, double max) {
 }
 
 void Application::updateAxes(QChart* chart, const Pair& range_x, const Pair& range_y) {
-    QString oldAxisXTitle, oldAxisYTitle;
-    auto oldAxisX = qobject_cast<QValueAxis *>(chart->axes(Qt::Horizontal).first());
-    auto oldAxisY = qobject_cast<QValueAxis *>(chart->axes(Qt::Vertical).first());
+    auto axisX = qobject_cast<QValueAxis *>(chart->axes(Qt::Horizontal).first());
+    auto axisY = qobject_cast<QValueAxis *>(chart->axes(Qt::Vertical).first());
 
-    if (oldAxisX) {
-        oldAxisXTitle = oldAxisX->titleText();
-        chart->removeAxis(oldAxisX);
-    }
-    if (oldAxisY) {
-        oldAxisYTitle = oldAxisY->titleText();
-        chart->removeAxis(oldAxisY);
-    }
+    axisX->setRange(range_x.first, range_x.second);
+    axisY->setRange(range_y.first, range_y.second);
 
-    chart->createDefaultAxes();
-    auto newAxisX = qobject_cast<QValueAxis *>(chart->axes(Qt::Horizontal).first());
-    auto newAxisY = qobject_cast<QValueAxis *>(chart->axes(Qt::Vertical).first());
-
-    if (newAxisX) {
-        newAxisX->setTitleText(oldAxisXTitle);
-        newAxisX->setRange(range_x.first, range_x.second);
-    }
-    if (newAxisY) {
-        newAxisY->setTitleText(oldAxisYTitle);
-        newAxisY->setRange(range_y.first, range_y.second);
+    for (auto series : chart->series()) {
+        if (!series->attachedAxes().contains(axisX))
+            series->attachAxis(axisX);
+        if (!series->attachedAxes().contains(axisY))
+            series->attachAxis(axisY);
     }
 }
 
@@ -142,7 +131,10 @@ bool Application::saveChartToFile(const QString& fileName, QChart* chart) {
     QTextStream out(&file);
     QList <QAbstractSeries*> seriesList = chart->series();
     for (QAbstractSeries* series : seriesList) {
-        out << "Name: " << series->name() << "\n";
+        const auto name = series->name();
+        if (name == "hor-line" || name == "ver-line")
+            continue;
+        out << "Name: " << name << "\n";
         if (auto xySeries = qobject_cast<QXYSeries*>(series)) {
             for (int i = 0; i < xySeries->count(); ++i)
                 out << xySeries->at(i).x() << ", " << xySeries->at(i).y() << "\n";
@@ -167,6 +159,54 @@ bool Application::saveChartToFile(const QString& fileName, QChart* chart) {
 
     file.close();
     return true;
+}
+
+void Application::addHorLine(QChart* chart, qreal value, const QPen& pen) {
+    auto axisX = qobject_cast<QValueAxis*>(chart->axes(Qt::Horizontal).first());
+    auto axisY = qobject_cast<QValueAxis*>(chart->axes(Qt::Vertical).first());
+
+    if (!axisX || !axisY) return;
+
+    auto line = new QLineSeries();
+    line->setName("hor-line");
+    line->setPen(pen);
+    chart->addSeries(line);
+    line->attachAxis(axisX);
+    line->attachAxis(axisY);
+    chart->legend()->markers(line).first()->setVisible(false);
+
+    QObject::connect(axisX, &QValueAxis::rangeChanged, [line, value](qreal min, qreal max) {
+        line->clear();
+        line->append(min, value);
+        line->append(max, value);
+    });
+
+    line->append(axisX->min(), value);
+    line->append(axisX->max(), value);
+}
+
+void Application::addVerLine(QChart* chart, qreal value, const QPen& pen) {
+    auto axisX = qobject_cast<QValueAxis*>(chart->axes(Qt::Horizontal).first());
+    auto axisY = qobject_cast<QValueAxis*>(chart->axes(Qt::Vertical).first());
+
+    if (!axisX || !axisY) return;
+
+    auto line = new QLineSeries();
+    line->setName("ver-line");
+    line->setPen(pen);
+    chart->addSeries(line);
+    line->attachAxis(axisX);
+    line->attachAxis(axisY);
+    chart->legend()->markers(line).first()->setVisible(false);
+
+    QObject::connect(axisY, &QValueAxis::rangeChanged, [line, value](qreal min, qreal max) {
+        line->clear();
+        line->append(value, min);
+        line->append(value, max);
+    });
+
+    line->append(value, axisY->min());
+    line->append(value, axisY->max());
 }
 
 /*

@@ -2,7 +2,8 @@
 // Created by Vadma on 13.07.2024.
 //
 #include "../application.h"
-#include "../structures/chart-properties-dialog.hpp"
+#include "code/qt-application/structures/dialogs/chart-dialog.hpp"
+#include "code/qt-application/structures/dialogs/mod-par-dialog.hpp"
 
 QLayout* Application::createCharts(const ChartsDataset& charts, QWidget* tab) {
     auto layout = new QHBoxLayout;
@@ -26,7 +27,7 @@ void Application::createChartContextMenu(QChartView* chartView) {
 
     auto saveImageAction    = new QAction(saveIcon, tr("Сохранить как PNG"), chartView);
     auto saveTextAction     = new QAction(saveIcon, tr("Сохранить как TXT"), chartView);
-    auto copyAction         = new QAction(copyIcon, tr("Копировать в буфер обмена"), chartView);
+    auto copyAction         = new QAction(copyIcon, tr("Копировать изображение"), chartView);
     auto propertiesAction   = new QAction(settingsIcon, tr("Свойства"), chartView);
 
     auto chart = chartView->chart();
@@ -55,7 +56,7 @@ void Application::createChartContextMenu(QChartView* chartView) {
     });
 
     connect(propertiesAction, &QAction::triggered, [chart]() {
-        ChartPropertiesDialog dialog(chart);
+        ChartDialog dialog(chart);
         dialog.exec();
     });
 

@@ -2,6 +2,7 @@
 // Created by Vadma on 21.07.2024.
 //
 #include "../application.h"
+#include "../structures/dialogs/mod-par-dialog.hpp"
 
 bool Application::numIsValidInput(const MathCore::Vec& num, const MathCore::Vec& den) {
     if (den.empty()) {
@@ -82,4 +83,11 @@ void Application::numClearCharts() {
     numFreqRespSeries.clear();
 
     numSize = 0;
+}
+
+void Application::numShowModParDialog() {
+    ModParDialog dialog;
+    if (dialog.exec() == QDialog::Accepted) {
+
+    }
 }

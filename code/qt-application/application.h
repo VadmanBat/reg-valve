@@ -131,6 +131,7 @@ private slots:
     void numAddTransferFunction();
     void numReplaceTransferFunction();
     void numClearCharts();
+    void numShowModParDialog();
 
     void regAddTransferFunction();
     void regReplaceTransferFunction();

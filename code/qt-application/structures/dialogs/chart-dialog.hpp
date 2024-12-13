@@ -2,8 +2,8 @@
 // Created by Vadma on 07.12.2024.
 //
 
-#ifndef REGVALVE_CHART_PROPERTIES_DIALOG_HPP
-#define REGVALVE_CHART_PROPERTIES_DIALOG_HPP
+#ifndef REGVALVE_CHART_DIALOG_HPP
+#define REGVALVE_CHART_DIALOG_HPP
 
 #include <QDialog>
 #include <QFormLayout>
@@ -11,19 +11,19 @@
 #include <QFont>
 #include <QtCharts>
 
-class ChartPropertiesDialog : public QDialog {
+class ChartDialog : public QDialog {
 Q_OBJECT
 
 public:
-    explicit ChartPropertiesDialog(QChart* chartPtr, QWidget* parent = nullptr) :
+    explicit ChartDialog(QChart* chartPtr, QWidget* parent = nullptr) :
             QDialog(parent), chart(chartPtr), series_size(chart->series().size())
     {
         setWindowTitle(tr("Свойства графика"));
         setWindowIcon(QIcon::fromTheme("dialog-information"));
         setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-        titleEdit = new QLineEdit(chart->title());
-        xAxisLabelEdit = new QLineEdit;
+        titleEdit       = new QLineEdit(chart->title());
+        xAxisLabelEdit  = new QLineEdit;
         if (auto axis = getAxis(Qt::Horizontal))
             xAxisLabelEdit->setText(axis->titleText());
         yAxisLabelEdit = new QLineEdit;
@@ -33,9 +33,9 @@ public:
         auto applyButton    = new QPushButton(tr("Применить"));
         auto cancelButton   = new QPushButton(tr("Отменить"));
 
-        connect(applyButton, &QPushButton::clicked, this, &ChartPropertiesDialog::updateChart);
-        connect(cancelButton, &QPushButton::clicked, this, &ChartPropertiesDialog::restoreChart);
-        connect(this, &QDialog::rejected, this, &ChartPropertiesDialog::restoreChart);
+        connect(applyButton, &QPushButton::clicked, this, &ChartDialog::updateChart);
+        connect(cancelButton, &QPushButton::clicked, this, &ChartDialog::restoreChart);
+        connect(this, &QDialog::rejected, this, &ChartDialog::restoreChart);
 
         auto buttonLayout = new QHBoxLayout;
         buttonLayout->addWidget(applyButton);
@@ -47,7 +47,10 @@ public:
         formLayout->addRow(tr("Заголовок:"), titleEdit);
         formLayout->addRow(tr("Подпись оси X:"), xAxisLabelEdit);
         formLayout->addRow(tr("Подпись оси Y:"), yAxisLabelEdit);
-        formLayout->addRow(getSeriesGrid());
+        if (auto grid = getSeriesGrid(); series_size != 0)
+            formLayout->addRow(grid);
+        else
+            delete grid;
         formLayout->addRow(buttonLayout);
 
         setLayout(formLayout);
@@ -201,4 +204,4 @@ private slots:
     }
 };
 
-#endif //REGVALVE_CHART_PROPERTIES_DIALOG_HPP
+#endif //REGVALVE_CHART_DIALOG_HPP

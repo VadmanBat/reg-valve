@@ -67,11 +67,12 @@ private:
     static std::pair <double, double> computeAxesRange(double min, double max);
     static void updateAxes(QChart* chart, const Pair& range_x, const Pair& range_y);
     static bool saveChartToFile(const QString& fileName, QChart* chart);
+    static VecPair readVectorFromFile(const QString& fileName);
     static void addHorLine(QChart* chart, qreal value, const QPen& pen = QPen(Qt::black, 2));
     static void addVerLine(QChart* chart, qreal value, const QPen& pen = QPen(Qt::black, 2));
 
     template <class Points>
-    static void addPoints(QChart* chart, const Points& points, const QString& title, std::size_t index) {
+    static void addPoints(QChart* chart, const Points& points, const QString& title, std::size_t index = 0) {
         auto series = new QLineSeries();
         series->setName(title);
         series->setPen(pens[index % 6]);
@@ -80,7 +81,7 @@ private:
         chart->addSeries(series);
     }
     template <class Points>
-    static void addComplexPoints(QChart* chart, const Points& points, const QString& title, std::size_t index) {
+    static void addComplexPoints(QChart* chart, const Points& points, const QString& title, std::size_t index = 0) {
         auto series = new QLineSeries();
         series->setName(title);
         series->setPen(pens[index % 6]);
@@ -140,8 +141,8 @@ private:
     QChart *numChartTranResp{new QChart}, *numChartFreqResp{new QChart};
     QChart *regChartTranResp{new QChart}, *regChartFreqResp{new QChart};
 
-    SetSeries <Series> numTranRespSeries, regTranRespSeries;
-    SetSeries <ComplexSeries> numFreqRespSeries, regFreqRespSeries;
+    SetSeries <Series> expTranRespSeries, numTranRespSeries, regTranRespSeries;
+    SetSeries <ComplexSeries> expFreqRespSeries, numFreqRespSeries, regFreqRespSeries;
 
     std::size_t numSize, regSize;
 
@@ -154,7 +155,7 @@ private:
             {numChartFreqResp, "Комплексно-частотная характеристика (КЧХ)", "Реальная ось", "Мнимая ось"}
     };
     const ChartsDataset REG_CHARTS = {
-            {regChartTranResp, "Переходная характеристика", "Время t, секунды", "h(t)"},
+            {regChartTranResp, "Переходный процесс", "Время t, секунды", "h(t)"},
             {regChartFreqResp, "Комплексно-частотная характеристика (КЧХ)", "Реальная ось", "Мнимая ось"}
     };
 

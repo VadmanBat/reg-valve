@@ -131,6 +131,70 @@ public:
             frequencyResponse.push_back(W(Complex(0, omega))); /// p = jw
         return frequencyResponse;
     } /// count(frequency) * (N + M)
+
+    static VecComp fft(const VecComp& x) {
+        const auto n = x.size();
+        if (n <= 1) return x;
+
+        VecComp even(n / 2);
+        VecComp odd(n / 2);
+
+        for (std::size_t i = 0; i < n; i += 2) {
+            even[i / 2] = x[i];
+            odd[i / 2] = x[i + 1];
+        }
+
+        VecComp even_fft = fft(even);
+        VecComp odd_fft = fft(odd);
+
+        VecComp y(n);
+        for (std::size_t k = 0; k < n / 2; ++k) {
+            Complex wk = std::polar(1.0, -2.0 * M_PI * k / n);
+            y[k]            = even_fft[k] + wk * odd_fft[k];
+            y[k + n / 2]    = even_fft[k] - wk * odd_fft[k];
+        }
+
+        return y;
+    }
+
+    static VecComp ifft(const VecComp& x) {
+        const auto n = x.size();
+        VecComp y = x;
+        for (std::size_t i = 0; i < n; ++i)
+            y[i] = conj(y[i]);
+        y = fft(y);
+        for (int i = 0; i < n; ++i)
+            y[i] = conj(y[i]) / double(n);
+        return y;
+    }
+
+    static VecComp calculateFrequencyResponse(const VecPair& h, double samplingRate) {
+        if (h.empty())
+            throw std::runtime_error("Input vector h_t is empty.");
+
+        const auto n = h.size();
+
+        VecComp fft_result(n);
+        for (size_t i = 0; i < n; ++i)
+            fft_result[i] = h[i].second;
+        fft_result = fft(fft_result);
+
+        VecComp frequencies(n / 2 + 1);
+        VecComp phase(n / 2 + 1);
+        VecComp amplitude(n / 2 + 1);
+        VecComp complex(n / 2 + 1);
+
+        for (size_t k = 0; k <= n / 2; ++k) {
+            frequencies[k] = double(k) * samplingRate / double(n);
+            phase[k] = std::atan2(fft_result[k].imag(), fft_result[k].real());
+            phase[k] = std::arg(fft_result[k]);
+            amplitude[k] = std::abs(fft_result[k]);
+            std::cout << amplitude[k] << '\n';
+            complex[k] = phase[k] / amplitude[k];
+        }
+
+        return complex;
+    }
 };
 
 #endif //REGVALVE_REG_CORE_HPP

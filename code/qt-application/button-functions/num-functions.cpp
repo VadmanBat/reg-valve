@@ -39,7 +39,7 @@ void Application::numAddTransferFunction() {
                 W.dampingRation(), W.steadyStateValue()
         } : std::vector <double>{});
 
-        numTranRespSeries.push_back(Series(W.transientResponse()));
+        numTranRespSeries.push_back(W.transientResponse());
         numFreqRespSeries.push_back(W.frequencyResponse());
 
         Application::addPoints(numChartTranResp, numTranRespSeries.back().original(), "Тест", numSize);

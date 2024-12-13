@@ -123,44 +123,6 @@ void Application::updateAxes(QChart* chart, const Pair& range_x, const Pair& ran
     }
 }
 
-bool Application::saveChartToFile(const QString& fileName, QChart* chart) {
-    QFile file(fileName);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-        return false;
-
-    QTextStream out(&file);
-    QList <QAbstractSeries*> seriesList = chart->series();
-    for (QAbstractSeries* series : seriesList) {
-        const auto name = series->name();
-        if (name == "hor-line" || name == "ver-line")
-            continue;
-        out << "Name: " << name << "\n";
-        if (auto xySeries = qobject_cast<QXYSeries*>(series)) {
-            for (int i = 0; i < xySeries->count(); ++i)
-                out << xySeries->at(i).x() << ", " << xySeries->at(i).y() << "\n";
-        } else if (auto lineSeries = qobject_cast<QLineSeries*>(series)) {
-            for (int i = 0; i < lineSeries->count(); ++i)
-                out << lineSeries->at(i).x() << ", " << lineSeries->at(i).y() << "\n";
-        } else if (auto scatterSeries = qobject_cast<QScatterSeries*>(series)) {
-            for (int i = 0; i < scatterSeries->count(); ++i)
-                out << scatterSeries->at(i).x() << ", " << scatterSeries->at(i).y() << "\n";
-        } else if (auto pieSeries = qobject_cast<QPieSeries*>(series)) {
-            for (QPieSlice* slice : pieSeries->slices())
-                out << slice->label() << ", " << slice->percentage() << "\n";
-        } else if (auto barSeries = qobject_cast<QBarSeries*>(series)) {
-            for (QBarSet* barSet : barSeries->barSets()) {
-                out << "Bar Set Name: " << barSet->label() << "\n";
-                for (int i = 0; i < barSet->count(); ++i)
-                    out << barSet->at(i) << "\n";
-            }
-        }
-        out << "\n";
-    }
-
-    file.close();
-    return true;
-}
-
 void Application::addHorLine(QChart* chart, qreal value, const QPen& pen) {
     auto axisX = qobject_cast<QValueAxis*>(chart->axes(Qt::Horizontal).first());
     auto axisY = qobject_cast<QValueAxis*>(chart->axes(Qt::Vertical).first());
@@ -209,8 +171,7 @@ void Application::addVerLine(QChart* chart, qreal value, const QPen& pen) {
     line->append(value, axisY->max());
 }
 
-/*
-std::vector <Pair> Application::readVectorFromFile(const QString& fileName) {
+bool Application::saveChartToFile(const QString& fileName, QChart* chart) {
     QFile file(fileName);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
         return false;
@@ -218,7 +179,10 @@ std::vector <Pair> Application::readVectorFromFile(const QString& fileName) {
     QTextStream out(&file);
     QList <QAbstractSeries*> seriesList = chart->series();
     for (QAbstractSeries* series : seriesList) {
-        out << "Name: " << series->name() << "\n";
+        const auto name = series->name();
+        if (name == "hor-line" || name == "ver-line")
+            continue;
+        out << "Name: " << name << "\n";
         if (auto xySeries = qobject_cast<QXYSeries*>(series)) {
             for (int i = 0; i < xySeries->count(); ++i)
                 out << xySeries->at(i).x() << ", " << xySeries->at(i).y() << "\n";
@@ -243,4 +207,40 @@ std::vector <Pair> Application::readVectorFromFile(const QString& fileName) {
 
     file.close();
     return true;
-}*/
+}
+
+#include <fstream>
+
+Application::VecPair Application::readVectorFromFile(const QString& fileName) {
+    std::vector <double> numbers;
+
+    std::ifstream file(fileName.toLocal8Bit().toStdString());
+    std::string line;
+    while (getline(file, line)) {
+        std::stringstream ss(line);
+        std::string word;
+        while (ss >> word) {
+            std::string clean_word;
+            for (char let : word)
+                if (std::isdigit(let) || let == '.' || let == '-')
+                    clean_word += let;
+            if (clean_word.empty())
+                continue;
+            try {
+                numbers.push_back(stod(clean_word));
+            } catch (const std::invalid_argument& e) {
+                std::cerr << "Ошибка преобразования: " << clean_word << std::endl;
+            } catch (const  std::out_of_range& e) {
+                std::cerr << "Ошибка переполнения: " << clean_word << std::endl;
+            }
+        }
+    }
+    file.close();
+
+    VecPair res;
+    const auto n = numbers.size();
+    for (std::size_t i = 0; i < n; i += 2)
+        res.emplace_back(numbers[i], numbers[i + 1]);
+
+    return res;
+}

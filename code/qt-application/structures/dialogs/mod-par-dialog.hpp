@@ -20,174 +20,181 @@ class ModParDialog : public QDialog {
     Q_OBJECT
 
 private:
-    QSpinBox *simulationTimeSpinBox;
-    QCheckBox *simulationTimeCheckBox;
-    QDoubleSpinBox *integrationStepDoubleSpinBox;
-    QSpinBox *numberOfIntervalsSpinBox;
-    QCheckBox *autoIntegrationCheckBox;
-    QDoubleSpinBox *frequencyMinSpinBox;
-    QDoubleSpinBox *frequencyMaxSpinBox;
-    QCheckBox *autoFrequencyRangeCheckBox;
-    QComboBox *frequencyScaleComboBox;
-    QDoubleSpinBox *frequencyStepDoubleSpinBox;
-    QSpinBox *numberOfPointsFreqSpinBox;
-    QCheckBox *autoFrequencyPointsCheckBox;
+    QCheckBox* autoSimTimeCheckBox;
+    QCheckBox* autoIntStepCheckBox;
+    QCheckBox* autoFreqRangeCheckBox;
+    QCheckBox* autoFreqPointsCheckBox;
+
+    QSpinBox* simTimeSpinBox;
+    QSpinBox* intIntervalsSpinBox;
+    QSpinBox* freqPointsSpinBox;
+
+    QDoubleSpinBox* intStepSpinBox;
+    QDoubleSpinBox* freqMinSpinBox;
+    QDoubleSpinBox* freqMaxSpinBox;
+    QDoubleSpinBox* freqStepSpinBox;
+
+    QComboBox* freqScaleComboBox;
 
 public:
     explicit ModParDialog(QWidget *parent = nullptr) : QDialog(parent) {
         setWindowTitle("Параметры моделирования");
 
-        auto simulationTimeLabel        = new QLabel("Время моделирования (с):");
-        auto integrationStepLabel       = new QLabel("Шаг интегрирования (с):");
-        auto numberOfIntervalsLabel     = new QLabel("Интервалы:");
-        auto frequencyScaleLabel        = new QLabel("Шкала:");
-        auto frequencyRangeLabel        = new QLabel("Диапазон частот (Гц):");
-        auto frequencyStepLabel         = new QLabel("Шаг (Гц):");
-        auto numberOfPointsFreqLabel    = new QLabel("Количество точек:");
+        auto simTimeLabel       = new QLabel("Время моделирования (с):");
+        auto intStepLabel       = new QLabel("Шаг интегрирования (с):");
+        auto intIntervalsLabel  = new QLabel("Интервалы:");
+        auto freqScaleLabel     = new QLabel("Шкала:");
+        auto freqRangeLabel     = new QLabel("Диапазон частот (Гц):");
+        auto freqStepLabel      = new QLabel("Шаг (Гц):");
+        auto pointsFreqLabel    = new QLabel("Количество точек:");
 
-        simulationTimeSpinBox           = new QSpinBox;
-        integrationStepDoubleSpinBox    = new QDoubleSpinBox;
-        simulationTimeCheckBox          = new QCheckBox("Авто");
-        numberOfIntervalsSpinBox        = new QSpinBox;
-        autoIntegrationCheckBox         = new QCheckBox("Авто");
-        frequencyMinSpinBox             = new QDoubleSpinBox;
-        frequencyMaxSpinBox             = new QDoubleSpinBox;
-        autoFrequencyRangeCheckBox      = new QCheckBox("Авто");
-        frequencyScaleComboBox          = new QComboBox;
-        frequencyStepDoubleSpinBox      = new QDoubleSpinBox;
-        numberOfPointsFreqSpinBox       = new QSpinBox;
-        autoFrequencyPointsCheckBox     = new QCheckBox("Авто");
+        autoSimTimeCheckBox     = new QCheckBox("Авто");
+        autoIntStepCheckBox     = new QCheckBox("Авто");
+        autoFreqRangeCheckBox   = new QCheckBox("Авто");
+        autoFreqPointsCheckBox  = new QCheckBox("Авто");
 
-        simulationTimeSpinBox->setMinimum(10);
-        simulationTimeSpinBox->setMaximum(10000);
-        simulationTimeSpinBox->setValue(500);
+        simTimeSpinBox          = new QSpinBox;
+        intIntervalsSpinBox     = new QSpinBox;
+        freqPointsSpinBox       = new QSpinBox;
 
-        connect(simulationTimeSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &ModParDialog::onSimulationTimeChanged);
-        connect(simulationTimeCheckBox, &QCheckBox::stateChanged, this, &ModParDialog::onSimulationTimeCheckBoxChanged);
-        connect(integrationStepDoubleSpinBox, &QDoubleSpinBox::editingFinished, this, &ModParDialog::onIntegrationStepChanged);
-        connect(numberOfIntervalsSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &ModParDialog::onNumberOfPointsChanged);
-        connect(autoIntegrationCheckBox, &QCheckBox::stateChanged, this, &ModParDialog::onAutoIntegrationCheckBoxChanged);
-        connect(autoFrequencyRangeCheckBox, &QCheckBox::stateChanged, this, &ModParDialog::onAutoFrequencyRangeCheckBoxChanged);
-        connect(frequencyScaleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ModParDialog::onFrequencyScaleChanged);
-        connect(autoFrequencyPointsCheckBox, &QCheckBox::stateChanged, this, &ModParDialog::onAutoFrequencyPointsCheckBoxChanged);
+        freqStepSpinBox         = new QDoubleSpinBox;
+        intStepSpinBox          = new QDoubleSpinBox;
+        freqMinSpinBox          = new QDoubleSpinBox;
+        freqMaxSpinBox          = new QDoubleSpinBox;
 
-        simulationTimeCheckBox->setCheckState(Qt::Checked);
-        autoFrequencyRangeCheckBox->setCheckState(Qt::Checked);
+        freqScaleComboBox       = new QComboBox;
 
-        integrationStepDoubleSpinBox->setMinimum(0.25);
-        integrationStepDoubleSpinBox->setMaximum(50);
-        integrationStepDoubleSpinBox->setSingleStep(0.1);
-        integrationStepDoubleSpinBox->setValue(5);
+        simTimeSpinBox->setMinimum(10);
+        simTimeSpinBox->setMaximum(10000);
+        simTimeSpinBox->setValue(500);
 
-        numberOfIntervalsSpinBox->setMinimum(10);
-        numberOfIntervalsSpinBox->setMaximum(2000);
-        numberOfIntervalsSpinBox->setValue(100);
+        connect(simTimeSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &ModParDialog::onSimTimeChanged);
+        connect(autoSimTimeCheckBox, &QCheckBox::stateChanged, this, &ModParDialog::onSimTimeCheckBoxChanged);
+        connect(intStepSpinBox, &QDoubleSpinBox::editingFinished, this, &ModParDialog::onIntStepChanged);
+        connect(intIntervalsSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this,
+                &ModParDialog::onIntIntervalsChanged);
+        connect(autoIntStepCheckBox, &QCheckBox::stateChanged, this, &ModParDialog::onAutoIntStepCheckBoxChanged);
+        connect(autoFreqRangeCheckBox, &QCheckBox::stateChanged, this, &ModParDialog::onAutoFreqRangeCheckBoxChanged);
+        connect(freqScaleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+                &ModParDialog::onFreqScaleChanged);
+        connect(autoFreqPointsCheckBox, &QCheckBox::stateChanged, this, &ModParDialog::onAutoFreqPointsCheckBoxChanged);
 
-        frequencyScaleComboBox->addItem("Логарифмическая");
-        frequencyScaleComboBox->addItem("Линейная");
+        autoSimTimeCheckBox->setCheckState(Qt::Checked);
+        autoFreqRangeCheckBox->setCheckState(Qt::Checked);
 
-        frequencyMinSpinBox->setMinimum(0.01);
-        frequencyMinSpinBox->setMaximum(200);
-        frequencyMinSpinBox->setValue(0.1);
-        frequencyMinSpinBox->setPrefix("от: ");
-        frequencyMaxSpinBox->setMinimum(0.01);
-        frequencyMaxSpinBox->setMaximum(200);
-        frequencyMaxSpinBox->setValue(1);
-        frequencyMaxSpinBox->setPrefix("до: ");
+        intStepSpinBox->setMinimum(0.25);
+        intStepSpinBox->setMaximum(50);
+        intStepSpinBox->setSingleStep(0.1);
+        intStepSpinBox->setValue(5);
 
-        frequencyStepDoubleSpinBox->setEnabled(false);
-        frequencyStepDoubleSpinBox->setMinimum(0.01);
-        frequencyStepDoubleSpinBox->setMaximum(2);
-        frequencyStepDoubleSpinBox->setValue(0.1);
-        frequencyStepDoubleSpinBox->setSingleStep(0.01);
+        intIntervalsSpinBox->setMinimum(10);
+        intIntervalsSpinBox->setMaximum(2000);
+        intIntervalsSpinBox->setValue(100);
 
-        numberOfPointsFreqSpinBox->setMinimum(2);
-        numberOfPointsFreqSpinBox->setMaximum(2000);
-        numberOfPointsFreqSpinBox->setValue(100);
+        freqScaleComboBox->addItem("Логарифмическая");
+        freqScaleComboBox->addItem("Линейная");
+
+        freqMinSpinBox->setMinimum(0.01);
+        freqMinSpinBox->setMaximum(200);
+        freqMinSpinBox->setValue(0.1);
+        freqMinSpinBox->setPrefix("от: ");
+        freqMaxSpinBox->setMinimum(0.01);
+        freqMaxSpinBox->setMaximum(200);
+        freqMaxSpinBox->setValue(1);
+        freqMaxSpinBox->setPrefix("до: ");
+
+        freqStepSpinBox->setMinimum(0.01);
+        freqStepSpinBox->setMaximum(2);
+        freqStepSpinBox->setValue(0.1);
+        freqStepSpinBox->setSingleStep(0.01);
+
+        freqPointsSpinBox->setMinimum(2);
+        freqPointsSpinBox->setMaximum(2000);
+        freqPointsSpinBox->setValue(100);
 
         auto mainLayout = new QVBoxLayout;
         auto timeLayout = new QHBoxLayout;
-        timeLayout->addWidget(simulationTimeLabel);
-        timeLayout->addWidget(simulationTimeSpinBox);
-        timeLayout->addWidget(simulationTimeCheckBox);
+        timeLayout->addWidget(simTimeLabel);
+        timeLayout->addWidget(simTimeSpinBox);
+        timeLayout->addWidget(autoSimTimeCheckBox);
         mainLayout->addLayout(timeLayout);
 
         auto integrationLayout = new QHBoxLayout;
-        integrationLayout->addWidget(integrationStepLabel);
-        integrationLayout->addWidget(integrationStepDoubleSpinBox);
-        integrationLayout->addWidget(numberOfIntervalsLabel);
-        integrationLayout->addWidget(numberOfIntervalsSpinBox);
-        integrationLayout->addWidget(autoIntegrationCheckBox);
+        integrationLayout->addWidget(intStepLabel);
+        integrationLayout->addWidget(intStepSpinBox);
+        integrationLayout->addWidget(intIntervalsLabel);
+        integrationLayout->addWidget(intIntervalsSpinBox);
+        integrationLayout->addWidget(autoIntStepCheckBox);
         mainLayout->addLayout(integrationLayout);
 
         auto frequencyRangeLayout = new QHBoxLayout;
-        frequencyRangeLayout->addWidget(frequencyRangeLabel);
-        frequencyRangeLayout->addWidget(frequencyMinSpinBox);
-        frequencyRangeLayout->addWidget(frequencyMaxSpinBox);
-        frequencyRangeLayout->addWidget(autoFrequencyRangeCheckBox);
+        frequencyRangeLayout->addWidget(freqRangeLabel);
+        frequencyRangeLayout->addWidget(freqMinSpinBox);
+        frequencyRangeLayout->addWidget(freqMaxSpinBox);
+        frequencyRangeLayout->addWidget(autoFreqRangeCheckBox);
         mainLayout->addLayout(frequencyRangeLayout);
 
         auto frequencyScaleLayout = new QHBoxLayout;
-        frequencyScaleLayout->addWidget(frequencyScaleLabel);
-        frequencyScaleLayout->addWidget(frequencyScaleComboBox);
-        frequencyScaleLayout->addWidget(frequencyStepLabel);
-        frequencyScaleLayout->addWidget(frequencyStepDoubleSpinBox);
-        frequencyScaleLayout->addWidget(numberOfPointsFreqLabel);
-        frequencyScaleLayout->addWidget(numberOfPointsFreqSpinBox);
-        frequencyScaleLayout->addWidget(autoFrequencyPointsCheckBox);
+        frequencyScaleLayout->addWidget(freqScaleLabel);
+        frequencyScaleLayout->addWidget(freqScaleComboBox);
+        frequencyScaleLayout->addWidget(freqStepLabel);
+        frequencyScaleLayout->addWidget(freqStepSpinBox);
+        frequencyScaleLayout->addWidget(pointsFreqLabel);
+        frequencyScaleLayout->addWidget(freqPointsSpinBox);
+        frequencyScaleLayout->addWidget(autoFreqPointsCheckBox);
         mainLayout->addLayout(frequencyScaleLayout);
 
         setLayout(mainLayout);
     }
 
 private slots:
-    void onSimulationTimeCheckBoxChanged(int state) {
-        simulationTimeSpinBox->setEnabled(state == Qt::Unchecked);
-        autoIntegrationCheckBox->setEnabled(state == Qt::Unchecked);
+    void onSimTimeCheckBoxChanged(int state) {
+        simTimeSpinBox->setEnabled(state == Qt::Unchecked);
+        autoIntStepCheckBox->setEnabled(state == Qt::Unchecked);
         if (state == Qt::Checked)
-            autoIntegrationCheckBox->setCheckState(Qt::Checked);
+            autoIntStepCheckBox->setCheckState(Qt::Checked);
     }
 
-    void onAutoIntegrationCheckBoxChanged(int state) {
-        integrationStepDoubleSpinBox->setEnabled(state == Qt::Unchecked);
-        numberOfIntervalsSpinBox->setEnabled(state == Qt::Unchecked);
+    void onAutoIntStepCheckBoxChanged(int state) {
+        intStepSpinBox->setEnabled(state == Qt::Unchecked);
+        intIntervalsSpinBox->setEnabled(state == Qt::Unchecked);
     }
 
-    void onAutoFrequencyRangeCheckBoxChanged(int state){
-        frequencyMinSpinBox->setEnabled(state == Qt::Unchecked);
-        frequencyMaxSpinBox->setEnabled(state == Qt::Unchecked);
-        autoFrequencyPointsCheckBox->setEnabled(state == Qt::Unchecked);
+    void onAutoFreqRangeCheckBoxChanged(int state){
+        freqMinSpinBox->setEnabled(state == Qt::Unchecked);
+        freqMaxSpinBox->setEnabled(state == Qt::Unchecked);
+        autoFreqPointsCheckBox->setEnabled(state == Qt::Unchecked);
         if (state == Qt::Checked)
-            autoFrequencyPointsCheckBox->setCheckState(Qt::Checked);
+            autoFreqPointsCheckBox->setCheckState(Qt::Checked);
     }
 
-    void onAutoFrequencyPointsCheckBoxChanged(int state){
+    void onAutoFreqPointsCheckBoxChanged(int state){
         if (state)
-            frequencyScaleComboBox->setCurrentIndex(0);
-        frequencyScaleComboBox->setEnabled(state == Qt::Unchecked);
-        numberOfPointsFreqSpinBox->setEnabled(state == Qt::Unchecked);
+            freqScaleComboBox->setCurrentIndex(0);
+        freqScaleComboBox->setEnabled(state == Qt::Unchecked);
+        freqPointsSpinBox->setEnabled(state == Qt::Unchecked);
     }
 
-    void onFrequencyScaleChanged(int index){
-        frequencyStepDoubleSpinBox->setEnabled(index == 1); //Линейная шкала
+    void onFreqScaleChanged(int index){
+        freqStepSpinBox->setEnabled(index == 1); //Линейная шкала
     }
 
-    void onSimulationTimeChanged(int value) {
-        integrationStepDoubleSpinBox->setMinimum(double(value) / 2000);
-        integrationStepDoubleSpinBox->setMaximum(double(value) / 10);
-        onNumberOfPointsChanged();
+    void onSimTimeChanged(int value) {
+        intStepSpinBox->setMinimum(double(value) / 2000);
+        intStepSpinBox->setMaximum(double(value) / 10);
+        onIntIntervalsChanged();
     }
 
-    void onIntegrationStepChanged() {
-        const auto time = simulationTimeSpinBox->value();
-        const auto dt = integrationStepDoubleSpinBox->value();
-        numberOfIntervalsSpinBox->setValue(int(time / dt));
+    void onIntStepChanged() {
+        const auto time = simTimeSpinBox->value();
+        const auto dt = intStepSpinBox->value();
+        intIntervalsSpinBox->setValue(int(time / dt));
     }
 
-    void onNumberOfPointsChanged() {
-        const auto time = simulationTimeSpinBox->value();
-        const auto points = numberOfIntervalsSpinBox->value();
-        integrationStepDoubleSpinBox->setValue(double(time) / points);
+    void onIntIntervalsChanged() {
+        const auto time = simTimeSpinBox->value();
+        const auto points = intIntervalsSpinBox->value();
+        intStepSpinBox->setValue(double(time) / points);
     }
 };
 

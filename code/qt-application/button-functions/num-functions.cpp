@@ -24,15 +24,31 @@ bool Application::numIsValidInput(const MathCore::Vec& num, const MathCore::Vec&
     return true;
 }
 
+Application::VecPair Application::getNumTranResp(const TransferFunction& W, const ModelParam& params) {
+    if (params.autoSimTime)
+        return W.transientResponse();
+    if (params.autoTimeIntervals)
+        return W.transientResponse({0, params.simTime});
+    return W.transientResponse({0, params.simTime}, params.timeIntervals);
+}
+/*
+Application::VecComp Application::getFreqTranResp(const TransferFunction& W, const ModelParam& params) {
+    if (params.autoFreqRange)
+        return W.frequencyResponse();
+    return W.transientResponse({0, params.simTime}, params.autoTimeIntervals ? 200 : params.timeIntervals);
+}*/
+
 void Application::numAddTransferFunction() {
     auto numerator = getLineEditData(numNumerator);
     auto denominator = getLineEditData(numDenominator);
 
     if (numIsValidInput(numerator, denominator)) {
         TransferFunction W(numerator, denominator);
-        std::cout << "is settled: " << W.isSettled() << '\n';
-        std::cout << "settling time: " << W.settlingTime() << '\n';
-        std::cout << "steady state value: " << W.steadyStateValue() << '\n';
+        numTranRespSeries.push_back(getNumTranResp(W, numModelParam));
+        numFreqRespSeries.push_back(W.frequencyResponse());
+
+        const auto& tranResp = numTranRespSeries.back().original();
+        const auto& freqResp = numFreqRespSeries.back().original();
 
         numWidget->updateValues(W.isSettled() ? std::vector <double>{
                 W.settlingTime(), W.naturalFrequency(),
@@ -40,11 +56,8 @@ void Application::numAddTransferFunction() {
                 W.dampingRation(), W.steadyStateValue()
         } : std::vector <double>{});
 
-        numTranRespSeries.push_back(W.transientResponse());
-        numFreqRespSeries.push_back(W.frequencyResponse());
-
-        Application::addPoints(numChartTranResp, numTranRespSeries.back().original(), "Тест", numSize);
-        Application::addComplexPoints(numChartFreqResp, numFreqRespSeries.back().original(), "Тест", numSize);
+        Application::addPoints(numChartTranResp, tranResp, "Тест", numSize);
+        Application::addComplexPoints(numChartFreqResp, freqResp, "Тест", numSize);
 
         ++numSize;
 
@@ -86,8 +99,8 @@ void Application::numClearCharts() {
 }
 
 void Application::numShowModParDialog() {
-    ModParDialog dialog;
+    ModParDialog dialog(numModelParam);
     if (dialog.exec() == QDialog::Accepted) {
-
+        numModelParam = dialog.data();
     }
 }

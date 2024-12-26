@@ -17,7 +17,6 @@ private:
     using Pair      = std::pair <Type, Type>;
     using VecPair   = std::vector <Pair>;
     using VecComp   = std::vector <Complex>;
-    using ValComp   = std::valarray <Complex>;
 
     Vec numerator, denominator;
     VecComp roots, impulse_factors, transient_factors;
@@ -60,8 +59,8 @@ private:
             omega_c         = omega_n * std::sqrt(1 - 2 * zeta_sq + std::sqrt(4 * zeta_sq * (zeta_sq - 1) + 2));
         }
         else {
-            is_settled = false;
-            peak_time = 0;
+            is_settled  = false;
+            peak_time   = 0;
         }
 
         recomputeFrontState();
@@ -123,14 +122,30 @@ public:
         return denominator;
     }
 
-    void setNumerator (Vec newNumerator) {
+    void setNumerator(Vec newNumerator) {
         numerator = std::move(newNumerator);
         recomputeFrontState();
     }
 
-    void setDenominator (Vec newDenominator) {
+    void setDenominator(Vec newDenominator) {
         denominator = std::move(newDenominator);
         recomputeBackState();
+    }
+
+    [[nodiscard]] inline Type transientResponse(const Type& time) const {
+        Complex result = steady_state_value;
+        const std::size_t n = transient_factors.size();
+        for (std::size_t i = 0; i < n; ++i)
+            result += transient_factors[i] * std::exp(roots[i] * time);
+        return result.real();
+    }
+
+    [[nodiscard]] inline Type impulseResponse(const Type& time) const {
+        Complex result = 0;
+        const std::size_t n = impulse_factors.size();
+        for (std::size_t i = 0; i < n; ++i)
+            result += impulse_factors[i] * std::exp(roots[i] * time);
+        return result.real();
     }
 
     [[nodiscard]] inline Complex frequencyResponse(const Complex& p) const {
@@ -149,164 +164,37 @@ public:
         return num / den;
     }
 
-    [[nodiscard]] inline Type impulseResponse(const Type& time) const {
-        Complex result(0);
-        const std::size_t n(impulse_factors.size());
-        for (std::size_t i = 0; i < n; ++i)
-            result += impulse_factors[i] * std::exp(roots[i] * time);
-        return result.real();
-    }
+    [[nodiscard]] VecPair transientResponse() const;
+    [[nodiscard]] VecPair transientResponse(const Pair& range, Type tolerance = 1e-2) const;
+    [[nodiscard]] VecPair transientResponse(const Pair& range, std::size_t points) const;
 
-    [[nodiscard]] inline Type transientResponse(const Type& time) const {
-        Complex result(steady_state_value);
-        const std::size_t n(transient_factors.size());
-        for (std::size_t i = 0; i < n; ++i)
-            result += transient_factors[i] * std::exp(roots[i] * time);
-        return result.real();
-    }
+    [[nodiscard]] VecPair impulseResponse() const;
+    [[nodiscard]] VecPair impulseResponse(const Pair& range, Type tolerance = 1e-2) const;
+    [[nodiscard]] VecPair impulseResponse(const Pair& range, std::size_t points) const;
 
-    [[nodiscard]] VecComp frequencyResponse(const Pair range, const std::size_t& points = 100) const {
-        VecComp response;
-        response.reserve(points);
-        for (const auto& frequency : MathCore::logRange(range, points, true))
-            response.emplace_back(frequencyResponse(Complex(0, frequency)));
-        return response;
-    }
+    [[nodiscard]] VecComp frequencyResponse() const;
+    [[nodiscard]] VecComp frequencyResponse(const Pair& range, Type tolerance = 1e-2) const;
+    [[nodiscard]] VecComp frequencyResponse(const Pair& range, std::size_t points) const;
+    [[nodiscard]] VecComp frequencyResponse(const Pair& range, std::size_t points, bool) const;
 
-    [[nodiscard]] VecPair impulseResponse(const Pair range, const std::size_t& points = 100) const {
-        VecPair response;
-        response.reserve(points);
-        for (const auto& time : MathCore::range(range, points))
-            response.emplace_back(time, impulseResponse(time));
-        return response;
-    }
+    [[nodiscard]] Type binarySearchFrequency(Type min, Type max, Type value, Type tolerance = 1e-3) const; /// log(N)
+    [[nodiscard]] Type ternarySearchFrequency(Type min, Type max, Type tolerance = 1e-3) const; /// log(N)
+    [[nodiscard]] Pair computeFrequencyRange(Type min = 0, Type max = 1e2) const; /// log(N)
 
-    [[nodiscard]] VecPair transientResponse(const Pair range, const std::size_t& points = 100) const {
-        VecPair response;
-        response.reserve(points);
-        for (const auto& time : MathCore::range(range, points))
-            response.emplace_back(time, transientResponse(time));
-        return response;
-    }
-
-    template <std::size_t POINTS = 100>
-    [[nodiscard]] VecComp frequencyResponse() const {
-        VecComp response;
-        response.reserve(POINTS);
-        const std::size_t m = POINTS / 2;
-        const std::size_t n = m + 1;
-        const auto a = MathCore::logRange(computeFrequencyRange(), m, true);
-        const auto b = MathCore::logRange(Pair(omega_c / 4, omega_c), m, false);
-        int i = 0, j = 0;
-        while (i < n && j < m)
-            if (a[i] < b[j]) {
-                response.emplace_back(frequencyResponse(Complex(0, a[i])));
-                ++i;
-            }
-            else {
-                response.emplace_back(frequencyResponse(Complex(0, b[j])));
-                ++j;
-            }
-        while (i < n) {
-            response.emplace_back(frequencyResponse(Complex(0, a[i])));
-            ++i;
-        }
-        while (j < m) {
-            response.emplace_back(frequencyResponse(Complex(0, b[j])));
-            ++j;
-        }
-        return response;
-    } /// N
-
-    template <std::size_t POINTS = 100>
-    [[nodiscard]] VecPair impulseResponse() const {
-        VecPair response;
-        response.reserve(POINTS);
-        for (const auto& time : MathCore::range(0, 2 * settling_time, POINTS))
-            response.emplace_back(time, impulseResponse(time));
-        return response;
-    } /// N
-
-    template <std::size_t POINTS = 100>
-    [[nodiscard]] VecPair transientResponse() const {
-        VecPair response;
-        response.reserve(POINTS);
-        for (const auto& time : MathCore::range(0, 2 * settling_time, POINTS))
-            response.emplace_back(time, transientResponse(time));
-        return response;
-    } /// N
-
-    template <Type TOLERANCE = 1e-3>
-    [[nodiscard]] Type binarySearchFrequency(Type min, Type max, const Type& value, const Type& epsilon = 1e-3) const {
-        Type mid((min + max) / 2);
-        while (max - min > TOLERANCE) {
-            Type response(std::abs(frequencyResponse(mid)));
-
-            if (std::abs(response - value) / value < epsilon)
-                return mid;
-
-            (response > value ? min : max) = mid;
-            mid = (min + max) / 2;
-        }
-
-        return mid;
-    } /// log(N)
-
-    [[nodiscard]] Pair computeFrequencyRange(const Type& min = 0, const Type& max = 1e2, const Type& epsilon = 1e-2) const {
-        const Type init_value(std::abs(frequencyResponse(0)));
-        return {
-                binarySearchFrequency(min, max, init_value, epsilon),
-                binarySearchFrequency(min, max, init_value * epsilon, epsilon)
-        };
-    } /// log(N)
-
-    [[nodiscard]] Type computeLinearIntegralCriterion(const std::size_t points = 100) const {
-        Type sum(0);
-        const Type step(settling_time / static_cast<Type>(points + 1));
-        for (std::size_t i = 1; i <= points; ++i)
-            sum += std::abs(transientResponse(static_cast<Type>(i) * step) - steady_state_value);
-        return sum * step;
-    } /// N
-
-    [[nodiscard]] Type computeIntegralQuadraticCriterion(const std::size_t points) const {
-        Type sum(0), error;
-        const Type step(settling_time / static_cast<Type>(points + 1));
-        for (std::size_t i = 1; i <= points; ++i) {
-            error = transientResponse(static_cast<Type>(i) * step) - steady_state_value;
-            sum += error * error;
-        }
-        return sum * step;
-    } /// N
-
-    [[nodiscard]] Type computeIntegralQuadraticCriterion() const {
-        const auto [coefficients, exponents](MathCore::squareExponentialSum(transient_factors, roots));
-        const auto n(coefficients.size());
-        Complex sum;
-        for (int i = 0; i < n; ++i)
-            sum += coefficients[i] / exponents[i] * (std::exp(exponents[i] * settling_time) - Complex(1));
-        return sum.real();
-    } /// size(roots)^2
-
-    [[nodiscard]] Type computeStandardDeviation(const std::size_t points = 100) const {
-        Type sum(0), error;
-        const Type step(settling_time / static_cast<Type>(points - 1));
-        for (std::size_t i = 0; i < points; ++i) {
-            error = transientResponse(static_cast<Type>(i) * step) - steady_state_value;
-            sum += error * error;
-        }
-        return std::sqrt(sum / static_cast<Type>(points - 1));
-    } /// N
+    [[nodiscard]] Type computeLinearIntegralCriterion(const VecPair& response) const; /// N
+    [[nodiscard]] Type computeIntegralQuadraticCriterion() const; /// size(roots)^2
+    [[nodiscard]] Type computeStandardDeviation(std::size_t points = 100) const; /// N
 
     void closeLoop() {
-        const std::size_t n(numerator.size());
-        const std::size_t m(denominator.size());
+        const std::size_t n = numerator.size();
+        const std::size_t m = denominator.size();
         if (n >= m) {
             denominator.resize(n, 0);
             for (std::size_t i = 0; i < n; ++i)
                 denominator[i] += numerator[i];
         }
         else {
-            const std::size_t delta(denominator.size() - n);
+            const std::size_t delta = denominator.size() - n;
             for (std::size_t i = 0; i < n; ++i)
                 denominator[delta + i] += numerator[i];
         }
@@ -384,7 +272,7 @@ public:
     }
 
     TransferFunction& operator*=(const TransferFunction& other) {
-        numerator = MathCore::multiply(numerator, other.numerator);
+        numerator   = MathCore::multiply(numerator, other.numerator);
         denominator = MathCore::multiply(denominator, other.denominator);
 
         recomputeBackState();

@@ -42,21 +42,19 @@ QWidget* Application::createRegTab() {
     uppLayout->addLayout(transferFunctionLayout);
     uppLayout->addWidget(regWidget);
 
-    auto addButton = new QPushButton("Добавить", regWidget);
+    auto addButton      = new QPushButton("Добавить", regWidget);
+    auto clearButton    = new QPushButton("Очистить", regWidget);
+
     connect(addButton, &QPushButton::clicked, this, &Application::regAddTransferFunction);
-    /*QPushButton *fullScreenButton = new QPushButton("Full Screen", regWidget);
+    connect(clearButton, &QPushButton::clicked, this, &Application::regClearCharts);
 
-    auto x = createCharts(REG_CHARTS, regTab);
-    auto y = qobject_cast<QChartView*>(x->itemAt(0)->widget());
-
-    connect(fullScreenButton, &QPushButton::clicked, [=, this](){
-        toggleFullScreen(y);
-    });*/
+    auto buttonLayout = new QVBoxLayout;
+    buttonLayout->addWidget(addButton);
+    buttonLayout->addWidget(clearButton);
 
     layout->addLayout(uppLayout);
     layout->addLayout(parametersLayout);
-    layout->addWidget(addButton);
-    //layout->addWidget(fullScreenButton);
+    layout->addLayout(buttonLayout);
     layout->addLayout(createCharts(REG_CHARTS, regTab));
 
     regTab->setLayout(layout);

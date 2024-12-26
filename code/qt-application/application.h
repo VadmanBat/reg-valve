@@ -24,6 +24,8 @@
 #include "../series/complex-series.hpp"
 #include "../series/set-series.hpp"
 
+#include "structures/model-param.hpp"
+
 using namespace QtCharts;
 
 class Application : public QWidget {
@@ -34,6 +36,7 @@ private:
     using Pair = std::pair <double, double>;
     using VecPair = std::vector <Pair>;
     using VecLine = std::vector <LineEdit*>;
+    using VecComp = std::vector <ProjectTypes::Complex>;
 
     static void showError(const QString& errorMessage);
 
@@ -128,6 +131,7 @@ private:
 private slots:
     void expOpenFile();
 
+    VecPair getNumTranResp(const TransferFunction& W, const ModelParam& params);
     void numAddTransferFunction();
     void numReplaceTransferFunction();
     void numClearCharts();
@@ -144,6 +148,8 @@ private:
 
     SetSeries <Series> expTranRespSeries, numTranRespSeries, regTranRespSeries;
     SetSeries <ComplexSeries> expFreqRespSeries, numFreqRespSeries, regFreqRespSeries;
+
+    ModelParam numModelParam;
 
     std::size_t numSize, regSize;
 

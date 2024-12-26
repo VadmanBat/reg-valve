@@ -202,10 +202,8 @@ public:
         }
         roots.push_back(-coeffs[1] / coeffs[0]);
 
-        for (auto& root : roots) {
-            std::cout << root.real() << ' ' << root.imag() << '\n';
+        for (auto& root : roots)
             root = ConvertCore::normalize(root, epsilon);
-        }
 
         return roots;
     } /// N * log(log((r - x) / epsilon))

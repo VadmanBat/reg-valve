@@ -14,6 +14,142 @@
 class ChartDialog : public QDialog {
 Q_OBJECT
 
+private:
+    void applyStyles() {
+        QString commonStyle = R"(
+        QWidget {
+            font-family: "Helvetica Neue", sans-serif;
+            font-size: 12px;
+            color: #333333;
+            background-color: #f5f5f5;
+        }
+
+        QLineEdit {
+            padding: 6px 8px;
+            border: 1px solid #c0c0c0;
+            border-radius: 4px;
+            background-color: white;
+            color: #333333;
+            selection-background-color: #e0eaf7;
+            selection-color: black;
+        }
+
+        QLineEdit:hover {
+            border-color: #909090;
+        }
+
+        QLineEdit:focus {
+            border-color: #4682B4;
+            outline: 1px solid rgba(70, 130, 180, 0.5);
+        }
+
+        QComboBox {
+            padding: 6px 8px;
+            border: 1px solid #c0c0c0;
+            border-radius: 4px;
+            background-color: white;
+            color: #333333;
+            selection-background-color: #e0eaf7;
+             selection-color: black;
+        }
+
+        QComboBox:hover {
+            border-color: #909090;
+        }
+
+        QComboBox:focus {
+            border-color: #4682B4;
+            outline: 1px solid rgba(70, 130, 180, 0.5);
+        }
+
+        QComboBox::drop-down {
+          border: 0px;
+        }
+
+        QComboBox::down-arrow {
+            image: url(./down_arrow.png); /*заменить на свой путь*/
+        }
+
+        QComboBox QAbstractItemView {
+          border: 1px solid #c0c0c0;
+          selection-background-color: #e0eaf7;
+          selection-color: black;
+          outline: none;
+        }
+
+        QSpinBox {
+            padding: 6px 8px;
+            border: 1px solid #c0c0c0;
+            border-radius: 4px;
+            background-color: white;
+            color: #333333;
+            selection-background-color: #e0eaf7;
+            selection-color: black;
+        }
+
+        QSpinBox:hover {
+             border-color: #909090;
+        }
+
+        QSpinBox:focus {
+            border-color: #4682B4;
+            outline: 1px solid rgba(70, 130, 180, 0.5);
+        }
+
+       /* Кнопки (QPushButton) */
+         QPushButton[text="Применить"], QPushButton[text="Отменить"] {
+            padding: 8px 16px;
+            border-radius: 4px;
+            color: white;
+        }
+
+        /* Кнопка "Применить" */
+        QPushButton[text="Применить"] {
+            background-color: #4CAF50; /* Зеленоватый цвет */
+             border: 1px solid #4CAF50;
+        }
+
+        QPushButton[text="Применить"]:hover {
+            background-color: #45a049; /* Затемненный оттенок зеленого при наведении */
+            border: 1px solid #45a049;
+        }
+
+        QPushButton[text="Применить"]:pressed {
+           background-color: #367c39;
+           border: 1px solid #367c39;
+        }
+
+        /* Кнопка "Отменить" */
+        QPushButton[text="Отменить"] {
+            background-color: #F44336; /* Красноватый цвет */
+            border: 1px solid #F44336;
+        }
+
+        QPushButton[text="Отменить"]:hover {
+            background-color: #da190b; /* Затемненный оттенок красного при наведении */
+             border: 1px solid #da190b;
+        }
+
+          QPushButton[text="Отменить"]:pressed {
+           background-color: #b6140a;
+           border: 1px solid #b6140a;
+        }
+
+        QPushButton[style*="background-color:"] {
+             border: 1px solid #c0c0c0;
+             min-width: 30px;
+             min-height: 30px;
+         }
+
+
+        QLabel {
+            font-size: 12px;
+            padding: 5px;
+        }
+    )";
+        setStyleSheet(commonStyle);
+    }
+
 public:
     explicit ChartDialog(QChart* chartPtr, QWidget* parent = nullptr) :
             QDialog(parent), chart(chartPtr), series_size(chart->series().size())
@@ -24,9 +160,10 @@ public:
 
         titleEdit       = new QLineEdit(chart->title());
         xAxisLabelEdit  = new QLineEdit;
+        yAxisLabelEdit  = new QLineEdit;
+
         if (auto axis = getAxis(Qt::Horizontal))
             xAxisLabelEdit->setText(axis->titleText());
-        yAxisLabelEdit = new QLineEdit;
         if (auto axis = getAxis(Qt::Vertical))
             yAxisLabelEdit->setText(axis->titleText());
 
@@ -54,6 +191,7 @@ public:
         formLayout->addRow(buttonLayout);
 
         setLayout(formLayout);
+        //applyStyles();
     }
 
 private:
@@ -70,6 +208,13 @@ private:
     QVector <QSpinBox*> widthSpinBoxes;
     QVector <QComboBox*> styleComboBoxes;
     QVector <QLineSeries*> lineSeriesPointers;
+
+    static QLabel* createLabel(const QString& text, Qt::AlignmentFlag flag) {
+        auto label = new QLabel(text);
+        label->setAlignment(flag);
+        label->setStyleSheet("padding: 5px;");
+        return label;
+    };
 
     [[nodiscard]] QAbstractAxis* getAxis(Qt::Orientation orientation) const {
         const auto axes = chart->axes(orientation);
@@ -94,16 +239,10 @@ private:
         auto layout = new QGridLayout;
         auto series = chart->series();
 
-        auto createCenteredLabel = [](const QString& text) {
-            auto label = new QLabel(text);
-            label->setAlignment(Qt::AlignCenter);
-            return label;
-        };
-
-        layout->addWidget(createCenteredLabel("Название"), 0, 0);
-        layout->addWidget(createCenteredLabel("Цвет"), 0, 1);
-        layout->addWidget(createCenteredLabel("Толщина"), 0, 2);
-        layout->addWidget(createCenteredLabel("Стиль"), 0, 3);
+        layout->addWidget(createLabel("Название", Qt::AlignCenter), 0, 0);
+        layout->addWidget(createLabel("Цвет", Qt::AlignCenter), 0, 1);
+        layout->addWidget(createLabel("Толщина", Qt::AlignCenter), 0, 2);
+        layout->addWidget(createLabel("Стиль", Qt::AlignCenter), 0, 3);
 
         for (int i = 0; i < series_size; ++i) {
             auto lineSeries = qobject_cast<QLineSeries*>(series[i]);

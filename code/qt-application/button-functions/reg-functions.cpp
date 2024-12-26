@@ -68,20 +68,21 @@ void Application::regAddTransferFunction() {
     }
 
     TransferFunction W(numerator, denominator, num, den);
+    regTranRespSeries.push_back(W.transientResponse());
+    regFreqRespSeries.push_back(W.frequencyResponse());
+
+    const auto& tranResp = regTranRespSeries.back().original();
+    const auto& freqResp = regFreqRespSeries.back().original();
 
     regWidget->updateValues(W.isSettled() ? std::vector <double>{
-            W.settlingTime(), W.naturalFrequency(), W.steadyStateValue(),  W.computeLinearIntegralCriterion(),
+            W.settlingTime(), W.naturalFrequency(), W.steadyStateValue(),  W.computeLinearIntegralCriterion(tranResp),
             W.riseTime(), W.cutFrequency(), 1 - W.steadyStateValue(), W.computeIntegralQuadraticCriterion(),
             W.peakTime(), W.dampingRation(), W.overshoot(), W.computeStandardDeviation()
     } : std::vector <double>{});
 
-    regTranRespSeries.push_back(W.isSettled() ? W.transientResponse() : W.transientResponse({0, 200}, 200));
-    regFreqRespSeries.push_back(W.frequencyResponse());
-    std::cout << regFreqRespSeries.back().original().size() << ' ' << regFreqRespSeries.back().optimal().size() << '\n';
-
     const auto title  = stream.str();
-    Application::addPoints(regChartTranResp, regTranRespSeries.back().original(), title.c_str(), regSize);
-    Application::addComplexPoints(regChartFreqResp, regFreqRespSeries.back().original(), title.c_str(), regSize);
+    Application::addPoints(regChartTranResp, tranResp, title.c_str(), regSize);
+    Application::addComplexPoints(regChartFreqResp, freqResp, title.c_str(), regSize);
 
     ++regSize;
 

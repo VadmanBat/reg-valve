@@ -161,6 +161,7 @@ private:
 public:
     explicit ModParDialog(const ModelParam& values, QWidget* parent = nullptr) : QDialog(parent) {
         setWindowTitle("Параметры моделирования");
+        setWindowIcon(QIcon::fromTheme("dialog-information"));
 
         autoSimTimeCheckBox         = new QCheckBox("Авто");
         autoTimeIntervalsCheckBox   = new QCheckBox("Авто");
@@ -176,10 +177,10 @@ public:
 
         freqScaleComboBox = new QComboBox;
 
-        connect(autoSimTimeCheckBox, &QCheckBox::stateChanged, this, &ModParDialog::onSimTimeCheckBoxChanged);
-        connect(autoTimeIntervalsCheckBox, &QCheckBox::stateChanged, this, &ModParDialog::onAutoTimeIntervalsCheckBoxChanged);
-        connect(autoFreqRangeCheckBox, &QCheckBox::stateChanged, this, &ModParDialog::onAutoFreqRangeCheckBoxChanged);
-        connect(autoFreqIntervalsCheckBox, &QCheckBox::stateChanged, this,&ModParDialog::onAutoFreqIntervalsCheckBoxChanged);
+        connect(autoSimTimeCheckBox, &QCheckBox::toggled, this, &ModParDialog::onSimTimeCheckBoxChanged);
+        connect(autoTimeIntervalsCheckBox, &QCheckBox::toggled, this, &ModParDialog::onAutoTimeIntervalsCheckBoxChanged);
+        connect(autoFreqRangeCheckBox, &QCheckBox::toggled, this, &ModParDialog::onAutoFreqRangeCheckBoxChanged);
+        connect(autoFreqIntervalsCheckBox, &QCheckBox::toggled, this,&ModParDialog::onAutoFreqIntervalsCheckBoxChanged);
         connect(this, &QDialog::rejected, this, &QDialog::accept);
 
         if (values.autoSimTime)
@@ -218,7 +219,7 @@ public:
         freqIntervalsSpinBox->setValue(values.freqIntervals);
 
         setLayout(getLayout());
-        applyStyles();
+        //applyStyles();
     }
 
     [[nodiscard]] ModelParam data() const {
@@ -237,27 +238,27 @@ public:
     }
 
 private slots:
-    void onSimTimeCheckBoxChanged(int state) {
-        simTimeSpinBox->setEnabled(state == Qt::Unchecked);
-        autoTimeIntervalsCheckBox->setEnabled(state == Qt::Unchecked);
-        if (state == Qt::Checked)
+    void onSimTimeCheckBoxChanged(bool state) {
+        simTimeSpinBox->setEnabled(!state);
+        autoTimeIntervalsCheckBox->setEnabled(!state);
+        if (state)
             autoTimeIntervalsCheckBox->setCheckState(Qt::Checked);
     }
 
-    void onAutoTimeIntervalsCheckBoxChanged(int state) {
-        timeIntervalsSpinBox->setEnabled(state == Qt::Unchecked);
+    void onAutoTimeIntervalsCheckBoxChanged(bool state) {
+        timeIntervalsSpinBox->setEnabled(!state);
     }
 
-    void onAutoFreqRangeCheckBoxChanged(int state){
-        freqMinSpinBox->setEnabled(state == Qt::Unchecked);
-        freqMaxSpinBox->setEnabled(state == Qt::Unchecked);
+    void onAutoFreqRangeCheckBoxChanged(bool state) {
+        freqMinSpinBox->setEnabled(!state);
+        freqMaxSpinBox->setEnabled(!state);
     }
 
-    void onAutoFreqIntervalsCheckBoxChanged(int state){
+    void onAutoFreqIntervalsCheckBoxChanged(bool state) {
         if (state)
             freqScaleComboBox->setCurrentIndex(0);
-        freqScaleComboBox->setEnabled(state == Qt::Unchecked);
-        freqIntervalsSpinBox->setEnabled(state == Qt::Unchecked);
+        freqScaleComboBox->setEnabled(!state);
+        freqIntervalsSpinBox->setEnabled(!state);
     }
 };
 

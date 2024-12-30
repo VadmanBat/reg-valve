@@ -7,7 +7,7 @@ TransferFunction::VecPair TransferFunction::transientResponse() const {
         t_end = 2 * settling_time;
     }
     else {
-        Type max = std::abs(transientResponse(190));
+        Type max = std::abs(transientResponse(200));
         for (int time = 190; time < 200; ++time)
             max = std::max(max, std::abs(transientResponse(time)));
         tolerance *= 2 * max;
@@ -47,10 +47,11 @@ TransferFunction::VecPair TransferFunction::transientResponse(const Pair& range,
         tolerance *= std::abs(steady_state_value);
     }
     else {
-        Type max = std::abs(transientResponse(190));
-        for (int time = 190; time < 200; ++time)
-            max = std::max(max, std::abs(transientResponse(time)));
-        tolerance *= 2 * max;
+        const Type step = 0.005 * (t_end - t_start), time = t_end - 10 * step;
+        Type max = std::abs(transientResponse(t_end));
+        for (int i = 0; i < 10; ++i)
+            max = std::max(max, std::abs(transientResponse(time + i * step)));
+        tolerance *= max;
     }
 
     Type t = t_start, y_current = transientResponse(t);

@@ -11,6 +11,8 @@
 #include <QFont>
 #include <QtCharts>
 
+#include <iostream>
+
 class ChartDialog : public QDialog {
 Q_OBJECT
 
@@ -200,7 +202,7 @@ private:
     QLineEdit* yAxisLabelEdit;
     QChart* chart;
 
-    int series_size;
+    qsizetype series_size;
     QVector <QPen> initPens, currentPens;
 
     QVector <QLineEdit*> seriesNameEdits;
@@ -222,7 +224,8 @@ private:
     }
 
     void changeSeriesColor(int index) {
-        if (auto newColor = QColorDialog::getColor(lineSeriesPointers[index]->pen().color(), this); newColor.isValid()) {
+        QColor newColor = QColorDialog::getColor(lineSeriesPointers[index]->pen().color(), this);
+        if (newColor.isValid()) {
             currentPens[index].setColor(newColor);
             lineSeriesPointers[index]->setPen(currentPens[index]);
             colorButtons[index]->setStyleSheet(QString("background-color: %1").arg(newColor.name()));
@@ -244,6 +247,7 @@ private:
         layout->addWidget(createLabel("Толщина", Qt::AlignCenter), 0, 2);
         layout->addWidget(createLabel("Стиль", Qt::AlignCenter), 0, 3);
 
+        int index = 0;
         for (int i = 0; i < series_size; ++i) {
             auto lineSeries = qobject_cast<QLineSeries*>(series[i]);
             if (!lineSeries || lineSeries->name() == "hor-line" || lineSeries->name() == "ver-line")
@@ -267,14 +271,14 @@ private:
             styleComboBox->addItem("Штрих-точка-точка");
             styleComboBox->setCurrentIndex(getIndexLine(lineSeries->pen().style()));
 
-            connect(colorButton, &QPushButton::clicked, [this, i]() { changeSeriesColor(i); });
-            connect(widthSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), [this, i]() { changeSeriesStyle(i); });
-            connect(styleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, i](){ changeSeriesStyle(i); });
-
-            layout->addWidget(nameEdit, i + 1, 0);
-            layout->addWidget(colorButton, i + 1, 1);
-            layout->addWidget(widthSpinBox, i + 1, 2);
-            layout->addWidget(styleComboBox, i + 1, 3);
+            connect(colorButton, &QPushButton::clicked, [this, index]() { changeSeriesColor(index); });
+            connect(widthSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), [this, index]() { changeSeriesStyle(index); });
+            connect(styleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, index](){ changeSeriesStyle(index); });
+            ++index;
+            layout->addWidget(nameEdit, index, 0);
+            layout->addWidget(colorButton, index, 1);
+            layout->addWidget(widthSpinBox, index, 2);
+            layout->addWidget(styleComboBox, index, 3);
 
             seriesNameEdits.append(nameEdit);
             colorButtons.append(colorButton);
@@ -336,7 +340,7 @@ private slots:
     }
 
     void restoreChart() {
-        for (int i = 0; i < series_size; ++i)
+        for (qsizetype i = 0; i < series_size; ++i)
             lineSeriesPointers[i]->setPen(initPens[i]);
         chart->update();
         accept();

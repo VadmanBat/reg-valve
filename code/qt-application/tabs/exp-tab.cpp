@@ -4,8 +4,6 @@
 
 #include "../application.h"
 
-using namespace QtCharts;
-
 QWidget* Application::createExpTab() {
     auto expTab = new QWidget(this);
     auto layout = new QVBoxLayout(expTab);

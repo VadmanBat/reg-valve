@@ -1,0 +1,31 @@
+QPushButton {
+    background-color: green;
+    color: white;
+    border-style: outset;
+    border-width: 2px;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+QPushButton:hover {
+    background-color: darkseagreen;
+    border-style: inset;
+}
+
+QPushButton:pressed {
+    background-color: lightgreen;
+    border-style: inset;
+    padding: 3px;
+}
+
+QPushButton#clearButton {
+    background-color: red;
+}
+
+QPushButton#clearButton:hover {
+    background-color: darkred;
+}
+
+QPushButton#clearButton:pressed {
+    background-color: lightcoral;
+}

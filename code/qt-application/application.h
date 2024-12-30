@@ -26,34 +26,17 @@
 
 #include "structures/model-param.hpp"
 
-using namespace QtCharts;
-
 class Application : public QWidget {
 private:
     using ChartData = std::tuple <QChart*, QString, QString, QString>;
     using ChartsDataset = std::vector <ChartData>;
 
-    using Pair = std::pair <double, double>;
-    using VecPair = std::vector <Pair>;
-    using VecLine = std::vector <LineEdit*>;
-    using VecComp = std::vector <ProjectTypes::Complex>;
+    using Pair      = std::pair <double, double>;
+    using VecPair   = std::vector <Pair>;
+    using VecLine   = std::vector <LineEdit*>;
+    using VecComp   = std::vector <ProjectTypes::Complex>;
 
     static void showError(const QString& errorMessage);
-
-    static QString getColor(const double& value);
-    static double getValue(QString text);
-    static void adjustLineEditWidth(QLineEdit* lineEdit);
-
-    template <class Container>
-    static Container reverseOptimize(const Container& container) {
-        auto first(container.rbegin());
-        const auto last(container.rend());
-        if (first == last)
-            return Container();
-        while (first != last && *first == 0)
-            ++first;
-        return Container(first, last);
-    }
 
     static MathCore::Vec getLineEditData(const VecLine& lineEdits);
     static QString correctLine(const QString& text);
@@ -67,7 +50,7 @@ private:
     static void createAxes(QChart* chart, const QString &titleX, const QString &titleY);
     static void eraseLastSeries(QChart* chart);
     static void removeAllSeries(QChart* chart);
-    static std::pair <double, double> computeAxesRange(double min, double max);
+    static Pair computeAxesRange(double min, double max);
     static void updateAxes(QChart* chart, const Pair& range_x, const Pair& range_y);
     static bool saveChartToFile(const QString& fileName, QChart* chart);
     static VecPair readVectorFromFile(const QString& fileName);
@@ -92,56 +75,42 @@ private:
             series->append(point.real(), point.imag());
         chart->addSeries(series);
     }
-    template <class Point>
-    static void appendPoint(QChart* chart, const Point& point, int index = 0) {
-        const auto& [x, y](point);
-        dynamic_cast<QScatterSeries*>(chart->series().at(index))->append(x, y);
-    }
-    template <class Point>
-    static void appendComplexPoint(QChart* chart, const Point& point, int index = 0) {
-        dynamic_cast<QScatterSeries*>(chart->series().at(index))->append(point.real(), point.imag());
-    }
+
+    inline static QPen pens[6];
+    static bool numIsValidInput(const MathCore::Vec &num, const MathCore::Vec &den);
 
     QWidget* createExpTab();
     QWidget* createNumTab();
     QWidget* createRegTab();
 
+    QFont font;
     QStackedLayout* mainLayout;
 
+/// app-functions:
+    void applyStyles();
+    void loadFonts();
+    void centerWindow();
+
 public:
-    explicit Application(QWidget* parent = nullptr) : QWidget(parent) {
-        auto tabWidget = new QTabWidget(this);
-        tabWidget->addTab(createExpTab(), "КЧХ по h(t)");
-        tabWidget->addTab(createNumTab(), "КЧХ по W(p)");
-        tabWidget->addTab(createRegTab(), "Ручная настройка регулятора");
-
-        mainLayout = new QStackedLayout(this);
-        mainLayout->addWidget(tabWidget);
-        setLayout(mainLayout);
-
-        numSize = 0;
-        regSize = 0;
-
-        applyStyles();
-    }
-
-private:
-    static bool numIsValidInput(const MathCore::Vec &num, const MathCore::Vec &den);
+    explicit Application(QWidget* parent = nullptr);
 
 private slots:
-    void expOpenFile();
+    static void showModParDialog(ModelParam& params);
 
-    VecPair getNumTranResp(const TransferFunction& W, const ModelParam& params);
+/// exp-tab:
+    void expOpenFile();
+/// num-tab:
     void numAddTransferFunction();
     void numReplaceTransferFunction();
     void numClearCharts();
-    void numShowModParDialog();
-
+/// reg-tab:
     void regAddTransferFunction();
     void regReplaceTransferFunction();
     void regClearCharts();
 
 private:
+    std::size_t numSize, regSize;
+
     QChart *expChartTranResp{new QChart}, *expChartFreqResp{new QChart};
     QChart *numChartTranResp{new QChart}, *numChartFreqResp{new QChart};
     QChart *regChartTranResp{new QChart}, *regChartFreqResp{new QChart};
@@ -149,9 +118,9 @@ private:
     SetSeries <Series> expTranRespSeries, numTranRespSeries, regTranRespSeries;
     SetSeries <ComplexSeries> expFreqRespSeries, numFreqRespSeries, regFreqRespSeries;
 
-    ModelParam numModelParam;
-
-    std::size_t numSize, regSize;
+    ModelParam numModelParam, regModelParam;
+    static VecPair getTranResp(const TransferFunction& W, const ModelParam& params);
+    static VecComp getFreqResp(const TransferFunction& W, const ModelParam& params);
 
     const ChartsDataset EXP_CHARTS = {
             {expChartTranResp, "Переходная характеристика", "Время t, секунды", "h(t)"},
@@ -173,9 +142,6 @@ private:
 
     RegulationWidget* numWidget{new RegulationWidget(3, 2)};
     RegulationWidget* regWidget{new RegulationWidget(3, 4)};
-
-    inline static QPen pens[6];
-    void applyStyles();
 };
 
 #endif //REGVALVE_APPLICATION_H

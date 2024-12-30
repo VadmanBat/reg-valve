@@ -9,6 +9,8 @@
 #include <QString>
 #include <iostream>
 
+#include <QRegularExpression>
+
 class StyleCore {
 public:
     template <typename T>
@@ -17,10 +19,11 @@ public:
 
         QString style = widget->styleSheet();
         QString replacement = QString("%1: %2;").arg(property,value);
-        QRegExp pattern(QString("%1: [^;]+;").arg(property));
+        QRegularExpression pattern(QString("%1:\\s*[^;]+;").arg(property));
+        QRegularExpressionMatch match;
 
-        if (pattern.indexIn(style) != -1)
-            style.replace(pattern, replacement);
+        if ((match = pattern.match(style)).hasMatch())
+            style.replace(match.capturedStart(), match.capturedLength(), replacement);
         else
             style += replacement;
 
@@ -34,14 +37,15 @@ public:
         QString replacement = QString("%1: %2;").arg(property, value);
         QString pattern = QString(R"((%1\s*\{[^}]*)(%2\s*:\s*[^;]+;)([^}]*\}))").arg(selector, property);
 
-        QRegExp regex(pattern);
-        if (regex.indexIn(style) != -1) {
-            style.replace(regex, QString("\\1%1\\3").arg(replacement));
+        QRegularExpression regex(pattern);
+        QRegularExpressionMatch match;
+        if ((match = regex.match(style)).hasMatch()) {
+            style.replace(match.capturedStart(), match.capturedLength(), QString("\\1%1\\3").arg(replacement));
         } else {
             QString selectorPattern = QString(R"((%1\s*\{[^}]*)(\}))").arg(selector);
-            QRegExp selectorRegex(selectorPattern);
-            if (selectorRegex.indexIn(style) != -1) {
-                style.replace(selectorRegex, QString("\\1 %2 \\2").arg(replacement));
+            QRegularExpression selectorRegex(selectorPattern);
+            if ((match = selectorRegex.match(style)).hasMatch()) {
+                style.replace(match.capturedStart(), match.capturedLength(), QString("\\1 %2 \\2").arg(replacement));
             } else {
                 style += QString("%1 { %2 }").arg(selector, replacement);
             }

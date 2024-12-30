@@ -5,7 +5,7 @@ int main(int argc, char* argv[]) {
 
     QLocale::setDefault(QLocale(QLocale::Russian));
     QTranslator translator;
-    if (translator.load("qt_ru", QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
+    if (translator.load("qt_ru", QLibraryInfo::path(QLibraryInfo::TranslationsPath)))
         QApplication::installTranslator(&translator);
 
     Application window;

@@ -3,29 +3,40 @@
 //
 #include "../application.h"
 
-QString Application::getColor(const double& value) {
+QString getColor(const double& value) {
     if (value == 0)
         return "violet";
     return value > 0 ? "blue" : "red";
 }
 
-double Application::getValue(QString text) {
+double getValue(QString text) {
     text.replace(',', '.');
-    if (text.count() == 1)
+    if (text.size() == 1)
         text += '1';
     return text.toDouble();
 }
 
-void Application::adjustLineEditWidth(QLineEdit* lineEdit) {
+void adjustLineEditWidth(QLineEdit* lineEdit) {
     int width(lineEdit->fontMetrics().horizontalAdvance(lineEdit->text()) + 10);
     lineEdit->setMinimumWidth(width);
     lineEdit->setMaximumWidth(width);
 }
 
+template <class Container>
+static Container reverseOptimize(const Container& container) {
+    auto first(container.rbegin());
+    const auto last(container.rend());
+    if (first == last)
+        return Container();
+    while (first != last && *first == 0)
+        ++first;
+    return Container(first, last);
+}
+
 MathCore::Vec Application::getLineEditData(const VecLine& lineEdits) {
-    const auto count(lineEdits.size());
-    MathCore::Vec values(count);
-    for (int i = 0; i < count; ++i)
+    const auto size = lineEdits.size();
+    MathCore::Vec values(size);
+    for (std::size_t i = 0; i < size; ++i)
         values[i] = getValue(lineEdits[i]->text());
     return reverseOptimize(values);
 }
@@ -35,7 +46,7 @@ QString Application::correctLine(const QString& text) {
         return "+0" + text;
     if (text.at(0).isDigit())
         return '+' + text;
-    if (text.count() > 1 && text.at(1) == ',')
+    if (text.size() > 1 && text.at(1) == ',')
         return text.at(0) + '0' + text.mid(1);
     return "";
 }
@@ -94,7 +105,7 @@ QLayout* Application::createTransferFunctionForm(VecLine& numerator, VecLine& de
     realNumberValidator->setNotation(QDoubleValidator::StandardNotation);
 
     /*auto numLayout = createLineEdit(numerator, realNumberValidator);
-    auto denLayout = createLineEdit(denominator, realNumberValidator);*/
+    auto denLayo    ut = createLineEdit(denominator, realNumberValidator);*/
 
     auto line = new QFrame;
     line->setFrameShape(QFrame::HLine);

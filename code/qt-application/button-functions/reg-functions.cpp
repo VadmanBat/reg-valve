@@ -68,8 +68,8 @@ void Application::regAddTransferFunction() {
     }
 
     TransferFunction W(numerator, denominator, num, den);
-    regTranRespSeries.push_back(W.transientResponse());
-    regFreqRespSeries.push_back(W.frequencyResponse());
+    regTranRespSeries.push_back(getTranResp(W, regModelParam));
+    regFreqRespSeries.push_back(getFreqResp(W, regModelParam));
 
     const auto& tranResp = regTranRespSeries.back().original();
     const auto& freqResp = regFreqRespSeries.back().original();

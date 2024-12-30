@@ -7,10 +7,10 @@ TransferFunction::VecPair TransferFunction::impulseResponse() const {
         t_end = 2 * settling_time;
     }
     else {
-        Type max = std::abs(impulseResponse(190));
+        Type max = std::abs(impulseResponse(200));
         for (int time = 190; time < 200; ++time)
             max = std::max(max, std::abs(impulseResponse(time)));
-        tolerance *= 2 * max;
+        tolerance *= max;
         t_end = 200;
     }
 

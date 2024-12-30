@@ -2,7 +2,6 @@
 // Created by Vadma on 21.07.2024.
 //
 #include "../application.h"
-
 #include <QMessageBox>
 
 void Application::showError(const QString& errorMessage) {

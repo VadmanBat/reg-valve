@@ -147,11 +147,11 @@ const char* blueSliderStyle =
 const char* checkBoxStyle =
         R"(
     QCheckBox::indicator {
-        width: 20;
+        width: 20px;
         height: 20px;
     }
     QCheckBox {
-        font-size: 16px;
+        font-size: 14px;
     }
 )";
 

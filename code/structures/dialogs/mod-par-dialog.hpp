@@ -16,7 +16,7 @@
 #include <QComboBox>
 #include <cmath>
 
-#include "../model-param.hpp"
+#include "code/structures/model-param.hpp"
 
 class ModParDialog : public QDialog {
 Q_OBJECT
@@ -177,11 +177,10 @@ public:
 
         freqScaleComboBox = new QComboBox;
 
-        connect(autoSimTimeCheckBox, &QCheckBox::toggled, this, &ModParDialog::onSimTimeCheckBoxChanged);
-        connect(autoTimeIntervalsCheckBox, &QCheckBox::toggled, this, &ModParDialog::onAutoTimeIntervalsCheckBoxChanged);
-        connect(autoFreqRangeCheckBox, &QCheckBox::toggled, this, &ModParDialog::onAutoFreqRangeCheckBoxChanged);
-        connect(autoFreqIntervalsCheckBox, &QCheckBox::toggled, this,&ModParDialog::onAutoFreqIntervalsCheckBoxChanged);
-        connect(this, &QDialog::rejected, this, &QDialog::accept);
+        connect(autoSimTimeCheckBox,            &QCheckBox::toggled, this, &ModParDialog::onSimTimeCheckBoxChanged);
+        connect(autoTimeIntervalsCheckBox,      &QCheckBox::toggled, this, &ModParDialog::onAutoTimeIntervalsCheckBoxChanged);
+        connect(autoFreqRangeCheckBox,          &QCheckBox::toggled, this, &ModParDialog::onAutoFreqRangeCheckBoxChanged);
+        connect(autoFreqIntervalsCheckBox,      &QCheckBox::toggled, this, &ModParDialog::onAutoFreqIntervalsCheckBoxChanged);
 
         if (values.autoSimTime)
             autoSimTimeCheckBox->setCheckState(Qt::Checked);
@@ -218,7 +217,22 @@ public:
         freqIntervalsSpinBox->setMaximum(2000);
         freqIntervalsSpinBox->setValue(values.freqIntervals);
 
-        setLayout(getLayout());
+        auto applyButton    = new QPushButton(tr("Применить"));
+        auto cancelButton   = new QPushButton(tr("Отменить"));
+
+        connect(applyButton,    &QPushButton::clicked, this, &ModParDialog::accept);
+        connect(cancelButton,   &QPushButton::clicked, this, &ModParDialog::reject);
+
+        auto buttonLayout = new QHBoxLayout;
+        buttonLayout->addWidget(applyButton);
+        buttonLayout->addWidget(cancelButton);
+
+        auto formLayout = new QFormLayout(this);
+        formLayout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
+        formLayout->addRow(getLayout());
+        formLayout->addRow(buttonLayout);
+        setLayout(formLayout);
+
         //applyStyles();
     }
 

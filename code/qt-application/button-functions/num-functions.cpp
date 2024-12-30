@@ -24,8 +24,8 @@ bool Application::numIsValidInput(const MathCore::Vec& num, const MathCore::Vec&
 }
 
 void Application::numAddTransferFunction() {
-    auto numerator = getLineEditData(numNumerator);
-    auto denominator = getLineEditData(numDenominator);
+    auto numerator = numTF.getNum();
+    auto denominator = numTF.getDen();
 
     if (numIsValidInput(numerator, denominator)) {
         TransferFunction W(numerator, denominator);

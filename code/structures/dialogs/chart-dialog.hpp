@@ -172,9 +172,10 @@ public:
         auto applyButton    = new QPushButton(tr("Применить"));
         auto cancelButton   = new QPushButton(tr("Отменить"));
 
-        connect(applyButton, &QPushButton::clicked, this, &ChartDialog::updateChart);
-        connect(cancelButton, &QPushButton::clicked, this, &ChartDialog::restoreChart);
-        connect(this, &QDialog::rejected, this, &ChartDialog::restoreChart);
+        connect(applyButton,    &QPushButton::clicked, this, &ChartDialog::accept);
+        connect(cancelButton,   &QPushButton::clicked, this, &ChartDialog::reject);
+        connect(this,           &QDialog::rejected, this, &ChartDialog::updateChart);
+        connect(this,           &QDialog::accepted, this, &ChartDialog::restoreChart);
 
         auto buttonLayout = new QHBoxLayout;
         buttonLayout->addWidget(applyButton);
@@ -336,14 +337,12 @@ private slots:
         for (int i = 0; i < series_size; ++i)
             lineSeriesPointers[i]->setName(seriesNameEdits[i]->text());
         chart->update();
-        accept();
     }
 
     void restoreChart() {
         for (qsizetype i = 0; i < series_size; ++i)
             lineSeriesPointers[i]->setPen(initPens[i]);
         chart->update();
-        accept();
     }
 };
 

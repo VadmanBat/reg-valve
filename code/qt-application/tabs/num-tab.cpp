@@ -7,8 +7,6 @@ QWidget* Application::createNumTab() {
     auto numTab = new QWidget(this);
     auto layout = new QVBoxLayout(numTab);
 
-    auto transferFunctionLayout = createTransferFunctionForm(numNumerator, numDenominator);
-
     numWidget->setLabels({
                                  "t<sub>р</sub>:", "ω<sub>n</sub>:",
                                  "t<sub>н</sub>:", "ω<sub>c</sub>:",
@@ -26,28 +24,40 @@ QWidget* Application::createNumTab() {
                          });
 
     auto uppLayout = new QHBoxLayout;
-    uppLayout->addLayout(transferFunctionLayout);
-    uppLayout->addWidget(numWidget);
+    uppLayout->addLayout(numTF.getLayout(), 80);
+    uppLayout->addWidget(numWidget, 20);
 
-    auto setButton      = new QPushButton("Параметры моделирования", numTab);
-    auto addButton      = new QPushButton("Добавить", numTab);
-    auto replaceButton  = new QPushButton("Заменить", numTab);
-    auto clearButton    = new QPushButton("Очистить", numTab);
+    auto queButton      = new QPushButton(QChar(0xf128), numTab);
+    auto setButton      = new QPushButton(QChar(0xf013), numTab);
+    auto addButton      = new QPushButton(QChar(0xf067), numTab);
+    auto replaceButton  = new QPushButton(QChar(0xf021), numTab);
+    auto clearButton    = new QPushButton(QChar(0xf00d), numTab);
+
+    queButton->setToolTip("Описание типовых звеньев");
+    setButton->setToolTip("Параметры моделирования");
+    addButton->setToolTip("Добавить передаточную функцию");
+    replaceButton->setToolTip("Заменить последнюю передаточную функцию");
+    clearButton->setToolTip("Очистить все передаточные функции");
+
+    queButton->setFont(font);
+    setButton->setFont(font);
+    addButton->setFont(font);
+    replaceButton->setFont(font);
+    clearButton->setFont(font);
 
     connect(setButton, &QPushButton::clicked, [this](){
         showModParDialog(numModelParam);
     });
-    connect(addButton, &QPushButton::clicked, this, &Application::numAddTransferFunction);
-    connect(replaceButton, &QPushButton::clicked, this, &Application::numReplaceTransferFunction);
-    connect(clearButton, &QPushButton::clicked, this, &Application::numClearCharts);
+    connect(addButton,      &QPushButton::clicked, this, &Application::numAddTransferFunction);
+    connect(replaceButton,  &QPushButton::clicked, this, &Application::numReplaceTransferFunction);
+    connect(clearButton,    &QPushButton::clicked, this, &Application::numClearCharts);
 
     auto buttonLayout = new QHBoxLayout;
-    auto rightButtonLayout = new QVBoxLayout;
+    buttonLayout->addWidget(queButton);
     buttonLayout->addWidget(setButton);
-    rightButtonLayout->addWidget(addButton);
-    rightButtonLayout->addWidget(replaceButton);
-    rightButtonLayout->addWidget(clearButton);
-    buttonLayout->addLayout(rightButtonLayout);
+    buttonLayout->addWidget(addButton);
+    buttonLayout->addWidget(replaceButton);
+    buttonLayout->addWidget(clearButton);
 
     layout->addLayout(uppLayout);
     layout->addLayout(buttonLayout);

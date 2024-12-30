@@ -22,7 +22,9 @@ void Application::centerWindow() {
 }
 
 Application::Application(QWidget* parent) :
-    QWidget(parent), numSize(0), regSize(0) {
+    QWidget(parent), numSize(0), regSize(0),
+    regTF(6, 6, "W<sub>ОУ</sub>(p) = ")
+{
         loadFonts();
 
         auto tabWidget = new QTabWidget(this);

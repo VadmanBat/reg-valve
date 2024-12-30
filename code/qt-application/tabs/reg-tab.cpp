@@ -2,15 +2,11 @@
 // Created by Vadma on 18.07.2024.
 //
 #include "../application.h"
-#include "../structures/dialogs/help-window.hpp"
+#include "code/structures/dialogs/help-dialog.hpp"
 
 QWidget* Application::createRegTab() {
     auto regTab = new QWidget(this);
     auto layout = new QVBoxLayout;
-
-    auto transferFunctionLayout = createTransferFunctionForm(
-            regNumerator, regDenominator, 6, 6, "W<sub>ОУ</sub>(p) = "
-    );
 
     regParameters.assign({
                                  new RegParameter("K<sub>p</sub>", 0.05, 50, 0.05, 5),
@@ -40,15 +36,14 @@ QWidget* Application::createRegTab() {
                          });
 
     auto uppLayout = new QHBoxLayout;
-    uppLayout->addLayout(transferFunctionLayout);
-    uppLayout->addWidget(regWidget);
+    uppLayout->addLayout(regTF.getLayout(), 60);
+    uppLayout->addWidget(regWidget, 30);
 
-    /*replay 0xf021*/
-    auto queButton      = new QPushButton(QChar(0xf128), regWidget);
-    auto setButton      = new QPushButton(QChar(0xf013), regWidget);
+    auto queButton      = new QPushButton(QChar(0xf128), regTab);
+    auto setButton      = new QPushButton(QChar(0xf013), regTab);
 
-    auto addButton      = new QPushButton(QChar(0xf067), regWidget);
-    auto clearButton    = new QPushButton(QChar(0xf00d), regWidget);
+    auto addButton      = new QPushButton(QChar(0xf067), regTab);
+    auto clearButton    = new QPushButton(QChar(0xf00d), regTab);
 
     queButton->setFont(font);
     setButton->setFont(font);
@@ -112,20 +107,20 @@ QWidget* Application::createRegTab() {
     clearButton->setStyleSheet(styleSheet);
 
     connect(queButton, &QPushButton::clicked, [](){
-        HelpWindow().exec();
+        HelpDialog().exec();
     });
     connect(setButton, &QPushButton::clicked, [this](){
         showModParDialog(regModelParam);
     });
-    connect(addButton, &QPushButton::clicked, this, &Application::regAddTransferFunction);
-    connect(clearButton, &QPushButton::clicked, this, &Application::regClearCharts);
+    connect(addButton,      &QPushButton::clicked, this, &Application::regAddTransferFunction);
+    connect(clearButton,    &QPushButton::clicked, this, &Application::regClearCharts);
 
-    auto buttonLayout = new QVBoxLayout;
-    auto buttonUppLayout = new QVBoxLayout;
+    auto buttonLayout       = new QVBoxLayout;
+    auto buttonUppLayout    = new QVBoxLayout;
 
     buttonUppLayout->addWidget(queButton);
     buttonUppLayout->addWidget(setButton);
-    uppLayout->addLayout(buttonUppLayout);
+    uppLayout->addLayout(buttonUppLayout, 10);
 
     buttonLayout->addWidget(addButton);
     buttonLayout->addWidget(clearButton);

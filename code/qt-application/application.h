@@ -7,24 +7,19 @@
 
 #include <QApplication>
 #include <QWidget>
-#include <QPushButton>
-#include <QVBoxLayout>
-#include <QFileDialog>
 #include <QtCharts>
 
-#include "../style-core.hpp"
+#include "code/structures/forms/transfer-function-form.hpp"
 
-#include "code/qt-application/structures/line-edit.hpp"
-#include "code/qt-application/structures/reg-parameter.hpp"
-#include "code/qt-application/structures/reg-widget.hpp"
+#include "code/structures/reg-parameter.hpp"
+#include "code/structures/reg-widget.hpp"
+#include "code/structures/model-param.hpp"
 
 #include "../transfer-function/transfer-function.hpp"
 
 #include "../series/series.hpp"
 #include "../series/complex-series.hpp"
 #include "../series/set-series.hpp"
-
-#include "structures/model-param.hpp"
 
 class Application : public QWidget {
 private:
@@ -33,16 +28,9 @@ private:
 
     using Pair      = std::pair <double, double>;
     using VecPair   = std::vector <Pair>;
-    using VecLine   = std::vector <LineEdit*>;
     using VecComp   = std::vector <ProjectTypes::Complex>;
 
     static void showError(const QString& errorMessage);
-
-    static MathCore::Vec getLineEditData(const VecLine& lineEdits);
-    static QString correctLine(const QString& text);
-    static QLayout* createLineEdit(VecLine& lineEdits, QDoubleValidator* validator);
-    static QLayout* createTransferFunctionForm(VecLine& numerator, VecLine& denominator,
-                                               std::size_t n = 6, std::size_t m = 6, const QString& title = "W(p) = ");
 
     /// charts functions:
     static QLayout* createCharts(const ChartsDataset& charts, QWidget* tab);
@@ -135,8 +123,7 @@ private:
             {regChartFreqResp, "Комплексно-частотная характеристика (КЧХ)", "Реальная ось", "Мнимая ось"}
     };
 
-    VecLine numNumerator, numDenominator;
-    VecLine regNumerator, regDenominator;
+    TransferFunctionForm numTF, regTF;
 
     std::vector <RegParameter*> regParameters;
 

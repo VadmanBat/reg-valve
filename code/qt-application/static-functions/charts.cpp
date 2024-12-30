@@ -2,8 +2,8 @@
 // Created by Vadma on 13.07.2024.
 //
 #include "../application.h"
-#include "code/qt-application/structures/dialogs/chart-dialog.hpp"
-#include "code/qt-application/structures/dialogs/mod-par-dialog.hpp"
+#include "code/structures/dialogs/chart-dialog.hpp"
+#include "code/structures/dialogs/mod-par-dialog.hpp"
 
 QLayout* Application::createCharts(const ChartsDataset& charts, QWidget* tab) {
     auto layout = new QHBoxLayout;
@@ -20,10 +20,9 @@ QLayout* Application::createCharts(const ChartsDataset& charts, QWidget* tab) {
 
 void Application::createChartContextMenu(QChartView* chartView) {
     auto style = QApplication::style();
-
-    QIcon saveIcon = style->standardIcon(QStyle::SP_DialogSaveButton);
-    QIcon copyIcon = style->standardIcon(QStyle::QStyle::SP_FileIcon);
-    QIcon settingsIcon = style->standardIcon(QStyle::SP_DialogApplyButton);
+    QIcon saveIcon      = style->standardIcon(QStyle::SP_DialogSaveButton);
+    QIcon copyIcon      = style->standardIcon(QStyle::SP_FileIcon);
+    QIcon settingsIcon  = style->standardIcon(QStyle::SP_DialogApplyButton);
 
     auto saveImageAction    = new QAction(saveIcon, tr("Сохранить как PNG"), chartView);
     auto saveTextAction     = new QAction(saveIcon, tr("Сохранить как TXT"), chartView);

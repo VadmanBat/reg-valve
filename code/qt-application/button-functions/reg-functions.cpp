@@ -4,8 +4,8 @@
 #include "../application.h"
 
 void Application::regAddTransferFunction() {
-    auto numerator = getLineEditData(regNumerator);
-    auto denominator = getLineEditData(regDenominator);
+    auto numerator = regTF.getNum();
+    auto denominator = regTF.getDen();
 
     if (denominator.empty())
         return;

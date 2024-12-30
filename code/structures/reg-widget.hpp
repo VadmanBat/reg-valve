@@ -5,18 +5,16 @@
 #ifndef REGVALVE_REG_WIDGET_HPP
 #define REGVALVE_REG_WIDGET_HPP
 
+#include <iomanip>
+#include <sstream>
+
 #include <QWidget>
 #include <QGridLayout>
-#include <QCheckBox>
 #include <QLabel>
 #include <QLineEdit>
 #include <QString>
 
-#include <iomanip>
-#include <sstream>
-#include <algorithm>
-
-#include "../../style-core.hpp"
+#include "code/style-core.hpp"
 
 class RegulationWidget : public QWidget {
 private:
@@ -26,6 +24,8 @@ private:
     std::vector <double> lastValues;
     std::vector <int> precisions;
     std::vector <std::pair <int, int>> colors;
+
+    int ph, pw;
 
     const QString palette[3] = {"white", "#90ee90", "#ffb6c1"};
 
@@ -38,17 +38,17 @@ private:
     void applyDefaultStyle() {
         for (auto label : labels) {
             label->setAlignment(Qt::AlignRight);
-            label->setStyleSheet("font-size: 14pt;");
+            label->setStyleSheet("font-size: 20px;");
             label->setFixedSize(48, 24);
         }
         for (auto lineEdit : lineEdits) {
-            lineEdit->setStyleSheet("font-size: 14pt;");
+            lineEdit->setStyleSheet("font-size: 20px;");
             lineEdit->setMinimumSize(80, 24);
             lineEdit->setReadOnly(true);
         }
     }
 
-    inline int getColorIndex(int index, double oldValue, double newValue) {
+    [[nodiscard]] inline int getColorIndex(std::size_t index, double oldValue, double newValue) const {
         if (oldValue == -1)
             return 0;
         if (newValue < oldValue)
@@ -58,7 +58,7 @@ private:
         return 0;
     }
 
-    void updateCellStyle(int index, double newValue) {
+    void updateCellStyle(std::size_t index, double newValue) {
         QString currentStyle = lineEdits[index]->styleSheet();
         const int colorIndex = getColorIndex(index, lastValues[index], newValue);
         QString newStyle = QString("background-color: %1;").arg(palette[colorIndex]);
@@ -74,8 +74,11 @@ private:
 
 public:
     explicit RegulationWidget(int rows, int cols, QWidget* parent = nullptr) : QWidget(parent) {
+        ph = QWidget::height() / rows;
+        pw = QWidget::width() / cols;
+
         setLayout(layout = new QGridLayout(this));
-        const auto size(rows * cols);
+        const auto size = rows * cols;
         labels.reserve(size);
         lineEdits.reserve(size);
         lastValues.assign(size, -1);
@@ -94,35 +97,35 @@ public:
     }
 
     void setLabels(const std::vector <QString>& labelNames) {
-        const auto n(std::min(labels.size(), labelNames.size()));
+        const auto n = std::min(labels.size(), labelNames.size());
         for (int i = 0; i < n; ++i)
             labels[i]->setText(labelNames[i]);
     }
 
     void setPrecisions(const std::vector <int>& valuePrecisions) {
-        const auto n(std::min(labels.size(), valuePrecisions.size()));
+        const auto n= std::min(labels.size(), valuePrecisions.size());
         for (int i = 0; i < n; ++i)
             precisions[i] = valuePrecisions[i];
     }
 
     void setColors(const std::vector <std::pair <int, int>>& valueColors) {
-        const auto n(std::min(labels.size(), valueColors.size()));
+        const auto n= std::min(labels.size(), valueColors.size());
         for (int i = 0; i < n; ++i)
             colors[i] = valueColors[i];
     }
 
     void updateValues(const std::vector <double>& values) {
         if (values.empty()) {
-            const auto n(lineEdits.size());
-            for (int i = 0; i < n; ++i) {
+            const auto n = lineEdits.size();
+            for (std::size_t i = 0; i < n; ++i) {
                 lineEdits[i]->setText("");
                 lastValues[i] = -1;
             }
             return;
         }
 
-        const auto n(std::min(lineEdits.size(), values.size()));
-        for (int i = 0; i < n; ++i) {
+        const auto n = std::min(lineEdits.size(), values.size());
+        for (std::size_t i = 0; i < n; ++i) {
             updateCellStyle(i, values[i]);
             lineEdits[i]->setText(formatDouble(values[i], precisions[i]));
             lastValues[i] = values[i];

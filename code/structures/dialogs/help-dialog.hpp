@@ -2,8 +2,8 @@
 // Created by Vadma on 27.12.2024.
 //
 
-#ifndef REGVALVE_HELP_WINDOW_HPP
-#define REGVALVE_HELP_WINDOW_HPP
+#ifndef REGVALVE_HELP_DIALOG_HPP
+#define REGVALVE_HELP_DIALOG_HPP
 
 #include <QDialog>
 #include <QFormLayout>
@@ -13,11 +13,11 @@
 #include <QTextEdit>
 #include <QPushButton>
 
-class HelpWindow : public QDialog {
+class HelpDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit HelpWindow(QWidget* parent = nullptr) : QDialog(parent) {
+    explicit HelpDialog(QWidget* parent = nullptr) : QDialog(parent) {
         setWindowTitle("Справка по настройке ПИД-регулятора");
         setWindowIcon(QIcon::fromTheme("dialog-information"));
         setGeometry(300, 300, 800, 600);
@@ -61,8 +61,8 @@ private:
 
         mainLayout->addWidget(textEdit);
 
-        auto okButton = new QPushButton("Ок", this);
-        connect(okButton, &QPushButton::clicked, this, &HelpWindow::close);
+        auto okButton = new QPushButton("Понятно", this);
+        connect(okButton, &QPushButton::clicked, this, &HelpDialog::close);
 
         auto buttonLayout = new QHBoxLayout;
         buttonLayout->addStretch(1);
@@ -73,4 +73,4 @@ private:
     }
 };
 
-#endif //REGVALVE_HELP_WINDOW_HPP
+#endif //REGVALVE_HELP_DIALOG_HPP

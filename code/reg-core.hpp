@@ -195,6 +195,45 @@ public:
 
         return complex;
     }
+
+    inline static double fact(int n) {
+        double answer = 1;
+        for (int i = 2; i <= n; ++i)
+            answer *= i;
+        return answer;
+    }
+
+#define PADE(n, k) fact(2 * n - k) * fact(n) / (fact(2 * n) * fact(k) * fact(n - k))
+    inline static Vec getPade(int n) {
+        Vec res(n + 1);
+        const double last = PADE(n, n);
+        for (int k = 0; k <= n; ++k)
+            res[n - k] = PADE(n, k) / last;
+        return res;
+    }
+#undef PADE
+
+    inline static std::vector <Vec> computePade() {
+        std::vector <Vec> res(7);
+        for (int i = 1; i <= 6; ++i)
+            res[i] = getPade(i);
+        return res;
+    }
+
+    inline static std::vector <Vec> Pade = computePade();
+    inline static std::pair <Vec, Vec> getPade(double tau, int order = 3) {
+        Vec den(order + 1);
+        den[order] = 1;
+        for (int i = order - 1; i >= 0; --i)
+            den[i] = den[i + 1] * tau;
+        const Vec& pade = Pade[order];
+        Vec num(order + 1);
+        for (int i = 0; i <= order; ++i) {
+            den[i] *= pade[i];
+            num[i] = den[i] * ((order - i) % 2 ? -1 : 1);
+        }
+        return {num, den};
+    }
 };
 
 #endif //REGVALVE_REG_CORE_HPP

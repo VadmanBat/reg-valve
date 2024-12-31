@@ -10,10 +10,12 @@ struct ModelParam {
     bool autoTimeIntervals  = true;
     bool autoFreqRange      = true;
     bool autoFreqIntervals  = true;
+    bool hybridDelayElement = true;
 
     int simTime         = 500;
-    std::size_t timeIntervals   = 100;
-    std::size_t freqIntervals   = 100;
+    int timeIntervals   = 100;
+    int freqIntervals   = 100;
+    int approxOrder     = 3;
 
     double freqMin = 0.01;
     double freqMax = 10;

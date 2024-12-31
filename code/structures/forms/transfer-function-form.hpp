@@ -33,6 +33,8 @@ private:
     using Vec       = std::vector <double>;
 
     VecLine numerator, denominator;
+    QDoubleSpinBox* delayElement;
+
     QHBoxLayout* mainLayout;
 
     static QString getColor(const double& value) {
@@ -149,6 +151,8 @@ public:
         mainLayout = new QHBoxLayout;
         mainLayout->addWidget(transferFunctionLabel);
         mainLayout->addLayout(transferFunctionLayout);
+
+        delayElement = new QDoubleSpinBox;
     }
 
     [[nodiscard]] inline QLayout* getLayout() const {
@@ -161,6 +165,14 @@ public:
 
     [[nodiscard]] inline Vec getDen() const {
         return getLineEditData(denominator);
+    }
+
+    [[nodiscard]] inline bool isDelayElement() const {
+        return delayElement->value() != 0;
+    }
+
+    [[nodiscard]] inline double delayTime() const {
+        return delayElement->value();
     }
 };
 

@@ -1,5 +1,8 @@
 #include "code/qt-application/application.h"
 
+#include <iostream>
+#include "code/reg-core.hpp"
+
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
 

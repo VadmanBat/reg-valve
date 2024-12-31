@@ -5,7 +5,6 @@
 #ifndef REGVALVE_APPLICATION_H
 #define REGVALVE_APPLICATION_H
 
-#include <QApplication>
 #include <QWidget>
 #include <QtCharts>
 
@@ -109,6 +108,8 @@ private:
     ModelParam numModelParam, regModelParam;
     static VecPair getTranResp(const TransferFunction& W, const ModelParam& params);
     static VecComp getFreqResp(const TransferFunction& W, const ModelParam& params);
+    [[nodiscard]] static TransferFunction getTransferFunction(const TransferFunctionForm& form);
+    [[nodiscard]] static TransferFunction getRegTransferFunction(const TransferFunctionForm& form);
 
     const ChartsDataset EXP_CHARTS = {
             {expChartTranResp, "Переходная характеристика", "Время t, секунды", "h(t)"},

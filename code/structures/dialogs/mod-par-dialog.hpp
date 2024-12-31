@@ -26,10 +26,12 @@ private:
     QCheckBox* autoTimeIntervalsCheckBox;
     QCheckBox* autoFreqRangeCheckBox;
     QCheckBox* autoFreqIntervalsCheckBox;
+    QCheckBox* hybridDelayElementCheckBox;
 
     QSpinBox* simTimeSpinBox;
     QSpinBox* timeIntervalsSpinBox;
     QSpinBox* freqIntervalsSpinBox;
+    QSpinBox* approxOrderSpinBox;
 
     QDoubleSpinBox* freqMinSpinBox;
     QDoubleSpinBox* freqMaxSpinBox;
@@ -48,9 +50,11 @@ private:
 
         auto timeTitleLabel     = createLabel("Временная характеристика", Qt::AlignCenter);
         auto freqTitleLabel     = createLabel("Частотная характеристика", Qt::AlignCenter);
+        auto approxTitleLabel   = createLabel("Аппроксимация звена запаздывания через ряд Паде", Qt::AlignCenter);
 
         timeTitleLabel->setStyleSheet("font-weight: bold; padding: 5px;");
         freqTitleLabel->setStyleSheet("font-weight: bold; padding: 5px;");
+        approxTitleLabel->setStyleSheet("font-weight: bold; padding: 5px;");
 
         auto simTimeLabel       = createLabel("Время:", Qt::AlignRight);
         auto timeIntervalsLabel = createLabel("Интервалы:", Qt::AlignRight);
@@ -58,6 +62,7 @@ private:
         auto freqMaxLabel       = createLabel("до:", Qt::AlignRight);
         auto freqMinLabel       = createLabel("от:", Qt::AlignRight);
         auto intervalsFreqLabel = createLabel("Интервалы:", Qt::AlignRight);
+        auto approxOrderLabel   = createLabel("Порядок разложения:", Qt::AlignRight);
 
         layout->addWidget(timeTitleLabel, 0, 0, 1, 5);
 
@@ -83,14 +88,17 @@ private:
         layout->addWidget(freqIntervalsSpinBox, 5, 3);
         layout->addWidget(autoFreqIntervalsCheckBox, 5, 4);
 
+        layout->addWidget(approxTitleLabel, 6, 0, 1, 5);
+
+        layout->addWidget(approxOrderLabel, 7, 0);
+        layout->addWidget(approxOrderSpinBox, 7, 1);
+        layout->addWidget(hybridDelayElementCheckBox, 7, 3, 1, 2);
+
         freqMinSpinBox->setMinimumWidth(130);
         freqMaxSpinBox->setMinimumWidth(130);
 
-        layout->setColumnStretch(0, 1);
-        layout->setColumnStretch(1, 1);
-        layout->setColumnStretch(2, 1);
-        layout->setColumnStretch(3, 1);
-        layout->setColumnStretch(4, 1);
+        for (int i = 0; i < 8; ++i)
+            layout->setColumnStretch(i, 1);
 
         return layout;
     }
@@ -167,10 +175,12 @@ public:
         autoTimeIntervalsCheckBox   = new QCheckBox("Авто");
         autoFreqRangeCheckBox       = new QCheckBox("Авто");
         autoFreqIntervalsCheckBox   = new QCheckBox("Авто");
+        hybridDelayElementCheckBox  = new QCheckBox("Гибридный метод");
 
         simTimeSpinBox          = new QSpinBox;
         timeIntervalsSpinBox    = new QSpinBox;
         freqIntervalsSpinBox    = new QSpinBox;
+        approxOrderSpinBox      = new QSpinBox;
 
         freqMinSpinBox = new QDoubleSpinBox;
         freqMaxSpinBox = new QDoubleSpinBox;
@@ -190,6 +200,7 @@ public:
         }
         autoFreqRangeCheckBox->setCheckState(values.autoFreqRange ? Qt::Checked : Qt::Unchecked);
         autoFreqIntervalsCheckBox->setCheckState(values.autoFreqIntervals ? Qt::Checked : Qt::Unchecked);
+        hybridDelayElementCheckBox->setCheckState(values.hybridDelayElement ? Qt::Checked : Qt::Unchecked);
 
         simTimeSpinBox->setMinimum(10);
         simTimeSpinBox->setMaximum(10000);
@@ -217,6 +228,10 @@ public:
         freqIntervalsSpinBox->setMaximum(2000);
         freqIntervalsSpinBox->setValue(values.freqIntervals);
 
+        approxOrderSpinBox->setMinimum(1);
+        approxOrderSpinBox->setMaximum(6);
+        approxOrderSpinBox->setValue(values.approxOrder);
+
         auto applyButton    = new QPushButton(tr("Применить"));
         auto cancelButton   = new QPushButton(tr("Отменить"));
 
@@ -242,9 +257,11 @@ public:
                 autoTimeIntervalsCheckBox->isChecked(),
                 autoFreqRangeCheckBox->isChecked(),
                 autoFreqIntervalsCheckBox->isChecked(),
+                hybridDelayElementCheckBox->isChecked(),
                 simTimeSpinBox->value(),
                 timeIntervalsSpinBox->value(),
                 freqIntervalsSpinBox->value(),
+                approxOrderSpinBox->value(),
                 freqMinSpinBox->value(),
                 freqMaxSpinBox->value(),
                 freqScaleComboBox->currentIndex()

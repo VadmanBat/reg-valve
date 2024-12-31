@@ -6,6 +6,7 @@
 #define REGVALVE_TRANSFER_FUNCTION_HPP
 
 #include "../math-core.hpp"
+#include "../reg-core.hpp"
 
 /// Класс передаточной функции W(p)
 class TransferFunction {
@@ -79,10 +80,38 @@ public:
         recomputeBackState();
     }
 
-    TransferFunction(const Vec& objectNum, const Vec& objectDen, const Vec& regNum, const Vec& regDen) :
+    [[maybe_unused]] TransferFunction(Vec numerator, Vec denominator, double tau, int order) :
+            numerator(std::move(numerator)), denominator(std::move(denominator))
+    {
+        const auto [num, den] = RegCore::getPade(tau, order);
+        numerator = MathCore::multiply(numerator, num);
+        denominator = MathCore::multiply(denominator, den);
+        recomputeBackState();
+    }
+
+    [[maybe_unused]] TransferFunction(Vec&& numerator, Vec&& denominator, double tau, int order) :
+            numerator(std::move(numerator)), denominator(std::move(denominator))
+    {
+        const auto [num, den] = RegCore::getPade(tau, order);
+        numerator = MathCore::multiply(numerator, num);
+        denominator = MathCore::multiply(denominator, den);
+        recomputeBackState();
+    }
+
+    [[maybe_unused]] TransferFunction(const Vec& objectNum, const Vec& objectDen, const Vec& regNum, const Vec& regDen) :
             numerator(MathCore::multiply(regNum, objectNum)),
             denominator(MathCore::multiply(regDen, objectDen))
     {
+        closeLoop();
+    }
+
+    [[maybe_unused]] TransferFunction(const Vec& objectNum, const Vec& objectDen, const Vec& regNum, const Vec& regDen, double tau, int order) :
+            numerator(MathCore::multiply(regNum, objectNum)),
+            denominator(MathCore::multiply(regDen, objectDen))
+    {
+        const auto [num, den] = RegCore::getPade(tau, order);
+        numerator = MathCore::multiply(numerator, num);
+        denominator = MathCore::multiply(denominator, den);
         closeLoop();
     }
 

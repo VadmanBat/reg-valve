@@ -67,7 +67,10 @@ void Application::regAddTransferFunction() {
             break;
     }
 
-    TransferFunction W(numerator, denominator, num, den);
+    int tau, order;
+    std::cin >> tau >> order;
+
+    TransferFunction W(numerator, denominator, num, den, tau, order);
     regTranRespSeries.push_back(getTranResp(W, regModelParam));
     regFreqRespSeries.push_back(getFreqResp(W, regModelParam));
 

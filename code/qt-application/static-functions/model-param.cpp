@@ -6,9 +6,8 @@
 
 void Application::showModParDialog(ModelParam& params) {
     ModParDialog dialog(params);
-    if (dialog.exec() == QDialog::Accepted) {
+    if (dialog.exec() == QDialog::Accepted)
         params = dialog.data();
-    }
 }
 
 Application::VecPair Application::getTranResp(const TransferFunction& W, const ModelParam& params) {
@@ -16,7 +15,7 @@ Application::VecPair Application::getTranResp(const TransferFunction& W, const M
         return W.transientResponse();
     if (params.autoTimeIntervals)
         return W.transientResponse({0, params.simTime});
-    return W.transientResponse({0, params.simTime}, params.timeIntervals);
+    return W.transientResponse({0, params.simTime}, (std::size_t)params.timeIntervals);
 }
 
 Application::VecComp Application::getFreqResp(const TransferFunction& W, const ModelParam& params) {
@@ -26,5 +25,19 @@ Application::VecComp Application::getFreqResp(const TransferFunction& W, const M
         return W.frequencyResponse({params.freqMin, params.freqMax}, 1e-2);
     if (params.freqScale == 1)
         return W.frequencyResponse({params.freqMin, params.freqMax}, params.freqIntervals, true);
-    return W.frequencyResponse({params.freqMin, params.freqMax}, params.freqIntervals);
+    return W.frequencyResponse({params.freqMin, params.freqMax}, (std::size_t)params.freqIntervals);
+}
+
+TransferFunction Application::getTransferFunction(const TransferFunctionForm& form) {
+    auto n = form.getNum();
+    if (form.isDelayElement())
+        return {n, form.getDen(), form.delayTime(), 4};
+    return {n, form.getDen()};
+}
+
+TransferFunction Application::getRegTransferFunction(const TransferFunctionForm& form) {
+    auto n = form.getNum();
+    if (form.isDelayElement())
+        return {n, form.getDen(), form.delayTime(), 4};
+    return {n, form.getDen()};
 }

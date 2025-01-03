@@ -16,7 +16,10 @@ find_package(Qt6 COMPONENTS Widgets Charts REQUIRED)
 
 file(GLOB_RECURSE HEADERS "code/*.h" "code/*.hpp" "code/*.hxx")
 file(GLOB_RECURSE SOURCES "code/*.cpp")
-add_executable(${PROJECT_NAME} main.cpp ${HEADERS} ${SOURCES})
+add_executable(${PROJECT_NAME} main.cpp ${HEADERS} ${SOURCES}
+        code/transfer-function/constructors.cpp
+        code/transfer-function/operators/assign.cpp
+)
 
 target_link_libraries(${PROJECT_NAME} Qt6::Widgets Qt6::Charts)
 

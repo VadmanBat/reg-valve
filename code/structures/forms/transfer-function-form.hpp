@@ -153,6 +153,7 @@ public:
         mainLayout->addLayout(transferFunctionLayout);
 
         delayElement = new QDoubleSpinBox;
+        mainLayout->addWidget(delayElement);
     }
 
     [[nodiscard]] inline QLayout* getLayout() const {

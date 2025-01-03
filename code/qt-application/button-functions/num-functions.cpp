@@ -28,7 +28,8 @@ void Application::numAddTransferFunction() {
     auto denominator = numTF.getDen();
 
     if (numIsValidInput(numerator, denominator)) {
-        TransferFunction W(numerator, denominator);
+        //TransferFunction W(numerator, denominator);
+        TransferFunction W(getTransferFunction(numTF));
         numTranRespSeries.push_back(getTranResp(W, numModelParam));
         numFreqRespSeries.push_back(getFreqResp(W, numModelParam));
 

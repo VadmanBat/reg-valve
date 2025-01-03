@@ -109,7 +109,7 @@ private:
     static VecPair getTranResp(const TransferFunction& W, const ModelParam& params);
     static VecComp getFreqResp(const TransferFunction& W, const ModelParam& params);
     [[nodiscard]] static TransferFunction getTransferFunction(const TransferFunctionForm& form);
-    [[nodiscard]] static TransferFunction getRegTransferFunction(const TransferFunctionForm& form);
+    [[nodiscard]] static TransferFunction getRegTransferFunction(const TransferFunctionForm& form, std::vector <double> a, std::vector <double> b);
 
     const ChartsDataset EXP_CHARTS = {
             {expChartTranResp, "Переходная характеристика", "Время t, секунды", "h(t)"},

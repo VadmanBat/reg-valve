@@ -17,7 +17,7 @@
 ///     - уточнение корней полинома численным методом Ньютона;
 ///     - решение матрицы аналитическим методом Гаусса-Жордана;
 ///     - вычисление коэффициентов простейших для разложения рациональной дроби методом Д’Аламбера;
-///     - вычисление (a * exp(b) + c * exp(d) + ... + n * exp(d))^2.
+///     - вычисление (a1 * exp(b1) + a2 * exp(b2) + ... + an * exp(bn))^2.
 
 class MathCore {
 public:
@@ -107,7 +107,7 @@ public:
     /// Вычисление полинома при перемножении двух полиномов
     template <typename Container>
     static Container multiply(const Container& a, const Container& b) {
-        const std::size_t n(a.size()), m(b.size());
+        const std::size_t n = a.size(), m = b.size();
         Container result(n + m - 1, 0);
         for (std::size_t i = 0; i < n; ++i)
             for (std::size_t j = 0; j < m; ++j)
@@ -142,14 +142,15 @@ public:
         return newCoefficients;
     } /// N
 
-    template <int EPSILON_ORDER = 9, std::size_t MAX_ITER = 100>
+    template <int EPSILON_ORDER = 6, std::size_t MAX_ITER = 100>
     static VecComp solvePolynomialNewton(const Vec& coefficients) {
         static const Type epsilon(std::pow(10.L, -EPSILON_ORDER));
 
         auto coeffs(ConvertCore::toComplexVector(coefficients));
         std::size_t degree(coeffs.size() - 1);
         auto f_init = [=](const Complex& x) {
-            Complex result(0);
+            //Complex result(0);
+            std::complex <long double> result(0);
             for (std::size_t i = 0; i <= degree; ++i) {
                 result *= x;
                 result += coeffs[i];
@@ -157,7 +158,8 @@ public:
             return result;
         };
         auto df_init = [=](const Complex& x) {
-            Complex result(0);
+            //Complex result(0);
+            std::complex <long double> result(0);
             for (std::size_t i = 0; i < degree; ++i) {
                 result *= x;
                 result += Complex(static_cast<Type>(degree - i)) * coeffs[i];
@@ -165,7 +167,8 @@ public:
             return result;
         };
         auto f = [&coeffs, &degree](const Complex& x) {
-            Complex result(0);
+            //Complex result(0);
+            std::complex <long double> result(0);
             for (std::size_t i = 0; i <= degree; ++i) {
                 result *= x;
                 result += coeffs[i];
@@ -173,7 +176,8 @@ public:
             return result;
         };
         auto df = [&coeffs, &degree](const Complex& x) {
-            Complex result(0);
+            //Complex result(0);
+            std::complex <long double> result(0);
             for (std::size_t i = 0; i < degree; ++i) {
                 result *= x;
                 result += Complex(static_cast<Type>(degree - i)) * coeffs[i];
@@ -182,31 +186,141 @@ public:
         };
 
         VecComp roots;
-        while (degree > 1) {
-            Complex x(1, 1);
-            for (std::size_t i = 0; i < MAX_ITER; ++i) {
-                const Complex fx(f(x));
-                const Complex dfx(df(x));
+        while (degree > 0) {
+            Complex x(-1, 1);
+            for (std::size_t i = 0; i < MAX_ITER; ++i) {std::cout << "i = " << i << ", value  = " << std::abs(f(x)) << " | " << std::abs(f_init(x)) << '\n';
+                const std::complex <long double> fx(f(x));
+                const std::complex <long double> dfx(df(x));
+                if (std::abs(fx) < epsilon) {
+                    /*x -= f_init(x) / df_init(x);
+                    x -= f_init(x) / df_init(x);
+                    x -= f_init(x) / df_init(x);*/
+                    break;
+                }
+                x -= fx / dfx;
+            }
+
+            if (std::abs(x.imag()) > epsilon) {
+                roots.push_back(x);
+                coeffs = deflatePolynomial(coeffs, x);
+                --degree;
+                x.imag(-x.imag());
+                for (auto k : coeffs)
+                    std::cout << k << ' ';
+                std::cout << '\n';
+            }
+            roots.push_back(x);
+            coeffs = deflatePolynomial(coeffs, x);
+            --degree;
+            for (auto k : coeffs)
+                std::cout << k << ' ';
+            std::cout << '\n';
+        }
+        if (degree)
+            roots.push_back(-coeffs[1] / coeffs[0]);
+
+        for (auto& root : roots) {
+            std::cout << "root = " << root << '\n';
+            std::cout << f_init(root) << ", abs = " << std::abs(f_init(root)) << '\n';
+            root = ConvertCore::normalize(root, epsilon);
+        }
+
+        return roots;
+    } /// N * log(log((r - x) / epsilon))
+    /*template <int EPSILON_ORDER = 9, std::size_t MAX_ITER = 100>
+    static VecComp solvePolynomialLaguerre(const Vec& coefficients) {
+        static const Type epsilon(std::pow(10.L, -EPSILON_ORDER));
+
+        std::vector <std::complex <long double>> coeffs(coefficients.size());
+        for (int i = 0; i < coefficients.size(); ++i)
+            coeffs[i] = coefficients[i];
+        //auto coeffs(ConvertCore::toComplexVector(coefficients));
+        std::size_t degree(coeffs.size() - 1);
+        auto f_init = [=](const std::complex <long double>& x) {
+            std::complex <long double> result(0);
+            for (std::size_t i = 0; i <= degree; ++i) {
+                result *= x;
+                result += coeffs[i];
+            }
+            return result;
+        };
+        auto f = [&coeffs, &degree](const std::complex <long double>& x) {
+            std::complex <long double> result(0);
+            for (std::size_t i = 0; i <= degree; ++i) {
+                result *= x;
+                result += coeffs[i];
+            }
+            return result;
+        };
+        auto df = [&coeffs, &degree](const std::complex <long double>& x) {
+            std::complex <long double> result(0);
+            for (std::size_t i = 0; i < degree; ++i) {
+                result *= x;
+                result += std::complex <long double>(static_cast<Type>(degree - i)) * coeffs[i];
+            }
+            return result;
+        };
+        auto d2f = [&coeffs, &degree](const std::complex <long double>& x) {
+            std::complex <long double> result(0);
+            int a = degree, b = a - 1;
+            for (std::size_t i = 0; i < degree - 1; ++i) {
+                result *= x;
+                result += std::complex <long double>(a * b) * coeffs[i];
+                --a, --b;
+            }
+            return result;
+        };
+
+        VecComp roots;
+        while (degree > 0) {
+            std::complex <long double> x(-1, 1);
+            for (std::size_t i = 0; i < MAX_ITER; ++i) {std::cout << "i = " << i << ", value  = " << std::abs(f(x)) << '\n';
+                const std::complex <long double> fx(f(x));
+                const std::complex <long double> d1fx(df(x));
+                const std::complex <long double> d2fx(d2f(x));
                 if (std::abs(fx) < epsilon) {
                     x -= f_init(x) / df_init(x);
                     x -= f_init(x) / df_init(x);
                     x -= f_init(x) / df_init(x);
                     break;
                 }
-                x -= fx / dfx;
+
+                std::complex <long double> discriminant = std::pow(std::complex <long double>(degree - 1.0) * d1fx, 2.0) - std::complex <long double>(degree * (degree-1.0),0.0)*fx*d2fx;
+                std::complex <long double> sqrt_discriminant = sqrt(discriminant);
+                std::complex <long double> denominator_1 = d1fx + sqrt_discriminant;
+                std::complex <long double> denominator_2 = d1fx - sqrt_discriminant;
+                std::complex <long double> denominator = abs(denominator_1) > abs(denominator_2) ? denominator_1 : denominator_2;
+
+                x -= (std::complex <long double>(degree,0.0) * fx) / denominator;
             }
 
-            roots.push_back(x);
+            if (std::abs(x.imag()) > epsilon) {
+                roots.emplace_back(x);
+                coeffs = deflatePolynomial(coeffs, x);
+                --degree;
+                x.imag(-x.imag());
+                for (auto k : coeffs)
+                    std::cout << k << ' ';
+                std::cout << '\n';
+            }
+            roots.emplace_back(x);
             coeffs = deflatePolynomial(coeffs, x);
             --degree;
+            for (auto k : coeffs)
+                std::cout << k << ' ';
+            std::cout << '\n';
         }
-        roots.push_back(-coeffs[1] / coeffs[0]);
+        if (degree)
+            roots.emplace_back(-coeffs[1] / coeffs[0]);
 
-        for (auto& root : roots)
+        for (auto& root : roots) {
+            std::cout << "root = " << root << '\n';
+            std::cout << f_init(root) << ", abs = " << std::abs(f_init(root)) << '\n';
             root = ConvertCore::normalize(root, epsilon);
+        }
 
         return roots;
-    } /// N * log(log((r - x) / epsilon))
+    } /// N * log(log((r - x) / epsilon))*/
     template <int EPSILON_ORDER = 9, std::size_t MAX_ITER = 100>
     static VecComp clarifyPolynomialNewton(const Vec& coefficients, VecComp& roots) {
         static const Type epsilon(std::pow(10.L, -EPSILON_ORDER));

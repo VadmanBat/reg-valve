@@ -67,10 +67,8 @@ void Application::regAddTransferFunction() {
             break;
     }
 
-    int tau, order;
-    std::cin >> tau >> order;
-
-    TransferFunction W(numerator, denominator, num, den, tau, order);
+    //TransferFunction W(numerator, denominator, num, den, tau, order);
+    TransferFunction W(getRegTransferFunction(regTF, num, den));
     regTranRespSeries.push_back(getTranResp(W, regModelParam));
     regFreqRespSeries.push_back(getFreqResp(W, regModelParam));
 
@@ -78,7 +76,7 @@ void Application::regAddTransferFunction() {
     const auto& freqResp = regFreqRespSeries.back().original();
 
     regWidget->updateValues(W.isSettled() ? std::vector <double>{
-            W.settlingTime(), W.naturalFrequency(), W.steadyStateValue(),  W.computeLinearIntegralCriterion(tranResp),
+            W.settlingTime(), W.naturalFrequency(), W.steadyStateValue(), W.computeLinearIntegralCriterion(tranResp),
             W.riseTime(), W.cutFrequency(), 1 - W.steadyStateValue(), W.computeIntegralQuadraticCriterion(),
             W.peakTime(), W.dampingRation(), W.overshoot(), W.computeStandardDeviation()
     } : std::vector <double>{});

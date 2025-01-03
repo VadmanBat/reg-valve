@@ -8,6 +8,8 @@
 #include "../math-core.hpp"
 #include "../reg-core.hpp"
 
+#include "../math-core/solve-polynomial.hpp"
+
 /// Класс передаточной функции W(p)
 class TransferFunction {
 private:
@@ -39,21 +41,16 @@ private:
     }
 
     void recomputeBackState() {
-        roots = MathCore::solvePolynomialNewton(denominator);
+        Complex dominant_root(roots[0]);
+        for (const auto root : roots)
+            if (root.real() > dominant_root.real())
+                dominant_root = root;
 
-        Complex dominant_real(roots[0]), dominant_imag(dominant_real);
-        for (const auto root : roots) {
-            if (root.real() > dominant_real.real())
-                dominant_real = root;
-            if (root.imag() > dominant_imag.imag())
-                dominant_imag = root;
-        }
-
-        if (dominant_real.real() < 0) {
+        if (dominant_root.real() < 0) {
             is_settled      = true;
-            settling_time   = -4 / dominant_real.real();
-            omega_n         = std::abs(dominant_imag);
-            zeta            = -dominant_imag.real() / omega_n;
+            settling_time   = -4 / dominant_root.real();
+            omega_n         = std::abs(dominant_root);
+            zeta            = -dominant_root.real() / omega_n;
             Type zeta_sq    = zeta * zeta;
             rise_time       = 1.8 / omega_n;
             peak_time       = M_PI / (omega_n * std::sqrt(1 - zeta_sq));
@@ -68,52 +65,12 @@ private:
     }
 
 public:
-    TransferFunction(Vec numerator, Vec denominator) :
-            numerator(std::move(numerator)), denominator(std::move(denominator))
-    {
-        recomputeBackState();
-    }
-
-    [[maybe_unused]] TransferFunction(Vec&& numerator, Vec&& denominator) :
-            numerator(std::move(numerator)), denominator(std::move(denominator))
-    {
-        recomputeBackState();
-    }
-
-    [[maybe_unused]] TransferFunction(Vec numerator, Vec denominator, double tau, int order) :
-            numerator(std::move(numerator)), denominator(std::move(denominator))
-    {
-        const auto [num, den] = RegCore::getPade(tau, order);
-        numerator = MathCore::multiply(numerator, num);
-        denominator = MathCore::multiply(denominator, den);
-        recomputeBackState();
-    }
-
-    [[maybe_unused]] TransferFunction(Vec&& numerator, Vec&& denominator, double tau, int order) :
-            numerator(std::move(numerator)), denominator(std::move(denominator))
-    {
-        const auto [num, den] = RegCore::getPade(tau, order);
-        numerator = MathCore::multiply(numerator, num);
-        denominator = MathCore::multiply(denominator, den);
-        recomputeBackState();
-    }
-
-    [[maybe_unused]] TransferFunction(const Vec& objectNum, const Vec& objectDen, const Vec& regNum, const Vec& regDen) :
-            numerator(MathCore::multiply(regNum, objectNum)),
-            denominator(MathCore::multiply(regDen, objectDen))
-    {
-        closeLoop();
-    }
-
-    [[maybe_unused]] TransferFunction(const Vec& objectNum, const Vec& objectDen, const Vec& regNum, const Vec& regDen, double tau, int order) :
-            numerator(MathCore::multiply(regNum, objectNum)),
-            denominator(MathCore::multiply(regDen, objectDen))
-    {
-        const auto [num, den] = RegCore::getPade(tau, order);
-        numerator = MathCore::multiply(numerator, num);
-        denominator = MathCore::multiply(denominator, den);
-        closeLoop();
-    }
+    TransferFunction(Vec numerator, Vec denominator);
+    [[maybe_unused]] TransferFunction(Vec&& numerator, Vec&& denominator);
+    [[maybe_unused]] TransferFunction(Vec num, Vec den, double tau, int order);
+    [[maybe_unused]] TransferFunction(Vec&& num, Vec&& den, double tau, int order);
+    [[maybe_unused]] TransferFunction(const Vec& objNum, const Vec& objDen, const Vec& regNum, const Vec& regDen);
+    [[maybe_unused]] TransferFunction(const Vec& objNum, const Vec& objDen, const Vec& regNum, const Vec& regDen, double tau, int order);
 
     [[nodiscard]] inline bool isSettled() const {
         return is_settled;
@@ -158,6 +115,7 @@ public:
 
     void setDenominator(Vec newDenominator) {
         denominator = std::move(newDenominator);
+        roots = SupMathCore::solvePolynomialLaguerre(denominator);
         recomputeBackState();
     }
 
@@ -227,83 +185,22 @@ public:
             for (std::size_t i = 0; i < n; ++i)
                 denominator[delta + i] += numerator[i];
         }
+        roots = SupMathCore::solvePolynomialLaguerre(denominator);
         recomputeBackState();
     }
 
-    TransferFunction& operator=(TransferFunction other) {
-        numerator   = std::move(other.numerator);
-        denominator = std::move(other.denominator);
-
-        roots               = std::move(other.roots);
-        impulse_factors     = std::move(other.impulse_factors);
-        transient_factors   = std::move(other.transient_factors);
-
-        is_settled          = other.is_settled;
-        settling_time       = other.settling_time;
-        steady_state_value  = other.steady_state_value;
-
-        return *this;
-    }
-
-    TransferFunction& operator=(TransferFunction&& other) noexcept {
-        numerator   = std::move(other.numerator);
-        denominator = std::move(other.denominator);
-
-        roots               = std::move(other.roots);
-        impulse_factors     = std::move(other.impulse_factors);
-        transient_factors   = std::move(other.transient_factors);
-
-        is_settled          = other.is_settled;
-        settling_time       = other.settling_time;
-        steady_state_value  = other.steady_state_value;
-
-        return *this;
-    }
-
-    void assign(Vec newNumerator, Vec newDenominator) {
-        numerator   = std::move(newNumerator);
-        denominator = std::move(newDenominator);
-
-        recomputeBackState();
-    }
-
-    void assign(Vec&& newNumerator, Vec&& newDenominator) {
-        numerator   = std::move(newNumerator);
-        denominator = std::move(newDenominator);
-
-        recomputeBackState();
-    }
-
-    void assign(TransferFunction other) {
-        numerator   = std::move(other.numerator);
-        denominator = std::move(other.denominator);
-
-        roots               = std::move(other.roots);
-        impulse_factors     = std::move(other.impulse_factors);
-        transient_factors   = std::move(other.transient_factors);
-
-        is_settled          = other.is_settled;
-        settling_time       = other.settling_time;
-        steady_state_value  = other.steady_state_value;
-    }
-
-    void assign(TransferFunction&& other) {
-        numerator   = std::move(other.numerator);
-        denominator = std::move(other.denominator);
-
-        roots               = std::move(other.roots);
-        impulse_factors     = std::move(other.impulse_factors);
-        transient_factors   = std::move(other.transient_factors);
-
-        is_settled          = other.is_settled;
-        settling_time       = other.settling_time;
-        steady_state_value  = other.steady_state_value;
-    }
+    TransferFunction& operator=(TransferFunction other);
+    TransferFunction& operator=(TransferFunction&& other) noexcept;
+    void assign(Vec newNumerator, Vec newDenominator);
+    void assign(Vec&& newNumerator, Vec&& newDenominator);
+    void assign(TransferFunction other);
+    void assign(TransferFunction&& other);
 
     TransferFunction& operator*=(const TransferFunction& other) {
         numerator   = MathCore::multiply(numerator, other.numerator);
         denominator = MathCore::multiply(denominator, other.denominator);
 
+        roots = SupMathCore::solvePolynomialLaguerre(denominator);
         recomputeBackState();
 
         return *this;

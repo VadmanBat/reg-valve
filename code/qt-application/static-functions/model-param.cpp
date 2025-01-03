@@ -30,14 +30,15 @@ Application::VecComp Application::getFreqResp(const TransferFunction& W, const M
 
 TransferFunction Application::getTransferFunction(const TransferFunctionForm& form) {
     auto n = form.getNum();
-    if (form.isDelayElement())
-        return {n, form.getDen(), form.delayTime(), 4};
+    if (form.isDelayElement()) {
+        return {n, form.getDen(), form.delayTime(), 6};
+    }
     return {n, form.getDen()};
 }
 
-TransferFunction Application::getRegTransferFunction(const TransferFunctionForm& form) {
+TransferFunction Application::getRegTransferFunction(const TransferFunctionForm& form, std::vector <double> a, std::vector <double> b) {
     auto n = form.getNum();
     if (form.isDelayElement())
-        return {n, form.getDen(), form.delayTime(), 4};
-    return {n, form.getDen()};
+        return {n, form.getDen(), a, b, form.delayTime(), 6};
+    return {n, form.getDen(), a, b};
 }

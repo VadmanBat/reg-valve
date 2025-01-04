@@ -152,8 +152,16 @@ public:
         mainLayout->addWidget(transferFunctionLabel);
         mainLayout->addLayout(transferFunctionLayout);
 
+        auto delayElementLabel = new QLabel("e");
+        delayElementLabel->setAlignment(Qt::AlignCenter);
+        delayElementLabel->setStyleSheet("font-size: 24pt;");
+        mainLayout->addWidget(delayElementLabel);
+        auto delayElementLayout = new QGridLayout;
         delayElement = new QDoubleSpinBox;
-        mainLayout->addWidget(delayElement);
+        delayElementLayout->addWidget(delayElement, 0, 0);
+        /*delayElementLayout->setRowStretch(0, 1);
+        delayElementLayout->setRowStretch(1, 2);*/
+        mainLayout->addLayout(delayElementLayout);
     }
 
     [[nodiscard]] inline QLayout* getLayout() const {

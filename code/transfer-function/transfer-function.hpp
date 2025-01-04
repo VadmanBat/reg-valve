@@ -8,7 +8,8 @@
 #include "../math-core.hpp"
 #include "../reg-core.hpp"
 
-#include "../math-core/solve-polynomial.hpp"
+#include "code/math-core/polynomial/solve.hpp"
+#include "code/math-core/fraction/decompose.hpp"
 
 /// Класс передаточной функции W(p)
 class TransferFunction {
@@ -30,12 +31,16 @@ private:
     Type omega_n{}, omega_c{}, zeta{}, m_overshoot{};
 
     void recomputeFrontState() {
-        impulse_factors = MathCore::decomposeFraction(numerator, roots, denominator.front());
         roots.emplace_back(0);
-        transient_factors = MathCore::decomposeFraction(numerator, roots, denominator.front());
+        transient_factors = SupMathCore::decomposeFraction(numerator, roots, denominator.front());
         roots.pop_back();
         steady_state_value = transient_factors.back().real();
         transient_factors.pop_back();
+
+        impulse_factors = transient_factors;
+        const auto n = roots.size();
+        for (std::size_t i = 0; i < n; ++i)
+            impulse_factors[i] *= roots[i];
 
         m_overshoot = std::abs(transientResponse(peak_time) - steady_state_value) / steady_state_value * 100;
     }

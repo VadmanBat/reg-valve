@@ -400,7 +400,7 @@ public:
         for (std::size_t i = n - std::min(n, numerator.size()), j = 0; i < n; ++i, ++j)
             matrix[i * cols + n] = numerator[j] / highestFactor;
         return solveMatrix(matrix, n);
-    } /// N^2 * N^2 + N^3
+    } /// N^2 + N^2 + N^3
 
     template <class Container>
     static std::pair <Container, Container> squareExponentialSum(const Container& coefficients, const Container& exponents) {

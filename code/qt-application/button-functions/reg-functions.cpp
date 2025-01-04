@@ -33,37 +33,37 @@ void Application::regAddTransferFunction() {
         case 1: /// P: Kp
             num = {Kp};
             den = {1};
-            stream << "P(" << Kp << ")";
+            stream << "П(" << Kp << ")";
             break;
         case 2: /// I: 1 / (Tu * p)
             num = {1};
             den = {Tu, 0};
-            stream << "I(" << Tu << ")";
+            stream << "И(" << Tu << ")";
             break;
         case 3: /// PI: (Kp * p + Kp / Tu) / p
             num = {Kp, Kp / Tu};
             den = {1, 0};
-            stream << "PI(" << Kp << ", " << Tu << ")";
+            stream << "ПИ(" << Kp << ", " << Tu << ")";
             break;
         case 4: /// D: Td * p
             num = {Td, 0};
             den = {1};
-            stream << "D(" << Td << ")";
+            stream << "Д(" << Td << ")";
             break;
         case 5: /// PD: Kp * Td * p + Kp
             num = {Kp * Td, Kp};
             den = {1};
-            stream << "PD(" << Kp << ", " << Td << ")";
+            stream << "ПД(" << Kp << ", " << Td << ")";
             break;
         case 6: /// ID: (Td * p^2 + 1 / Tu) / (p)
             num = {Td, 0, 1 / Tu};
             den = {1, 0};
-            stream << "ID(" << Tu << ", " << Td << ")";
+            stream << "ИД(" << Tu << ", " << Td << ")";
             break;
         case 7: /// PID: (Kp * Td * p^2 + Kp * p + kp / Tu) / p
             num = {Kp * Td, Kp, Kp / Tu};
             den = {1, 0};
-            stream << "PID(" << Kp << ", " << Tu << ", " << Td << ")";
+            stream << "ПИД(" << Kp << ", " << Tu << ", " << Td << ")";
             break;
     }
 

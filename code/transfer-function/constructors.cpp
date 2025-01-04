@@ -1,7 +1,5 @@
-//
-// Created by Vadma on 03.01.2025.
-//
 #include "transfer-function.hpp"
+#include "code/math-core/polynomial/solve.hpp"
 
 TransferFunction::TransferFunction(Vec numerator, Vec denominator) :
         numerator(std::move(numerator)), denominator(std::move(denominator))

@@ -19,6 +19,9 @@ file(GLOB_RECURSE SOURCES "code/*.cpp")
 add_executable(${PROJECT_NAME} main.cpp ${HEADERS} ${SOURCES}
         code/transfer-function/constructors.cpp
         code/transfer-function/operators/assign.cpp
+        code/math-core/polynomial/multiply.hpp
+        code/math-core/matrix/solve.hpp
+        code/math-core/fraction/decompose.hpp
 )
 
 target_link_libraries(${PROJECT_NAME} Qt6::Widgets Qt6::Charts)

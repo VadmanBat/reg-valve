@@ -1,11 +1,7 @@
-//
-// Created by Vadma on 03.01.2025.
-//
+#ifndef MATH_CORE_SOLVE_POLYNOMIAL_HPP
+#define MATH_CORE_SOLVE_POLYNOMIAL_HPP
 
-#ifndef REGVALVE_SOLVE_POLYNOMIAL_HPP
-#define REGVALVE_SOLVE_POLYNOMIAL_HPP
-
-#include "deflate-polynomial.hpp"
+#include "deflate.hpp"
 
 namespace SupMathCore {
     template <typename Type>
@@ -84,4 +80,4 @@ namespace SupMathCore {
     } /// N * log(log((r - x) / epsilon))
 }
 
-#endif //REGVALVE_SOLVE_POLYNOMIAL_HPP
+#endif //MATH_CORE_SOLVE_POLYNOMIAL_HPP

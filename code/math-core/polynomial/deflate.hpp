@@ -1,9 +1,5 @@
-//
-// Created by Vadma on 03.01.2025.
-//
-
-#ifndef REGVALVE_DEFLATE_POLYNOMIAL_HPP
-#define REGVALVE_DEFLATE_POLYNOMIAL_HPP
+#ifndef MATH_CORE_DEFLATE_POLYNOMIAL_HPP
+#define MATH_CORE_DEFLATE_POLYNOMIAL_HPP
 
 #include <vector>
 #include <complex>
@@ -43,4 +39,4 @@ namespace SupMathCore {
     }
 }
 
-#endif //REGVALVE_DEFLATE_POLYNOMIAL_HPP
+#endif //MATH_CORE_DEFLATE_POLYNOMIAL_HPP

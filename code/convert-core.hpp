@@ -1,5 +1,5 @@
 //
-// Created by Vadma on 08.07.2024.
+// Created by Vadim on 08.07.2024.
 //
 
 #ifndef REGVALVE_CONVERT_CORE_HPP
@@ -41,7 +41,7 @@ public:
         std::vector <Complex> res;
         res.reserve(numbers.size());
         for (const auto& number : numbers)
-            res.push_back(number);
+            res.emplace_back(number);
         return res;
     } /// N
 

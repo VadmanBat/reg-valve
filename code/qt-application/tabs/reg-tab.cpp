@@ -1,5 +1,5 @@
 //
-// Created by Vadma on 18.07.2024.
+// Created by Vadim on 18.07.2024.
 //
 #include "../application.h"
 #include "code/structures/dialogs/help-dialog.hpp"

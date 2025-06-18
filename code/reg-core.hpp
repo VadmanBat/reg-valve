@@ -1,5 +1,5 @@
 //
-// Created by Vadma on 17.07.2024.
+// Created by Vadim on 17.07.2024.
 //
 
 #ifndef REGVALVE_REG_CORE_HPP

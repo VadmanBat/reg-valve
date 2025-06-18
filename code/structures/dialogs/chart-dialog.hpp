@@ -1,5 +1,5 @@
 //
-// Created by Vadma on 07.12.2024.
+// Created by Vadim on 07.12.2024.
 //
 
 #ifndef REGVALVE_CHART_DIALOG_HPP
@@ -157,7 +157,7 @@ public:
             QDialog(parent), chart(chartPtr), series_size(chart->series().size())
     {
         setWindowTitle(tr("Свойства графика"));
-        setWindowIcon(QIcon::fromTheme("dialog-information"));
+        setWindowIcon(QIcon::fromTheme("document-properties"));
         setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
         titleEdit       = new QLineEdit(chart->title());

@@ -1,5 +1,5 @@
 //
-// Created by Vadma on 15.12.2024.
+// Created by Vadim on 15.12.2024.
 //
 
 #ifndef REGVALVE_MODEL_PARAM_HPP

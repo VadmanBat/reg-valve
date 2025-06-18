@@ -1,5 +1,5 @@
 //
-// Created by Vadma on 26.12.2024.
+// Created by Vadim on 26.12.2024.
 //
 #include "../application.h"
 #include "code/structures/dialogs/mod-par-dialog.hpp"
@@ -28,17 +28,14 @@ Application::VecComp Application::getFreqResp(const TransferFunction& W, const M
     return W.frequencyResponse({params.freqMin, params.freqMax}, (std::size_t)params.freqIntervals);
 }
 
-TransferFunction Application::getTransferFunction(const TransferFunctionForm& form) {
-    auto n = form.getNum();
-    if (form.isDelayElement()) {
-        return {n, form.getDen(), form.delayTime(), 6};
-    }
-    return {n, form.getDen()};
+TransferFunction Application::getTransferFunction(const TranFuncForm& form) const {
+    if (form.isDelayElement())
+        return {form.getNum(), form.getDen(), form.delayTime(), numModelParam.approxOrder};
+    return {form.getNum(), form.getDen()};
 }
 
-TransferFunction Application::getRegTransferFunction(const TransferFunctionForm& form, std::vector <double> a, std::vector <double> b) {
-    auto n = form.getNum();
+TransferFunction Application::getRegTransferFunction(const TranFuncForm& form, std::vector <double> a, std::vector <double> b) const {
     if (form.isDelayElement())
-        return {n, form.getDen(), a, b, form.delayTime(), 6};
-    return {n, form.getDen(), a, b};
+        return {form.getNum(), form.getDen(), a, b, form.delayTime(), regModelParam.approxOrder};
+    return {form.getNum(), form.getDen(), a, b};
 }

@@ -1,5 +1,5 @@
 //
-// Created by Vadma on 18.07.2024.
+// Created by Vadim on 18.07.2024.
 //
 
 #ifndef REGVALVE_TRANSFER_FUNCTION_HPP
@@ -8,8 +8,11 @@
 #include "../math-core.hpp"
 #include "../reg-core.hpp"
 
-#include "code/math-core/polynomial/solve.hpp"
-#include "code/math-core/fraction/decompose.hpp"
+#include "code/numina/polynomial/solve.hpp"
+#include "code/numina/fraction/invlaplace.hpp"
+#include "code/numina/terms/term-expression.hpp"
+
+#include <map>
 
 /// Класс передаточной функции W(p)
 class TransferFunction {
@@ -22,6 +25,32 @@ private:
     using VecPair   = std::vector <Pair>;
     using VecComp   = std::vector <Complex>;
 
+    class Roots {
+        struct comp {
+            bool operator()(const auto& a, const auto& b) const {
+                return a.real() != b.real() ? a.real() > b.real() : a.imag() < b.imag();
+            }
+        };
+
+        std::map <Complex, int, comp> getRoots(VecComp roots) {
+            static const Type epsilon = std::sqrt(std::numeric_limits<Type>::epsilon());
+            const auto n = roots.size();
+            std::sort(roots.begin(), roots.end(), comp());
+            int powers = 1;
+            std::map <Complex, int, comp> res;
+            for (std::size_t i = 1; i < n; ++i) {
+                if (std::abs(roots[i - 1] - roots[i]) < epsilon) {
+                    ++powers;
+                    continue;
+                }
+                res[roots[i - 1]] = powers;
+                powers = 1;
+            }
+            res[roots[n - 1]] = powers;
+            return res;
+        }
+    };
+
     Vec numerator, denominator;
     VecComp roots, impulse_factors, transient_factors;
 
@@ -32,25 +61,28 @@ private:
 
     void recomputeFrontState() {
         roots.emplace_back(0);
-        transient_factors = SupMathCore::decomposeFraction(numerator, roots, denominator.front());
-        roots.pop_back();
+        transient_factors = numina::simpleParfrac(numerator, roots, denominator.front());
+        transientFunction = TermExpression(roots, transient_factors, std::vector <int>(roots.size(), 0));
+        //transientFunction = numina::invlaplace(numerator, denominator, roots);
+        impulseFunction = transientFunction.derivative();
         steady_state_value = transient_factors.back().real();
         transient_factors.pop_back();
+        roots.pop_back();
 
         impulse_factors = transient_factors;
         const auto n = roots.size();
         for (std::size_t i = 0; i < n; ++i)
             impulse_factors[i] *= roots[i];
 
-        m_overshoot = std::abs(transientResponse(peak_time) - steady_state_value) / steady_state_value * 100;
+        m_overshoot = std::abs(transientFunction(peak_time) - steady_state_value) / steady_state_value * 100;
     }
 
     void recomputeBackState() {
-        Complex dominant_root(roots[0]);
-        for (const auto root : roots)
-            if (root.real() > dominant_root.real())
-                dominant_root = root;
-
+        std::sort(roots.begin(), roots.end(),
+        [](const auto& a, const auto& b){
+            return a.real() != b.real() ? a.real() > b.real() : a.imag() < b.imag();
+        });
+        const Complex& dominant_root(roots[0]);
         if (dominant_root.real() < 0) {
             is_settled      = true;
             settling_time   = -4 / dominant_root.real();
@@ -58,7 +90,7 @@ private:
             zeta            = -dominant_root.real() / omega_n;
             Type zeta_sq    = zeta * zeta;
             rise_time       = 1.8 / omega_n;
-            peak_time       = M_PI / (omega_n * std::sqrt(1 - zeta_sq));
+            peak_time       = std::numbers::pi / (omega_n * std::sqrt(1 - zeta_sq));
             omega_c         = omega_n * std::sqrt(1 - 2 * zeta_sq + std::sqrt(4 * zeta_sq * (zeta_sq - 1) + 2));
         }
         else {
@@ -70,9 +102,11 @@ private:
     }
 
 public:
-    TransferFunction(Vec numerator, Vec denominator);
+    TermExpression <Type> transientFunction, impulseFunction;
+    TransferFunction() = default;
+    TransferFunction(const Vec& numerator, const Vec& denominator);
     [[maybe_unused]] TransferFunction(Vec&& numerator, Vec&& denominator);
-    [[maybe_unused]] TransferFunction(Vec num, Vec den, double tau, int order);
+    [[maybe_unused]] TransferFunction(const Vec& num, const Vec& den, double tau, int order);
     [[maybe_unused]] TransferFunction(Vec&& num, Vec&& den, double tau, int order);
     [[maybe_unused]] TransferFunction(const Vec& objNum, const Vec& objDen, const Vec& regNum, const Vec& regDen);
     [[maybe_unused]] TransferFunction(const Vec& objNum, const Vec& objDen, const Vec& regNum, const Vec& regDen, double tau, int order);
@@ -104,6 +138,9 @@ public:
     [[nodiscard]] inline Type overshoot() const {
         return m_overshoot;
     }
+    [[nodiscard]] inline VecComp getRoots() const {
+        return roots;
+    }
 
     [[nodiscard]] inline Vec getNumerator() const {
         return numerator;
@@ -120,11 +157,11 @@ public:
 
     void setDenominator(Vec newDenominator) {
         denominator = std::move(newDenominator);
-        roots = SupMathCore::solvePolynomialLaguerre(denominator);
+        roots = numina::solve_polynomial_laguerre(denominator);
         recomputeBackState();
     }
 
-    [[nodiscard]] inline Type transientResponse(const Type& time) const {
+    /*[[nodiscard]] inline Type transientResponse(const Type& time) const {
         Complex result = steady_state_value;
         const std::size_t n = transient_factors.size();
         for (std::size_t i = 0; i < n; ++i)
@@ -138,7 +175,7 @@ public:
         for (std::size_t i = 0; i < n; ++i)
             result += impulse_factors[i] * std::exp(roots[i] * time);
         return result.real();
-    }
+    }*/
 
     [[nodiscard]] inline Complex frequencyResponse(const Complex& p) const {
         Complex num(0);
@@ -169,6 +206,9 @@ public:
     [[nodiscard]] VecComp frequencyResponse(const Pair& range, std::size_t points) const;
     [[nodiscard]] VecComp frequencyResponse(const Pair& range, std::size_t points, bool) const;
 
+    [[nodiscard]] VecComp amplitudeFrequencyResponse() const;
+    [[nodiscard]] VecComp phaseFrequencyResponse() const;
+
     [[nodiscard]] Type binarySearchFrequency(Type min, Type max, Type value, Type tolerance = 1e-3) const; /// log(N)
     [[nodiscard]] Type ternarySearchFrequency(Type min, Type max, Type tolerance = 1e-3) const; /// log(N)
     [[nodiscard]] Pair computeFrequencyRange(Type min = 0, Type max = 1e2) const; /// log(N)
@@ -190,22 +230,22 @@ public:
             for (std::size_t i = 0; i < n; ++i)
                 denominator[delta + i] += numerator[i];
         }
-        roots = SupMathCore::solvePolynomialLaguerre(denominator);
+        roots = numina::solve_polynomial_laguerre(denominator);
         recomputeBackState();
     }
 
-    TransferFunction& operator=(TransferFunction other);
+    TransferFunction& operator=(const TransferFunction& other);
     TransferFunction& operator=(TransferFunction&& other) noexcept;
-    void assign(Vec newNumerator, Vec newDenominator);
+    void assign(const Vec& newNumerator, const Vec& newDenominator);
     void assign(Vec&& newNumerator, Vec&& newDenominator);
-    void assign(TransferFunction other);
+    void assign(const TransferFunction& other);
     void assign(TransferFunction&& other);
 
     TransferFunction& operator*=(const TransferFunction& other) {
         numerator   = MathCore::multiply(numerator, other.numerator);
         denominator = MathCore::multiply(denominator, other.denominator);
 
-        roots = SupMathCore::solvePolynomialLaguerre(denominator);
+        roots = numina::solve_polynomial_laguerre(denominator);
         recomputeBackState();
 
         return *this;

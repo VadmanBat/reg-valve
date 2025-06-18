@@ -23,7 +23,7 @@ TransferFunction::Type TransferFunction::computeStandardDeviation(const std::siz
     Type sum = 0, error;
     const Type step = settling_time / static_cast<Type>(points - 1);
     for (std::size_t i = 0; i < points; ++i) {
-        error = transientResponse(static_cast<Type>(i) * step) - steady_state_value;
+        error = transientFunction(static_cast<Type>(i) * step) - steady_state_value;
         sum += error * error;
     }
     return std::sqrt(sum / static_cast<Type>(points - 1));

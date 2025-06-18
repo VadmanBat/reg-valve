@@ -1,5 +1,5 @@
 //
-// Created by Vadma on 21.07.2024.
+// Created by Vadim on 21.07.2024.
 //
 #include "../application.h"
 
@@ -9,8 +9,8 @@ void Application::regAddTransferFunction() {
 
     if (denominator.empty())
         return;
-    if (numerator.size() > denominator.size())
-        return;
+    /*if (numerator.size() > denominator.size())
+        return;*/
 
     std::vector <double> num, den;
 
@@ -68,18 +68,20 @@ void Application::regAddTransferFunction() {
     }
 
     //TransferFunction W(numerator, denominator, num, den, tau, order);
-    TransferFunction W(getRegTransferFunction(regTF, num, den));
+#define W regTranFunc
+    W = TransferFunction(getRegTransferFunction(regTF, num, den));
     regTranRespSeries.push_back(getTranResp(W, regModelParam));
-    regFreqRespSeries.push_back(getFreqResp(W, regModelParam));
+    regFreqRespSeries.push_back(getFreqResp(W, regModelParam));std::cout << "Hello" << '\n';
 
     const auto& tranResp = regTranRespSeries.back().original();
     const auto& freqResp = regFreqRespSeries.back().original();
 
     regWidget->updateValues(W.isSettled() ? std::vector <double>{
-            W.settlingTime(), W.naturalFrequency(), W.steadyStateValue(), W.computeLinearIntegralCriterion(tranResp),
-            W.riseTime(), W.cutFrequency(), 1 - W.steadyStateValue(), W.computeIntegralQuadraticCriterion(),
-            W.peakTime(), W.dampingRation(), W.overshoot(), W.computeStandardDeviation()
+            W.settlingTime(),   W.naturalFrequency(),   W.steadyStateValue(),       W.computeLinearIntegralCriterion(tranResp),
+            W.riseTime(),       W.cutFrequency(),       1 - W.steadyStateValue(),   W.computeIntegralQuadraticCriterion(),
+            W.peakTime(),       W.dampingRation(),      W.overshoot(),              W.computeStandardDeviation()
     } : std::vector <double>{});
+#undef W //regTranFunc
 
     const auto title  = stream.str();
     Application::addPoints(regChartTranResp, tranResp, title.c_str(), regSize);

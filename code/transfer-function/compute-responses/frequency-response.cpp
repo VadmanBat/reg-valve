@@ -14,7 +14,7 @@ TransferFunction::VecComp TransferFunction::frequencyResponse() const {
     VecComp points;
     points.reserve(200);
     points.push_back(frequencyResponse(Complex(0, w)));
-    do {
+    do {//std::cout << "freq-comp" << '\n';
         value_next_real     = frequencyResponse(Complex(0, w_next));
         value_mid_linear    = Complex(0.5, 0) * (value_current + value_next_real);
         error               = std::abs(frequencyResponse(Complex(0, w + 0.5 * dw)) - value_mid_linear);

@@ -1,5 +1,5 @@
 //
-// Created by Vadma on 08.07.2024.
+// Created by Vadim on 08.07.2024.
 //
 
 #ifndef REGVALVE_APPLICATION_H
@@ -8,7 +8,7 @@
 #include <QWidget>
 #include <QtCharts>
 
-#include "code/structures/forms/transfer-function-form.hpp"
+#include "code/structures/forms/tran-func-form.hpp"
 
 #include "code/structures/reg-parameter.hpp"
 #include "code/structures/reg-widget.hpp"
@@ -108,8 +108,8 @@ private:
     ModelParam numModelParam, regModelParam;
     static VecPair getTranResp(const TransferFunction& W, const ModelParam& params);
     static VecComp getFreqResp(const TransferFunction& W, const ModelParam& params);
-    [[nodiscard]] static TransferFunction getTransferFunction(const TransferFunctionForm& form);
-    [[nodiscard]] static TransferFunction getRegTransferFunction(const TransferFunctionForm& form, std::vector <double> a, std::vector <double> b);
+    [[nodiscard]] TransferFunction getTransferFunction(const TranFuncForm& form) const;
+    [[nodiscard]] TransferFunction getRegTransferFunction(const TranFuncForm& form, std::vector <double> a, std::vector <double> b) const;
 
     const ChartsDataset EXP_CHARTS = {
             {expChartTranResp, "Переходная характеристика", "Время t, секунды", "h(t)"},
@@ -124,7 +124,8 @@ private:
             {regChartFreqResp, "Комплексно-частотная характеристика (КЧХ)", "Реальная ось", "Мнимая ось"}
     };
 
-    TransferFunctionForm numTF, regTF;
+    TransferFunction numTranFunc, regTranFunc;
+    TranFuncForm numTF, regTF;
 
     std::vector <RegParameter*> regParameters;
 

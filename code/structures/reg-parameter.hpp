@@ -1,5 +1,5 @@
 //
-// Created by Vadma on 23.07.2024.
+// Created by Vadim on 23.07.2024.
 //
 
 #ifndef REGVALVE_REG_PARAMETER_HPP

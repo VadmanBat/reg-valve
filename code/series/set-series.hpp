@@ -1,5 +1,5 @@
 //
-// Created by Vadma on 05.12.2024.
+// Created by Vadim on 05.12.2024.
 //
 
 #ifndef REGVALVE_SET_SERIES_HPP

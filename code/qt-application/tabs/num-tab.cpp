@@ -1,5 +1,5 @@
 //
-// Created by Vadma on 08.07.2024.
+// Created by Vadim on 08.07.2024.
 //
 #include "../application.h"
 
@@ -45,6 +45,11 @@ QWidget* Application::createNumTab() {
     replaceButton->setFont(font);
     clearButton->setFont(font);
 
+    auto nameLabel = new QLabel;
+
+    numTF.setTF(numTranFunc);
+    regTF.setTF(regTranFunc);
+    numTF.createConnect(nameLabel);
     connect(setButton, &QPushButton::clicked, [this](){
         showModParDialog(numModelParam);
     });
@@ -53,6 +58,7 @@ QWidget* Application::createNumTab() {
     connect(clearButton,    &QPushButton::clicked, this, &Application::numClearCharts);
 
     auto buttonLayout = new QHBoxLayout;
+    buttonLayout->addWidget(nameLabel);
     buttonLayout->addWidget(queButton);
     buttonLayout->addWidget(setButton);
     buttonLayout->addWidget(addButton);

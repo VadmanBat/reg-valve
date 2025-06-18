@@ -1,5 +1,5 @@
 //
-// Created by Vadma on 19.07.2024.
+// Created by Vadim on 19.07.2024.
 //
 
 #ifndef REGVALVE_DOUBLESLIDER_HPP

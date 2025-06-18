@@ -1,5 +1,5 @@
 //
-// Created by Vadma on 08.07.2024.
+// Created by Vadim on 08.07.2024.
 //
 
 #ifndef REGVALVE_MATH_CORE_HPP
@@ -188,7 +188,7 @@ public:
         VecComp roots;
         while (degree > 0) {
             Complex x(-1, 1);
-            for (std::size_t i = 0; i < MAX_ITER; ++i) {std::cout << "i = " << i << ", value  = " << std::abs(f(x)) << " | " << std::abs(f_init(x)) << '\n';
+            for (std::size_t i = 0; i < MAX_ITER; ++i) {//std::cout << "i = " << i << ", value  = " << std::abs(f(x)) << " | " << std::abs(f_init(x)) << '\n';
                 const std::complex <long double> fx(f(x));
                 const std::complex <long double> dfx(df(x));
                 if (std::abs(fx) < epsilon) {
@@ -205,30 +205,30 @@ public:
                 coeffs = deflatePolynomial(coeffs, x);
                 --degree;
                 x.imag(-x.imag());
-                for (auto k : coeffs)
+                /*for (auto k : coeffs)
                     std::cout << k << ' ';
-                std::cout << '\n';
+                std::cout << '\n';*/
             }
             roots.push_back(x);
             coeffs = deflatePolynomial(coeffs, x);
             --degree;
-            for (auto k : coeffs)
+            /*for (auto k : coeffs)
                 std::cout << k << ' ';
-            std::cout << '\n';
+            std::cout << '\n';*/
         }
         if (degree)
             roots.push_back(-coeffs[1] / coeffs[0]);
 
-        for (auto& root : roots) {
+        /*for (auto& root : roots) {
             std::cout << "root = " << root << '\n';
             std::cout << f_init(root) << ", abs = " << std::abs(f_init(root)) << '\n';
             root = ConvertCore::normalize(root, epsilon);
-        }
+        }*/
 
         return roots;
     } /// N * log(log((r - x) / epsilon))
     /*template <int EPSILON_ORDER = 9, std::size_t MAX_ITER = 100>
-    static VecComp solvePolynomialLaguerre(const Vec& coefficients) {
+    static VecComp solve_polynomial_laguerre(const Vec& coefficients) {
         static const Type epsilon(std::pow(10.L, -EPSILON_ORDER));
 
         std::vector <std::complex <long double>> coeffs(coefficients.size());
@@ -304,7 +304,7 @@ public:
                 std::cout << '\n';
             }
             roots.emplace_back(x);
-            coeffs = deflatePolynomial(coeffs, x);
+            coeffs = deflate_polynomial(coeffs, x);
             --degree;
             for (auto k : coeffs)
                 std::cout << k << ' ';

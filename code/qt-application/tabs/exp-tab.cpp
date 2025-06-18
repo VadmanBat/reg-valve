@@ -1,5 +1,5 @@
 //
-// Created by Vadma on 08.07.2024.
+// Created by Vadim on 08.07.2024.
 //
 
 #include "../application.h"

@@ -1,5 +1,5 @@
 //
-// Created by Vadma on 21.07.2024.
+// Created by Vadim on 21.07.2024.
 //
 #include "../application.h"
 #include <QMessageBox>

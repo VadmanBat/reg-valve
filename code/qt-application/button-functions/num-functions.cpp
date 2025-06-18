@@ -1,5 +1,5 @@
 //
-// Created by Vadma on 21.07.2024.
+// Created by Vadim on 21.07.2024.
 //
 #include "../application.h"
 
@@ -8,10 +8,10 @@ bool Application::numIsValidInput(const MathCore::Vec& num, const MathCore::Vec&
         showError("Знаменатель НЕ может быть равен нулю!");
         return false;
     }
-    if (den.back() == 0) {
+    /*if (den.back() == 0) {
         showError("Свободный член знаменателя НЕ может быть равен нулю!");
         return false;
-    }
+    }*/
     if (den.size() == 1) {
         showError("Порядок знаменателя НЕ может быть меньше первого порядка!");
         return false;
@@ -29,7 +29,8 @@ void Application::numAddTransferFunction() {
 
     if (numIsValidInput(numerator, denominator)) {
         //TransferFunction W(numerator, denominator);
-        TransferFunction W(getTransferFunction(numTF));
+#define W numTranFunc
+        W = getTransferFunction(numTF);
         numTranRespSeries.push_back(getTranResp(W, numModelParam));
         numFreqRespSeries.push_back(getFreqResp(W, numModelParam));
 
@@ -37,10 +38,11 @@ void Application::numAddTransferFunction() {
         const auto& freqResp = numFreqRespSeries.back().original();
 
         numWidget->updateValues(W.isSettled() ? std::vector <double>{
-                W.settlingTime(), W.naturalFrequency(),
-                W.riseTime(), W.cutFrequency(),
-                W.dampingRation(), W.steadyStateValue()
+                W.settlingTime(),   W.naturalFrequency(),
+                W.riseTime(),       W.cutFrequency(),
+                W.dampingRation(),  W.steadyStateValue()
         } : std::vector <double>{});
+#undef W //numTranFunc
 
         Application::addPoints(numChartTranResp, tranResp, "Тест", numSize);
         Application::addComplexPoints(numChartFreqResp, freqResp, "Тест", numSize);

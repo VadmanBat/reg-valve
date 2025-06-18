@@ -1,5 +1,5 @@
 //
-// Created by Vadma on 13.12.2024.
+// Created by Vadim on 13.12.2024.
 //
 
 #ifndef REGVALVE_MOD_PAR_DIALOG_HPP
@@ -169,7 +169,7 @@ private:
 public:
     explicit ModParDialog(const ModelParam& values, QWidget* parent = nullptr) : QDialog(parent) {
         setWindowTitle("Параметры моделирования");
-        setWindowIcon(QIcon::fromTheme("dialog-information"));
+        setWindowIcon(QIcon::fromTheme("document-properties"));
 
         autoSimTimeCheckBox         = new QCheckBox("Авто");
         autoTimeIntervalsCheckBox   = new QCheckBox("Авто");

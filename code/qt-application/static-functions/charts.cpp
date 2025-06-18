@@ -1,5 +1,5 @@
 //
-// Created by Vadma on 13.07.2024.
+// Created by Vadim on 13.07.2024.
 //
 #include "../application.h"
 #include "code/structures/dialogs/chart-dialog.hpp"
@@ -19,15 +19,10 @@ QLayout* Application::createCharts(const ChartsDataset& charts, QWidget* tab) {
 }
 
 void Application::createChartContextMenu(QChartView* chartView) {
-    auto style = QApplication::style();
-    QIcon saveIcon      = style->standardIcon(QStyle::SP_DialogSaveButton);
-    QIcon copyIcon      = style->standardIcon(QStyle::SP_FileIcon);
-    QIcon settingsIcon  = style->standardIcon(QStyle::SP_DialogApplyButton);
-
-    auto saveImageAction    = new QAction(saveIcon, tr("Сохранить как PNG"), chartView);
-    auto saveTextAction     = new QAction(saveIcon, tr("Сохранить как TXT"), chartView);
-    auto copyAction         = new QAction(copyIcon, tr("Копировать изображение"), chartView);
-    auto propertiesAction   = new QAction(settingsIcon, tr("Свойства"), chartView);
+    auto saveImageAction    = new QAction(QIcon::fromTheme("document-save-as"), tr("Сохранить как PNG"), chartView);
+    auto saveTextAction     = new QAction(QIcon::fromTheme("document-save-as"), tr("Сохранить как TXT"), chartView);
+    auto copyAction         = new QAction(QIcon::fromTheme("edit-copy"), tr("Копировать изображение"), chartView);
+    auto propertiesAction   = new QAction(QIcon::fromTheme("document-properties"), tr("Свойства"), chartView);
 
     auto chart = chartView->chart();
 

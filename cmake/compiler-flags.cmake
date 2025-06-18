@@ -47,7 +47,6 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 # ========== Статическая линковка ==========
-
 if (STATIC_BUILD)
     set_target_properties(${PROJECT_NAME} PROPERTIES
             LINK_SEARCH_START_STATIC ON

@@ -13,6 +13,7 @@ set(NUMINA_SOURCES
         ../code/numina/polynomial/deflate.hpp
         ../code/numina/polynomial/multiply.hpp
         ../code/numina/polynomial/solve.hpp
+        #../code/numina/polynomial/polynomial.hpp
         ../code/numina/terms/term.hpp
         ../code/numina/terms/term-expression.hpp
         ../code/numina/terms/time-terms/time-terms.hpp

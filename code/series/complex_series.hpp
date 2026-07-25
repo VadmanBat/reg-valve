@@ -1,12 +1,13 @@
 #pragma once
 
 #include <cmath>
-#include <utility>
+#include <complex>
 #include <vector>
 
-class Series {
+class ComplexSeries {
     using Type      = double;
-    using Container = std::vector<std::pair<Type, Type>>;
+    using Complex   = std::complex<Type>;
+    using Container = std::vector<Complex>;
 
     Container data, opt_data;
     Type min_value_x{}, max_value_x{};
@@ -18,8 +19,20 @@ class Series {
         const auto* arr = data.data();
         const std::size_t n = data.size();
         for (std::size_t i = n % 2; i + 1 < n; i += 2) {
-            const auto a = arr[i].second;
-            const auto b = arr[i + 1].second;
+            Type a = arr[i].real(), b = arr[i + 1].real();
+            if (a < b) {
+                if (a < min_value_x)
+                    min_value_x = a;
+                if (b > max_value_x)
+                    max_value_x = b;
+            } else {
+                if (b < min_value_x)
+                    min_value_x = b;
+                if (a > max_value_x)
+                    max_value_x = a;
+            }
+            a = arr[i].imag();
+            b = arr[i + 1].imag();
             if (a < b) {
                 if (a < min_value_y)
                     min_value_y = a;
@@ -32,13 +45,6 @@ class Series {
                     max_value_y = a;
             }
         }
-        if (n % 2 == 1) {
-            const auto y = arr[n - 1].second;
-            if (y < min_value_y)
-                min_value_y = y;
-            if (y > max_value_y)
-                max_value_y = y;
-        }
         const auto range_x = max_value_x - min_value_x;
         const auto range_y = max_value_y - min_value_y;
         const Type rx = range_x > 0 ? range_x : 1;
@@ -47,10 +53,10 @@ class Series {
         opt_data.clear();
         opt_data.reserve(n);
         opt_data.push_back(arr[0]);
-        auto [x1, y1] = arr[0];
+        Type x1 = arr[0].real(), y1 = arr[0].imag();
         for (std::size_t i = 1; i + 1 < n; ++i) {
-            const auto [x2, y2] = arr[i];
-            const auto [x3, y3] = arr[i + 1];
+            const Type x2 = arr[i].real(), y2 = arr[i].imag();
+            const Type x3 = arr[i + 1].real(), y3 = arr[i + 1].imag();
             const auto k = (y3 - y1) / (x3 - x1);
             const auto b = y1 - k * x1;
             const auto dist = std::abs(k * x2 - y2 + b) / std::sqrt(k * k + 1);
@@ -67,12 +73,12 @@ class Series {
     }
 
 public:
-    explicit Series(Container values)
+    explicit ComplexSeries(Container values)
         : data(std::move(values)),
-          min_value_x(data.empty() ? 0 : data.front().first),
-          max_value_x(data.empty() ? 0 : data.back().first),
-          min_value_y(data.empty() ? 0 : data.front().second),
-          max_value_y(data.empty() ? 0 : data.front().second) {
+          min_value_x(data.empty() ? 0 : data.front().real()),
+          max_value_x(data.empty() ? 0 : data.front().real()),
+          min_value_y(data.empty() ? 0 : data.front().imag()),
+          max_value_y(data.empty() ? 0 : data.front().imag()) {
         if (!data.empty())
             optimize();
     }

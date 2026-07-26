@@ -1,16 +1,15 @@
 #pragma once
 
+#include "code/charts/response_chart_bank.h"
 #include "code/model/model_param.hpp"
-#include "code/series/complex_series.hpp"
-#include "code/series/series.hpp"
-#include "code/series/set_series.hpp"
 #include "code/widgets/regulation_widget.h"
 #include "code/widgets/tran_func_form.h"
 
 #include "numina/classes/control/transfer-function.h"
 
-#include <QChart>
 #include <QWidget>
+
+class QMenu;
 
 namespace Ui {
 class NumTab;
@@ -27,6 +26,7 @@ private slots:
     void replaceTransferFunction();
     void clearCharts();
     void openSettings();
+    void openChartsMenu();
 
 private:
     void showError(const QString& message);
@@ -36,11 +36,8 @@ private:
     Ui::NumTab* ui;
     TranFuncForm* form_{nullptr};
     RegulationWidget* metrics_{nullptr};
-    QChart* chartTran_{nullptr};
-    QChart* chartFreq_{nullptr};
-    SetSeries<Series> tranSeries_;
-    SetSeries<ComplexSeries> freqSeries_;
+    ResponseChartBank* charts_{nullptr};
+    QMenu* chartsMenu_{nullptr};
     ModelParam modelParam_;
     numina::TransferFunction currentTf_;
-    std::size_t seriesIndex_{0};
 };

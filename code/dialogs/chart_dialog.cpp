@@ -85,7 +85,13 @@ void ChartDialog::buildSeriesEditors() {
         auto* widthSpin = new QSpinBox;
         auto* styleCombo = new QComboBox;
 
-        colorButton->setStyleSheet(QStringLiteral("background-color: %1").arg(lineSeries->pen().color().name()));
+        colorButton->setObjectName(QStringLiteral("seriesColorButton"));
+        colorButton->setAutoFillBackground(true);
+        {
+            QPalette pal = colorButton->palette();
+            pal.setColor(QPalette::Button, lineSeries->pen().color());
+            colorButton->setPalette(pal);
+        }
         widthSpin->setRange(1, 10);
         widthSpin->setValue(lineSeries->pen().width());
         styleCombo->addItems({tr("Сплошная"), tr("Штриховая"), tr("Точечная"), tr("Штрих-точка"), tr("Штрих-точка-точка")});
@@ -118,7 +124,9 @@ void ChartDialog::changeSeriesColor(int index) {
         return;
     currentPens_[index].setColor(newColor);
     lineSeriesPointers_[index]->setPen(currentPens_[index]);
-    colorButtons_[index]->setStyleSheet(QStringLiteral("background-color: %1").arg(newColor.name()));
+    QPalette pal = colorButtons_[index]->palette();
+    pal.setColor(QPalette::Button, newColor);
+    colorButtons_[index]->setPalette(pal);
 }
 
 void ChartDialog::changeSeriesStyle(int index) {

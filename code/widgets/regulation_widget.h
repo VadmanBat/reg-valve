@@ -30,6 +30,5 @@ private:
     std::vector<QLineEdit*> lineEdits_;
     std::vector<double> lastValues_;
     std::vector<int> precisions_;
-    std::vector<std::pair<int, int>> colors_;
-    const QString palette_[3] = {"white", "#90ee90", "#ffb6c1"};
+    std::vector<std::pair<int, int>> colors_; ///< per-cell: flash index when value down / up (0..2)
 };

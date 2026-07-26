@@ -3,6 +3,7 @@
 #include "code/dialogs/chart_dialog.h"
 #include "code/series/complex_series.hpp"
 #include "code/series/series.hpp"
+#include "code/util/data_file_parser.hpp"
 
 #include <QApplication>
 #include <QClipboard>
@@ -23,8 +24,6 @@
 #define CHART_TR(str) QCoreApplication::translate("chart_utils", str)
 
 #include <cmath>
-#include <fstream>
-#include <sstream>
 
 namespace chart_utils {
 namespace {
@@ -277,30 +276,9 @@ bool saveChartToFile(const QString& fileName, QChart* chart) {
 }
 
 VecPair readVectorFromFile(const QString& fileName) {
-    std::vector<double> numbers;
-    std::ifstream file(fileName.toLocal8Bit().toStdString());
-    std::string line;
-    while (std::getline(file, line)) {
-        std::stringstream ss(line);
-        std::string word;
-        while (ss >> word) {
-            std::string clean;
-            for (char let : word)
-                if (std::isdigit(static_cast<unsigned char>(let)) || let == '.' || let == '-' || let == '+')
-                    clean += let;
-            if (clean.empty())
-                continue;
-            try {
-                numbers.push_back(std::stod(clean));
-            } catch (...) {
-            }
-        }
-    }
-    VecPair res;
-    res.reserve(numbers.size() / 2);
-    for (std::size_t i = 0; i + 1 < numbers.size(); i += 2)
-        res.emplace_back(numbers[i], numbers[i + 1]);
-    return res;
+    // Robust path: '.' / ',' decimals, junk separators stripped (see data_file_parser).
+    auto opt = data_file_parser::readStepResponse(fileName);
+    return opt.value_or(VecPair{});
 }
 
 QChartView* makeChartView(QChart* chart, QWidget* parent, const QString& title, const QString& titleX,

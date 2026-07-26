@@ -1,0 +1,269 @@
+/* Global application chrome. Semantic roles via objectName / dynamic properties.
+   Avoid hardcoded black/white on text; use palette() where possible. */
+
+/* ---- Toolbar action buttons ---- */
+QPushButton#addButton,
+QPushButton#replaceButton,
+QPushButton#settingsButton,
+QPushButton#helpButton,
+QPushButton#openFileButton,
+QPushButton#identifyButton {
+    background-color: #2e7d32;
+    color: white;
+    border: 2px solid #1b5e20;
+    border-style: outset;
+    border-radius: 5px;
+    padding: 5px;
+    min-width: 32px;
+    min-height: 32px;
+}
+
+QPushButton#addButton:hover,
+QPushButton#replaceButton:hover,
+QPushButton#settingsButton:hover,
+QPushButton#helpButton:hover,
+QPushButton#openFileButton:hover,
+QPushButton#identifyButton:hover {
+    background-color: #388e3c;
+    border-style: inset;
+}
+
+QPushButton#addButton:pressed,
+QPushButton#replaceButton:pressed,
+QPushButton#settingsButton:pressed,
+QPushButton#helpButton:pressed,
+QPushButton#openFileButton:pressed,
+QPushButton#identifyButton:pressed {
+    background-color: #1b5e20;
+    border-style: inset;
+    padding: 3px;
+}
+
+QPushButton#clearButton {
+    background-color: #c62828;
+    color: white;
+    border: 2px solid #8e0000;
+    border-style: outset;
+    border-radius: 5px;
+    padding: 5px;
+    min-width: 32px;
+    min-height: 32px;
+}
+
+QPushButton#clearButton:hover {
+    background-color: #d32f2f;
+    border-style: inset;
+}
+
+QPushButton#clearButton:pressed {
+    background-color: #8e0000;
+    border-style: inset;
+    padding: 3px;
+}
+
+/* ---- Transfer function form (editable) + display (readonly) ---- */
+TranFuncForm QLabel#tfTitle,
+TfDisplayWidget QLabel#tfTitle {
+    font-size: 24pt;
+}
+
+/* Fraction bar N / D — same role as text (dark on light, light/white on dark) */
+TranFuncForm QFrame#tfDivider,
+TfDisplayWidget QFrame#tfDivider {
+    background-color: palette(window-text);
+    border: none;
+    min-height: 2px;
+    max-height: 2px;
+    margin: 2px 0;
+}
+
+/* Read-only poly text on identification tab */
+TfDisplayWidget QLabel#tfPolyText {
+    font-size: 14pt;
+    color: palette(window-text);
+    padding: 2px 6px;
+}
+
+TfDisplayWidget QLabel#tfDelayText {
+    font-size: 16pt;
+    color: palette(window-text);
+    padding-left: 8px;
+}
+
+TranFuncForm QLineEdit#tfCoeff {
+    font-size: 16pt;
+    min-width: 36px;
+    max-width: 36px;
+}
+
+/* Sign of coefficient — theme-friendly accents (not pure black) */
+TranFuncForm QLineEdit#tfCoeff[coeffSign="zero"] {
+    color: #9c27b0;
+}
+
+TranFuncForm QLineEdit#tfCoeff[coeffSign="positive"] {
+    color: #1565c0;
+}
+
+TranFuncForm QLineEdit#tfCoeff[coeffSign="negative"] {
+    color: #c62828;
+}
+
+TranFuncForm QLabel#tfPower {
+    font-size: 16pt;
+}
+
+TranFuncForm QLabel#tfPower[powerActive="false"] {
+    color: palette(mid);
+}
+
+TranFuncForm QLabel#tfPower[powerActive="true"] {
+    color: palette(window-text);
+}
+
+/* Delay: · e^(− τ p) */
+TranFuncForm QLabel#tfMulDot {
+    font-size: 22pt;
+    color: palette(window-text);
+    padding: 0 4px;
+}
+
+TranFuncForm QLabel#tfDelayBase {
+    font-size: 28pt;
+    font-weight: 500;
+    color: palette(window-text);
+    padding-bottom: 2px;
+}
+
+TranFuncForm QLabel#tfDelayMinus,
+TranFuncForm QLabel#tfDelayP {
+    font-size: 14pt;
+    color: palette(window-text);
+}
+
+TranFuncForm QDoubleSpinBox#tfDelay {
+    font-size: 13pt;
+    padding: 1px 3px;
+    /* width is content-driven in code; do not force min-width */
+}
+
+TranFuncForm QWidget#tfDelayExp {
+    padding-top: 0;
+}
+
+/* Charts visibility tool button */
+QToolButton#chartsButton {
+    min-width: 36px;
+    max-width: 36px;
+    min-height: 36px;
+    max-height: 36px;
+    padding: 2px;
+    font-size: 16px;
+    background-color: #6a1b9a;
+    color: white;
+    border: 2px solid #4a148c;
+    border-style: outset;
+    border-radius: 5px;
+}
+QToolButton#chartsButton:hover {
+    background-color: #7b1fa2;
+    border-style: inset;
+}
+QToolButton#chartsButton:pressed {
+    background-color: #4a148c;
+    border-style: inset;
+}
+
+/* Overlay clipboard buttons under delay / display copy */
+TranFuncForm QPushButton#tfCopyButton,
+TranFuncForm QPushButton#tfPasteButton,
+TfDisplayWidget QPushButton#tfCopyButton {
+    min-width: 24px;
+    max-width: 24px;
+    min-height: 24px;
+    max-height: 24px;
+    padding: 0;
+    margin: 0;
+    font-size: 12px;
+    color: white;
+    border-style: outset;
+    border-width: 1px;
+    border-radius: 4px;
+}
+
+/* Copy — green (same family as + / add) */
+TranFuncForm QPushButton#tfCopyButton,
+TfDisplayWidget QPushButton#tfCopyButton {
+    background-color: #2e7d32;
+    border-color: #1b5e20;
+}
+TranFuncForm QPushButton#tfCopyButton:hover,
+TfDisplayWidget QPushButton#tfCopyButton:hover {
+    background-color: #388e3c;
+    border-style: inset;
+}
+TranFuncForm QPushButton#tfCopyButton:pressed,
+TfDisplayWidget QPushButton#tfCopyButton:pressed {
+    background-color: #1b5e20;
+    border-style: inset;
+}
+
+/* Paste — blue */
+TranFuncForm QPushButton#tfPasteButton {
+    background-color: #1565c0;
+    border-color: #0d47a1;
+}
+TranFuncForm QPushButton#tfPasteButton:hover {
+    background-color: #1e88e5;
+    border-style: inset;
+}
+TranFuncForm QPushButton#tfPasteButton:pressed {
+    background-color: #0d47a1;
+    border-style: inset;
+}
+
+/* ---- Metrics panel (adaptive; room for HTML subscripts) ---- */
+RegulationWidget QLabel#metricLabel {
+    font-size: 13px;
+    padding: 2px 4px 4px 2px; /* bottom pad so <sub> is not clipped */
+    min-width: 0;
+    /* no max-width — width follows content / layout */
+}
+
+RegulationWidget QLineEdit#metricValue {
+    font-size: 13px;
+    padding: 2px 6px;
+    min-width: 56px;
+    background-color: palette(base);
+    color: palette(text);
+}
+
+/* Flash: 0 neutral, 1 “better/down role”, 2 “worse/up role” — soft fills work on light+dark */
+RegulationWidget QLineEdit#metricValue[metricFlash="0"] {
+    background-color: palette(base);
+}
+
+RegulationWidget QLineEdit#metricValue[metricFlash="1"] {
+    background-color: rgba(46, 125, 50, 0.35);
+}
+
+RegulationWidget QLineEdit#metricValue[metricFlash="2"] {
+    background-color: rgba(198, 40, 40, 0.35);
+}
+
+/* ---- Regulator parameter row ---- */
+QLabel#regParamLabel {
+    font-size: 14pt;
+}
+
+QCheckBox#regParamCheck {
+    spacing: 0;
+    padding: 0;
+    margin: 0;
+}
+
+QDoubleSpinBox#regParamMin,
+QDoubleSpinBox#regParamMax,
+QSpinBox#regParamPoints {
+    font-size: 9pt;
+}

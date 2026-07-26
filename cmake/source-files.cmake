@@ -26,8 +26,11 @@ set(SOURCES
         ${CMAKE_SOURCE_DIR}/code/widgets/reg_parameter.cpp
         ${CMAKE_SOURCE_DIR}/code/widgets/regulation_widget.cpp
         ${CMAKE_SOURCE_DIR}/code/widgets/tran_func_form.cpp
+        ${CMAKE_SOURCE_DIR}/code/widgets/tf_display_widget.cpp
 
         ${CMAKE_SOURCE_DIR}/code/charts/chart_utils.cpp
+        ${CMAKE_SOURCE_DIR}/code/charts/chart_panel.cpp
+        ${CMAKE_SOURCE_DIR}/code/charts/response_chart_bank.cpp
 
         ${UI_FILES}
 )

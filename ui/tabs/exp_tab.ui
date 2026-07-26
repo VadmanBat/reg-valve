@@ -4,16 +4,66 @@
  <widget class="QWidget" name="ExpTab">
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="toolbarLayout">
+    <layout class="QHBoxLayout" name="topLayout">
      <item>
-      <widget class="QPushButton" name="openFileButton">
+      <widget class="QWidget" name="formHost" native="true"/>
+     </item>
+     <item>
+      <widget class="QWidget" name="metricsHost" native="true"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="buttonLayout">
+     <item>
+      <widget class="QLabel" name="methodLabel">
        <property name="text">
-        <string>Открыть файл</string>
+        <string>Метод:</string>
        </property>
       </widget>
      </item>
      <item>
-      <spacer name="toolbarSpacer">
+      <widget class="QComboBox" name="methodCombo">
+       <item>
+        <property name="text">
+         <string>По переходной h(t)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>По клапану / сигналу</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="openFileButton">
+       <property name="objectName">
+        <string notr="true">openFileButton</string>
+       </property>
+       <property name="toolTip">
+        <string>Загрузить экспериментальные данные</string>
+       </property>
+       <property name="text">
+        <string>📂</string>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>36</width>
+         <height>36</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="fileLabel">
+       <property name="text">
+        <string>Файл не выбран</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="buttonSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -24,6 +74,63 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="settingsButton">
+       <property name="objectName">
+        <string notr="true">settingsButton</string>
+       </property>
+       <property name="toolTip">
+        <string>Параметры моделирования</string>
+       </property>
+       <property name="text">
+        <string>⚙</string>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>36</width>
+         <height>36</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="identifyButton">
+       <property name="objectName">
+        <string notr="true">identifyButton</string>
+       </property>
+       <property name="toolTip">
+        <string>Идентифицировать ПФ</string>
+       </property>
+       <property name="text">
+        <string>▶</string>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>36</width>
+         <height>36</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="clearButton">
+       <property name="objectName">
+        <string notr="true">clearButton</string>
+       </property>
+       <property name="toolTip">
+        <string>Очистить</string>
+       </property>
+       <property name="text">
+        <string>×</string>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>36</width>
+         <height>36</height>
+        </size>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

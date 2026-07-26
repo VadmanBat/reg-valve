@@ -1,31 +1,57 @@
-QPushButton {
-    background-color: green;
+/* Legacy path kept for deploy layouts that copy styles/button-style.qss.
+   Prefer app.qss. This file mirrors the toolbar button roles. */
+
+QPushButton#addButton,
+QPushButton#replaceButton,
+QPushButton#settingsButton,
+QPushButton#helpButton,
+QPushButton#openFileButton,
+QPushButton#identifyButton {
+    background-color: #2e7d32;
     color: white;
+    border: 2px solid #1b5e20;
     border-style: outset;
-    border-width: 2px;
     border-radius: 5px;
     padding: 5px;
 }
 
-QPushButton:hover {
-    background-color: darkseagreen;
+QPushButton#addButton:hover,
+QPushButton#replaceButton:hover,
+QPushButton#settingsButton:hover,
+QPushButton#helpButton:hover,
+QPushButton#openFileButton:hover,
+QPushButton#identifyButton:hover {
+    background-color: #388e3c;
     border-style: inset;
 }
 
-QPushButton:pressed {
-    background-color: lightgreen;
+QPushButton#addButton:pressed,
+QPushButton#replaceButton:pressed,
+QPushButton#settingsButton:pressed,
+QPushButton#helpButton:pressed,
+QPushButton#openFileButton:pressed,
+QPushButton#identifyButton:pressed {
+    background-color: #1b5e20;
     border-style: inset;
     padding: 3px;
 }
 
 QPushButton#clearButton {
-    background-color: red;
+    background-color: #c62828;
+    color: white;
+    border: 2px solid #8e0000;
+    border-style: outset;
+    border-radius: 5px;
+    padding: 5px;
 }
 
 QPushButton#clearButton:hover {
-    background-color: darkred;
+    background-color: #d32f2f;
+    border-style: inset;
 }
 
 QPushButton#clearButton:pressed {
-    background-color: lightcoral;
+    background-color: #8e0000;
+    border-style: inset;
+    padding: 3px;
 }

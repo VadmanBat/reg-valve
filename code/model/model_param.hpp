@@ -9,7 +9,7 @@ struct ModelParam {
     int simTime       = 500;
     int timeIntervals = 100;
     int freqIntervals = 100;
-    int approxOrder   = 3;
+    int approxOrder   = 6;
 
     double freqMin = 0.01;
     double freqMax = 10.0;

@@ -34,24 +34,25 @@ cmake --build build
 ## Структура
 
 ```
-ui/                 # .ui для Designer
+ui/                 # .ui (kebab-case)
 code/app/           # MainWindow
-code/tabs/          # Exp / Num / Reg
-code/dialogs/       # диалоги
-code/widgets/       # TranFuncForm, RegParameter, RegulationWidget, DoubleSlider
+code/tabs/          # id-tab, analysis-tab, synthesis-tab, rim-tab
+code/dialogs/       # dialogs
+code/widgets/       # tran-func-form, tf-display-widget, …
 code/series/        # Series, ComplexSeries, SetSeries
-code/charts/        # chart_utils
-code/control/       # фабрика P…PID (только здесь)
-code/util/          # tf_builder → API numina
+code/charts/        # chart-utils, chart-panel, response-chart-bank
+code/control/       # regulator-factory
+code/util/          # tf-builder, format.hxx, data-file-parser
 ```
 
-Редактирование UI: открыть `ui/**/*.ui` в Qt Designer.
+Файлы: **kebab-case**. Числа: `num_format::SIGNIFICANT_DIGITS` в `format.hxx`.
 
 ## Вкладки
 
-1. **Идентификация** — файл h(t) или (t, u, y) → Simoyu / Дюамель+Simoyu; сравнение «Эксперимент» / «Модель»
-2. **Анализ** — ввод W(p), переходная/КЧХ, показатели качества объекта
-3. **Синтез** — ручная настройка регулятора, замкнутый контур
+1. **Идентификация** (`IdTab`) — h(t) / (t,u,y) → Simoyu / Дюамель (+τ)
+2. **Анализ** (`AnalysisTab`) — W(p), отклики, качество
+3. **Синтез** (`SynthesisTab`) — регулятор, замкнутый контур
+4. **Настройка РИМ** (`RimTab`) — заглушка
 
 ## License
 

@@ -5,6 +5,7 @@
 QPushButton#addButton,
 QPushButton#replaceButton,
 QPushButton#settingsButton,
+QPushButton#idSettingsButton,
 QPushButton#helpButton,
 QPushButton#openFileButton,
 QPushButton#identifyButton {
@@ -13,14 +14,16 @@ QPushButton#identifyButton {
     border: 2px solid #1b5e20;
     border-style: outset;
     border-radius: 5px;
-    padding: 5px;
-    min-width: 32px;
-    min-height: 32px;
+    padding: 6px;
+    min-width: 40px;
+    min-height: 40px;
+    font-size: 14pt;
 }
 
 QPushButton#addButton:hover,
 QPushButton#replaceButton:hover,
 QPushButton#settingsButton:hover,
+QPushButton#idSettingsButton:hover,
 QPushButton#helpButton:hover,
 QPushButton#openFileButton:hover,
 QPushButton#identifyButton:hover {
@@ -31,6 +34,7 @@ QPushButton#identifyButton:hover {
 QPushButton#addButton:pressed,
 QPushButton#replaceButton:pressed,
 QPushButton#settingsButton:pressed,
+QPushButton#idSettingsButton:pressed,
 QPushButton#helpButton:pressed,
 QPushButton#openFileButton:pressed,
 QPushButton#identifyButton:pressed {
@@ -39,15 +43,27 @@ QPushButton#identifyButton:pressed {
     padding: 3px;
 }
 
+QPushButton#idSettingsButton {
+    background-color: #1565c0;
+    border-color: #0d47a1;
+}
+QPushButton#idSettingsButton:hover {
+    background-color: #1e88e5;
+}
+QPushButton#idSettingsButton:pressed {
+    background-color: #0d47a1;
+}
+
 QPushButton#clearButton {
     background-color: #c62828;
     color: white;
     border: 2px solid #8e0000;
     border-style: outset;
     border-radius: 5px;
-    padding: 5px;
-    min-width: 32px;
-    min-height: 32px;
+    padding: 6px;
+    min-width: 40px;
+    min-height: 40px;
+    font-size: 14pt;
 }
 
 QPushButton#clearButton:hover {
@@ -93,20 +109,19 @@ TfDisplayWidget QLabel#tfDelayText {
 TranFuncForm QLineEdit#tfCoeff {
     font-size: 16pt;
     min-width: 36px;
-    max-width: 36px;
 }
 
-/* Sign of coefficient — theme-friendly accents (not pure black) */
+/* Sign of coefficient — light accents (readable on dark themes) */
 TranFuncForm QLineEdit#tfCoeff[coeffSign="zero"] {
-    color: #9c27b0;
+    color: #ce93d8;
 }
 
 TranFuncForm QLineEdit#tfCoeff[coeffSign="positive"] {
-    color: #1565c0;
+    color: #80d8ff; /* light cyan / blue */
 }
 
 TranFuncForm QLineEdit#tfCoeff[coeffSign="negative"] {
-    color: #c62828;
+    color: #ffb0c8; /* light pink */
 }
 
 TranFuncForm QLabel#tfPower {
@@ -153,12 +168,12 @@ TranFuncForm QWidget#tfDelayExp {
 
 /* Charts visibility tool button */
 QToolButton#chartsButton {
-    min-width: 36px;
-    max-width: 36px;
-    min-height: 36px;
-    max-height: 36px;
+    min-width: 40px;
+    max-width: 40px;
+    min-height: 40px;
+    max-height: 40px;
     padding: 2px;
-    font-size: 16px;
+    font-size: 14pt;
     background-color: #6a1b9a;
     color: white;
     border: 2px solid #4a148c;
@@ -184,7 +199,7 @@ TfDisplayWidget QPushButton#tfCopyButton {
     max-height: 24px;
     padding: 0;
     margin: 0;
-    font-size: 12px;
+    font-size: 9pt;
     color: white;
     border-style: outset;
     border-width: 1px;
@@ -224,18 +239,19 @@ TranFuncForm QPushButton#tfPasteButton:pressed {
 
 /* ---- Metrics panel (adaptive; room for HTML subscripts) ---- */
 RegulationWidget QLabel#metricLabel {
-    font-size: 13px;
+    font-size: 10pt;
     padding: 2px 4px 4px 2px; /* bottom pad so <sub> is not clipped */
     min-width: 0;
     /* no max-width — width follows content / layout */
 }
 
 RegulationWidget QLineEdit#metricValue {
-    font-size: 13px;
+    font-size: 10pt;
     padding: 2px 6px;
-    min-width: 56px;
+    /* width fixed in code for significant/scientific digits */
     background-color: palette(base);
     color: palette(text);
+    font-family: "Consolas", "Cascadia Mono", "Courier New", monospace;
 }
 
 /* Flash: 0 neutral, 1 “better/down role”, 2 “worse/up role” — soft fills work on light+dark */

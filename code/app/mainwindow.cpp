@@ -1,12 +1,14 @@
 #include "code/app/mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "code/tabs/exp_tab.h"
-#include "code/tabs/num_tab.h"
-#include "code/tabs/reg_tab.h"
+#include "code/tabs/id-tab.h"
+#include "code/tabs/analysis-tab.h"
+#include "code/tabs/synthesis-tab.h"
+#include "code/tabs/rim-tab.h"
 
 #include <QApplication>
 #include <QFile>
+#include <QFont>
 #include <QFontDatabase>
 #include <QGuiApplication>
 #include <QScreen>
@@ -16,10 +18,10 @@ MainWindow::MainWindow(QWidget* parent) : QWidget(parent), ui(new Ui::MainWindow
     loadFonts();
     applyStyles();
 
-    // 1) data → plant model · 2) open-loop plant behaviour · 3) controller design
-    ui->tabWidget->addTab(new ExpTab(this), tr("Идентификация"));
-    ui->tabWidget->addTab(new NumTab(this), tr("Анализ"));
-    ui->tabWidget->addTab(new RegTab(this), tr("Синтез"));
+    ui->tabWidget->addTab(new IdTab(this), tr("Идентификация"));
+    ui->tabWidget->addTab(new AnalysisTab(this), tr("Анализ"));
+    ui->tabWidget->addTab(new SynthesisTab(this), tr("Синтез"));
+    ui->tabWidget->addTab(new RimTab(this), tr("Настройка РИМ"));
 
     centerWindow();
 }
@@ -33,7 +35,6 @@ void MainWindow::loadFonts() {
 }
 
 void MainWindow::applyStyles() {
-    // Prefer app.qss; fall back to legacy button-style.qss paths used in deploy layouts.
     const QStringList candidates = {
         QStringLiteral("data/styles/app.qss"),
         QStringLiteral("styles/app.qss"),
@@ -45,7 +46,11 @@ void MainWindow::applyStyles() {
         if (!qss.open(QFile::ReadOnly))
             continue;
         qApp->setStyleSheet(QString::fromUtf8(qss.readAll()));
-        qss.close();
+        // Keep a real point size after QSS (px rules leave pointSize == -1).
+        QFont f = qApp->font();
+        if (f.pointSize() <= 0)
+            f.setPointSize(10);
+        qApp->setFont(f);
         return;
     }
 }
@@ -53,7 +58,6 @@ void MainWindow::applyStyles() {
 void MainWindow::centerWindow() {
     if (auto* screen = QGuiApplication::primaryScreen()) {
         const QRect g = screen->geometry();
-        const int w = 1200, h = 800;
-        setGeometry((g.width() - w) / 2, (g.height() - h) / 2, w, h);
+        setGeometry((g.width() - 1200) / 2, (g.height() - 800) / 2, 1200, 800);
     }
 }

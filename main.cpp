@@ -1,6 +1,7 @@
 #include "code/app/mainwindow.h"
 
 #include <QApplication>
+#include <QFont>
 #include <QLibraryInfo>
 #include <QLocale>
 #include <QTranslator>
@@ -9,6 +10,12 @@ int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
 
     QLocale::setDefault(QLocale(QLocale::Russian));
+
+    QFont app_font = app.font();
+    if (app_font.pointSize() <= 0)
+        app_font.setPointSize(10);
+    app.setFont(app_font);
+
     QTranslator translator;
     if (translator.load(QStringLiteral("qt_ru"), QLibraryInfo::path(QLibraryInfo::TranslationsPath)))
         QApplication::installTranslator(&translator);
@@ -17,12 +24,3 @@ int main(int argc, char* argv[]) {
     window.show();
     return QApplication::exec();
 }
-/*
-1. Доделай то, что начал в прошлый раз.
-2. 1-я вкладка (идентификация): выводить коэффициенты ПФ как C++ печатает в консоль: десятичная или научная запись;
-3. Все вкладки: аналогичное правило вывода чисел для форм с показателями качества;
-4. 1-я вкладка (идентификация): предусмотреть определение тау запаздывания, пока по идеальному равенству сигнала в первое время;
-5. Важно: при моделировании объекта, у которого свободный член знаменателя равен нулю, заказывать КЧХ необходимо с частотой без нуля;
-6. Так как показатели качества теперь выводят фиксированное максимальное количество чисел: десятичная или научная запись, то им необходимо дать фиксированную ширину для вывода, а саму таблицу прижать вправо, а форму с ПФ прижать влево;
-7. Цвета для тёмной темы подобраны неудачно для коэффициентов ПФ: слишком тёмный синий и красный, нужно сделать светлый голубой и светлый розовый, аналогично для реальной части корней в корневой таблице
- */

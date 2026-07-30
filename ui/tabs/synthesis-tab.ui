@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SynthesisTab</class>
+ <widget class="QWidget" name="SynthesisTab">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="topLayout">
+     <item>
+      <widget class="QWidget" name="formHost" native="true"/>
+     </item>
+     <item>
+      <widget class="QWidget" name="metricsHost" native="true"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="paramsLayout"/>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="buttonLayout">
+     <item>
+      <spacer name="buttonSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="helpButton">
+       <property name="objectName">
+        <string notr="true">helpButton</string>
+       </property>
+       <property name="toolTip">
+        <string>Справка</string>
+       </property>
+       <property name="text">
+        <string>?</string>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>36</width>
+         <height>36</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="settingsButton">
+       <property name="objectName">
+        <string notr="true">settingsButton</string>
+       </property>
+       <property name="toolTip">
+        <string>Параметры моделирования</string>
+       </property>
+       <property name="text">
+        <string>⚙</string>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>36</width>
+         <height>36</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="addButton">
+       <property name="objectName">
+        <string notr="true">addButton</string>
+       </property>
+       <property name="toolTip">
+        <string>Добавить</string>
+       </property>
+       <property name="text">
+        <string>+</string>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>36</width>
+         <height>36</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="clearButton">
+       <property name="objectName">
+        <string notr="true">clearButton</string>
+       </property>
+       <property name="toolTip">
+        <string>Очистить</string>
+       </property>
+       <property name="text">
+        <string>×</string>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>36</width>
+         <height>36</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="chartsLayout"/>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

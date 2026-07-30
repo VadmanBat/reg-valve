@@ -20,9 +20,21 @@ class SynthesisTab;
 
 class SynthesisTab : public QWidget {
     Q_OBJECT
-public:
-    explicit SynthesisTab(QWidget* parent = nullptr);
-    ~SynthesisTab() override;
+
+private:
+    Ui::SynthesisTab* ui;
+    TranFuncForm* form_{nullptr};
+    RegulationWidget* metrics_{nullptr};
+    std::vector<RegParameter*> parameters_;
+    ResponseChartBank* charts_{nullptr};
+    QMenu* charts_menu_{nullptr};
+    ModelParam model_param_;
+    numina::TransferFunction current_tf_;
+
+    void install_custom_widgets();
+    void setup_metrics();
+    void show_error(const QString& message);
+    void apply_current_regulator(bool replace_last);
 
 private slots:
     void addTransferFunction();
@@ -31,18 +43,7 @@ private slots:
     void openSettings();
     void openHelp();
 
-private:
-    void installCustomWidgets();
-    void setupMetrics();
-    void showError(const QString& message);
-    void applyCurrentRegulator(bool replaceLast);
-
-    Ui::SynthesisTab* ui;
-    TranFuncForm* form_{nullptr};
-    RegulationWidget* metrics_{nullptr};
-    std::vector<RegParameter*> parameters_;
-    ResponseChartBank* charts_{nullptr};
-    QMenu* chartsMenu_{nullptr};
-    ModelParam modelParam_;
-    numina::TransferFunction currentTf_;
+public:
+    explicit SynthesisTab(QWidget* parent = nullptr);
+    ~SynthesisTab() override;
 };

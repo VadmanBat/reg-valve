@@ -17,27 +17,28 @@ class AnalysisTab;
 
 class AnalysisTab : public QWidget {
     Q_OBJECT
-public:
-    explicit AnalysisTab(QWidget* parent = nullptr);
-    ~AnalysisTab() override;
+
+private:
+    Ui::AnalysisTab* ui;
+    TranFuncForm* form_{nullptr};
+    RegulationWidget* metrics_{nullptr};
+    ResponseChartBank* charts_{nullptr};
+    QMenu* charts_menu_{nullptr};
+    ModelParam model_param_;
+    numina::TransferFunction current_tf_;
+
+    void show_error(const QString& message);
+    void setup_metrics();
+    void install_custom_widgets();
+    void update_metrics();
 
 private slots:
     void addTransferFunction();
     void replaceTransferFunction();
     void clearCharts();
     void openSettings();
-    void openChartsMenu();
 
-private:
-    void showError(const QString& message);
-    void setupMetrics();
-    void installCustomWidgets();
-
-    Ui::AnalysisTab* ui;
-    TranFuncForm* form_{nullptr};
-    RegulationWidget* metrics_{nullptr};
-    ResponseChartBank* charts_{nullptr};
-    QMenu* chartsMenu_{nullptr};
-    ModelParam modelParam_;
-    numina::TransferFunction currentTf_;
+public:
+    explicit AnalysisTab(QWidget* parent = nullptr);
+    ~AnalysisTab() override;
 };

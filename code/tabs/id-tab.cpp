@@ -37,15 +37,15 @@ IdTab::IdTab(QWidget* parent) : QWidget(parent), ui(new Ui::IdTab) {
     vis.impulse = vis.nyquist = vis.amplitude = vis.phase = false;
     charts_->setVisibility(vis);
 
-    chartsMenu_ = new QMenu(this);
-    connect(chartsMenu_, &QMenu::aboutToShow, this, [this] { charts_->populateMenu(chartsMenu_); });
+    charts_menu_ = new QMenu(this);
+    connect(charts_menu_, &QMenu::aboutToShow, this, [this] { charts_->populateMenu(charts_menu_); });
 
     auto* charts_btn = new QToolButton(this);
     charts_btn->setObjectName(QStringLiteral("chartsButton"));
     charts_btn->setText(QStringLiteral("◫"));
     charts_btn->setToolTip(tr("Отображаемые графики"));
     charts_btn->setPopupMode(QToolButton::InstantPopup);
-    charts_btn->setMenu(chartsMenu_);
+    charts_btn->setMenu(charts_menu_);
     charts_btn->setFixedSize(40, 40);
     ui->buttonLayout->insertWidget(ui->buttonLayout->indexOf(ui->idSettingsButton), charts_btn);
 
@@ -59,8 +59,8 @@ IdTab::IdTab(QWidget* parent) : QWidget(parent), ui(new Ui::IdTab) {
     connect(ui->settingsButton, &QPushButton::clicked, this, &IdTab::openSettings);
     connect(ui->idSettingsButton, &QPushButton::clicked, this, &IdTab::openIdSettings);
     connect(ui->methodCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int) {
-        if (hasData_)
-            ui->fileLabel->setText(tr("%1 (нажмите ▶ для пересчёта)").arg(QFileInfo(filePath_).fileName()));
+        if (has_data_)
+            ui->fileLabel->setText(tr("%1 (нажмите ▶ для пересчёта)").arg(QFileInfo(file_path_).fileName()));
     });
 }
 
@@ -93,7 +93,6 @@ void IdTab::setup_metrics() {
         QStringLiteral("ζ:"),
         QStringLiteral("h<sub>уст</sub>:"),
     });
-    metrics_->setPrecisions({0, 0, 0, 0, 0, 0});
     metrics_->setColors({{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}});
 }
 
@@ -102,20 +101,20 @@ void IdTab::show_error(const QString& message) {
 }
 
 void IdTab::openSettings() {
-    ModParDialog dialog(modelParam_, this);
+    ModParDialog dialog(model_param_, this);
     if (dialog.exec() != QDialog::Accepted)
         return;
-    modelParam_ = dialog.data();
-    if (hasData_ && !display_->isEmpty())
+    model_param_ = dialog.data();
+    if (has_data_ && !display_->isEmpty())
         runIdentification();
 }
 
 void IdTab::openIdSettings() {
-    IdSettingsDialog dialog(idSettings_, this);
+    IdSettingsDialog dialog(id_settings_, this);
     if (dialog.exec() != QDialog::Accepted)
         return;
-    idSettings_ = dialog.data();
-    if (hasData_)
+    id_settings_ = dialog.data();
+    if (has_data_)
         runIdentification();
 }
 
@@ -124,8 +123,8 @@ void IdTab::openFile() {
                                                       tr("Файлы данных (*.txt *.csv *.dat);;Все файлы (*)"));
     if (path.isEmpty())
         return;
-    filePath_ = path;
-    hasData_  = true;
+    file_path_ = path;
+    has_data_  = true;
     ui->fileLabel->setText(QFileInfo(path).fileName());
     ui->fileLabel->setToolTip(path);
     runIdentification();
@@ -138,9 +137,9 @@ bool IdTab::load_step_file(const QString& path) {
                       "Числа с «.»/«,» и научной записью; мусор отбрасывается."));
         return false;
     }
-    stepSeries_ = std::move(*opt);
-    valveSeries_.clear();
-    signalSeries_.clear();
+    step_series_ = std::move(*opt);
+    valve_series_.clear();
+    signal_series_.clear();
     return true;
 }
 
@@ -159,64 +158,64 @@ bool IdTab::load_valve_signal_file(const QString& path) {
                        .arg(numbers.size()));
         return false;
     }
-    valveSeries_  = std::move(valve);
-    signalSeries_ = std::move(signal);
-    stepSeries_.clear();
+    valve_series_  = std::move(valve);
+    signal_series_ = std::move(signal);
+    step_series_.clear();
     return true;
 }
 
 void IdTab::runIdentification() {
-    if (filePath_.isEmpty()) {
+    if (file_path_.isEmpty()) {
         show_error(tr("Сначала выберите файл с экспериментальными данными."));
         return;
     }
 
     const auto method = static_cast<Method>(ui->methodCombo->currentIndex());
     const bool loaded =
-        (method == Method::StepResponse) ? load_step_file(filePath_) : load_valve_signal_file(filePath_);
+        (method == Method::StepResponse) ? load_step_file(file_path_) : load_valve_signal_file(file_path_);
     if (!loaded)
         return;
-    hasData_ = true;
+    has_data_ = true;
 
     try {
         numina::SimoyuIdentifier simoyu;
         Series experimental_h;
-        const bool auto_order = idSettings_.autoOrder;
+        const bool auto_order = id_settings_.autoOrder;
         const std::size_t den_n =
-            static_cast<std::size_t>(std::clamp(idSettings_.denOrder, 1, 12));
+            static_cast<std::size_t>(std::clamp(id_settings_.denOrder, 1, 12));
         const std::size_t num_m = static_cast<std::size_t>(
-            std::clamp(idSettings_.numOrder, 0, static_cast<int>(den_n)));
+            std::clamp(id_settings_.numOrder, 0, static_cast<int>(den_n)));
         const std::size_t max_order =
-            static_cast<std::size_t>(std::clamp(modelParam_.approxOrder, 2, 12));
-        const bool want_tau = idSettings_.estimateTau;
+            static_cast<std::size_t>(std::clamp(model_param_.approxOrder, 2, 12));
+        const bool want_tau = id_settings_.estimateTau;
 
         if (method == Method::StepResponse) {
-            if (stepSeries_.size() < 2) {
+            if (step_series_.size() < 2) {
                 show_error(tr("Недостаточно точек переходной характеристики."));
                 return;
             }
-            experimental_h = stepSeries_;
+            experimental_h = step_series_;
         } else {
-            if (valveSeries_.size() < 2 || signalSeries_.size() < 2) {
+            if (valve_series_.size() < 2 || signal_series_.size() < 2) {
                 show_error(tr("Недостаточно точек клапана/сигнала (строк: %1).")
-                               .arg(valveSeries_.size()));
+                               .arg(valve_series_.size()));
                 return;
             }
-            for (std::size_t i = 1; i < valveSeries_.size(); ++i) {
-                if (valveSeries_[i].first < valveSeries_[i - 1].first) {
+            for (std::size_t i = 1; i < valve_series_.size(); ++i) {
+                if (valve_series_[i].first < valve_series_[i - 1].first) {
                     show_error(tr("Время должно быть неубывающим (нарушение около точки %1).").arg(i));
                     return;
                 }
             }
             numina::DuhamelSolver duhamel;
-            experimental_h = duhamel.stepResponse(valveSeries_, signalSeries_);
+            experimental_h = duhamel.stepResponse(valve_series_, signal_series_);
             if (experimental_h.size() < 2) {
                 show_error(tr("Дюамель не восстановил h(t) (точек: %1).\n"
                               "Проверьте, что u(t) меняется и y(t) согласован по времени.")
                                .arg(experimental_h.size()));
                 return;
             }
-            stepSeries_ = experimental_h;
+            step_series_ = experimental_h;
         }
 
         numina::SimoyuIdentifier::DelayFit fit;
@@ -240,10 +239,9 @@ void IdTab::runIdentification() {
             return;
         }
 
-        identifiedTf_  = fit.plant;
-        identifiedTau_ = fit.tau > 0.0 ? fit.tau : 0.0;
-        apply_result(fit.plant, identifiedTau_, experimental_h);
-        ui->fileLabel->setText(QFileInfo(filePath_).fileName());
+        const double tau = fit.tau > 0.0 ? fit.tau : 0.0;
+        apply_result(fit.plant, tau, experimental_h);
+        ui->fileLabel->setText(QFileInfo(file_path_).fileName());
     } catch (const std::exception& ex) {
         show_error(tr("Ошибка идентификации: %1").arg(QString::fromUtf8(ex.what())));
     }
@@ -252,13 +250,13 @@ void IdTab::runIdentification() {
 void IdTab::apply_result(const numina::TransferFunction& plant, double tau, const Series& experimental_h) {
     numina::TransferFunction model = plant;
     if (tau > 0.0)
-        model *= numina::TransferFunction::makeDelay(tau, static_cast<std::uint8_t>(modelParam_.approxOrder));
+        model *= numina::TransferFunction::makeDelay(tau, static_cast<std::uint8_t>(model_param_.approxOrder));
 
     display_->setTransferFunction(plant, tau);
 
     charts_->clearAll();
     charts_->appendTransientCurve(experimental_h, tr("Эксперимент"));
-    charts_->appendFromTf(model, modelParam_, tr("Модель"));
+    charts_->appendFromTf(model, model_param_, tr("Модель"));
 
     try {
         numina::ResponseLab lab(model);
@@ -275,13 +273,11 @@ void IdTab::apply_result(const numina::TransferFunction& plant, double tau, cons
 }
 
 void IdTab::clearAll() {
-    hasData_ = false;
-    filePath_.clear();
-    stepSeries_.clear();
-    valveSeries_.clear();
-    signalSeries_.clear();
-    identifiedTf_  = {};
-    identifiedTau_ = 0.0;
+    has_data_ = false;
+    file_path_.clear();
+    step_series_.clear();
+    valve_series_.clear();
+    signal_series_.clear();
     display_->clear();
     charts_->clearAll();
     metrics_->updateValues({});

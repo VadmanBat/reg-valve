@@ -76,3 +76,13 @@ include(cmake/compiler-flags.cmake)
 if (CCACHE_FOUND)
     set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_COMPILER_LAUNCHER ccache)
 endif ()
+
+# Pure logic tests (no Qt GUI) — nice axis rounding, etc.
+option(REGVALVE_BUILD_TESTS "Build unit tests (nice-axis, …)" ON)
+if (REGVALVE_BUILD_TESTS)
+    enable_testing()
+    add_executable(nice_axis_test tests/nice-axis-test.cpp)
+    target_include_directories(nice_axis_test PRIVATE ${CMAKE_SOURCE_DIR})
+    target_compile_features(nice_axis_test PRIVATE cxx_std_23)
+    add_test(NAME nice_axis_test COMMAND nice_axis_test)
+endif ()

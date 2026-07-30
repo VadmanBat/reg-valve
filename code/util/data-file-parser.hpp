@@ -148,11 +148,4 @@ inline std::optional<VecPair> readStepResponse(const QString& filePath) {
     return pairs;
 }
 
-inline std::optional<std::pair<VecPair, VecPair>> readValveSignal(const QString& filePath) {
-    VecPair valve, signal;
-    if (!asValveSignal(extractNumbersFromFile(filePath), valve, signal))
-        return std::nullopt;
-    return std::make_pair(std::move(valve), std::move(signal));
-}
-
 } // namespace data_file_parser

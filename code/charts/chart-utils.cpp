@@ -1,29 +1,24 @@
 #include "code/charts/chart-utils.hpp"
 
 #include "code/dialogs/chart-dialog.h"
-#include "code/series/complex-series.hpp"
-#include "code/series/series.hpp"
-#include "code/util/data-file-parser.hpp"
 
 #include <QApplication>
 #include <QClipboard>
 #include <QCoreApplication>
 #include <QFile>
 #include <QFileDialog>
-#include <QGuiApplication>
+#include <QLegend>
+#include <QLegendMarker>
 #include <QLineSeries>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPainter>
-#include <QScreen>
 #include <QTextStream>
 #include <QValueAxis>
 
 #include <algorithm>
 
 #define CHART_TR(str) QCoreApplication::translate("chart_utils", str)
-
-#include <cmath>
 
 namespace chart_utils {
 namespace {
@@ -44,7 +39,62 @@ QList<QPointF> toPoints(const VecComp& data) {
     return pts;
 }
 
+bool isGuideSeries(const QString& name) {
+    return name == QLatin1String(kHorGuide) || name == QLatin1String(kVerGuide);
+}
+
+QLineSeries* findSeriesByName(QChart* chart, const char* name) {
+    if (!chart)
+        return nullptr;
+    for (auto* s : chart->series()) {
+        if (s->name() == QLatin1String(name))
+            return qobject_cast<QLineSeries*>(s);
+    }
+    return nullptr;
+}
+
+void hideLegendMarker(QChart* chart, QAbstractSeries* series) {
+    if (!chart || !series || !chart->legend())
+        return;
+    for (auto* marker : chart->legend()->markers(series))
+        marker->setVisible(false);
+}
+
+QPen guidePen() {
+    QPen pen(QColor(0x12, 0x12, 0x12), 2.0);
+    pen.setCosmetic(true);
+    pen.setCapStyle(Qt::FlatCap);
+    pen.setStyle(Qt::SolidLine);
+    return pen;
+}
+
+QLineSeries* lastDataSeries(QChart* chart) {
+    if (!chart)
+        return nullptr;
+    const auto all = chart->series();
+    for (auto i = all.size(); i > 0; --i) {
+        auto* s = qobject_cast<QLineSeries*>(all[i - 1]);
+        if (!s || isGuideSeries(s->name()))
+            continue;
+        return s;
+    }
+    return nullptr;
+}
+
+void attach_to_axes(QChart* chart, QAbstractSeries* series) {
+    auto* axis_x = qobject_cast<QValueAxis*>(chart->axes(Qt::Horizontal).value(0, nullptr));
+    auto* axis_y = qobject_cast<QValueAxis*>(chart->axes(Qt::Vertical).value(0, nullptr));
+    if (axis_x && !series->attachedAxes().contains(axis_x))
+        series->attachAxis(axis_x);
+    if (axis_y && !series->attachedAxes().contains(axis_y))
+        series->attachAxis(axis_y);
+}
+
 } // namespace
+
+Pair computeAxesRange(double min, double max) {
+    return niceAxisRange(min, max, /*include_zero=*/true);
+}
 
 QPen penForIndex(std::size_t index) {
     static const QPen pens[6] = {
@@ -55,76 +105,103 @@ QPen penForIndex(std::size_t index) {
 }
 
 void createAxes(QChart* chart, const QString& titleX, const QString& titleY) {
-    auto* axisX = new QValueAxis(chart);
-    auto* axisY = new QValueAxis(chart);
-    axisX->setTitleText(titleX);
-    axisY->setTitleText(titleY);
-    chart->addAxis(axisX, Qt::AlignBottom);
-    chart->addAxis(axisY, Qt::AlignLeft);
+    auto* axis_x = new QValueAxis(chart);
+    auto* axis_y = new QValueAxis(chart);
+    axis_x->setTitleText(titleX);
+    axis_y->setTitleText(titleY);
+    chart->addAxis(axis_x, Qt::AlignBottom);
+    chart->addAxis(axis_y, Qt::AlignLeft);
 }
 
-void createChartContextMenu(QChartView* chartView) {
-    auto* saveImageAction  = new QAction(CHART_TR("Сохранить как PNG"), chartView);
-    auto* saveTextAction   = new QAction(CHART_TR("Сохранить как TXT"), chartView);
-    auto* copyAction       = new QAction(CHART_TR("Копировать изображение"), chartView);
-    auto* propertiesAction = new QAction(CHART_TR("Свойства"), chartView);
+void updateOriginGuides(QChart* chart, const Pair& range_x, const Pair& range_y) {
+    if (!chart)
+        return;
 
-    QChart* chart = chartView->chart();
+    auto ensure = [chart](const char* name) -> QLineSeries* {
+        auto* s = findSeriesByName(chart, name);
+        if (s)
+            return s;
+        s = new QLineSeries;
+        s->setName(QString::fromLatin1(name));
+        s->setPen(guidePen());
+        s->setPointsVisible(false);
+        chart->addSeries(s);
+        attach_to_axes(chart, s);
+        hideLegendMarker(chart, s);
+        return s;
+    };
 
-    QObject::connect(saveImageAction, &QAction::triggered, [chart, chartView] {
-        const QString fileName =
+    auto* hor = ensure(kHorGuide);
+    auto* ver = ensure(kVerGuide);
+
+    // y = 0 — ось абсцисс (t / Re / ω)
+    hor->replace(QList<QPointF>{
+        {range_x.first, 0.0},
+        {range_x.second, 0.0},
+    });
+    // x = 0 — ось ординат (h / Im / |W| / φ)
+    ver->replace(QList<QPointF>{
+        {0.0, range_y.first},
+        {0.0, range_y.second},
+    });
+
+    attach_to_axes(chart, hor);
+    attach_to_axes(chart, ver);
+    hideLegendMarker(chart, hor);
+    hideLegendMarker(chart, ver);
+}
+
+void createChartContextMenu(QChartView* chart_view) {
+    auto* save_image_action = new QAction(CHART_TR("Сохранить как PNG"), chart_view);
+    auto* save_text_action  = new QAction(CHART_TR("Сохранить как TXT"), chart_view);
+    auto* copy_action       = new QAction(CHART_TR("Копировать изображение"), chart_view);
+    auto* properties_action = new QAction(CHART_TR("Свойства"), chart_view);
+
+    QChart* chart = chart_view->chart();
+
+    QObject::connect(save_image_action, &QAction::triggered, [chart, chart_view] {
+        const QString file_name =
             QFileDialog::getSaveFileName(nullptr, CHART_TR("Сохранить график"), chart->title(),
                                          CHART_TR("Рисунок PNG (*.png);;Все файлы (*)"));
-        if (!fileName.isEmpty() && !chartView->grab().save(fileName, "png"))
+        if (!file_name.isEmpty() && !chart_view->grab().save(file_name, "png"))
             QMessageBox::warning(nullptr, CHART_TR("Ошибка"), CHART_TR("Не удалось сохранить график!"));
     });
 
-    QObject::connect(saveTextAction, &QAction::triggered, [chart] {
-        const QString fileName =
+    QObject::connect(save_text_action, &QAction::triggered, [chart] {
+        const QString file_name =
             QFileDialog::getSaveFileName(nullptr, CHART_TR("Сохранить график"), chart->title(),
                                          CHART_TR("Текст txt (*.txt);;Все файлы (*)"));
-        if (!fileName.isEmpty() && !saveChartToFile(fileName, chart))
+        if (!file_name.isEmpty() && !saveChartToFile(file_name, chart))
             QMessageBox::warning(nullptr, CHART_TR("Ошибка"), CHART_TR("Не удалось сохранить график!"));
     });
 
-    QObject::connect(copyAction, &QAction::triggered, [chartView] {
-        QApplication::clipboard()->setImage(chartView->grab().toImage());
+    QObject::connect(copy_action, &QAction::triggered, [chart_view] {
+        QApplication::clipboard()->setImage(chart_view->grab().toImage());
     });
 
-    QObject::connect(propertiesAction, &QAction::triggered, [chart] {
+    QObject::connect(properties_action, &QAction::triggered, [chart] {
         ChartDialog dialog(chart);
         dialog.exec();
     });
 
-    auto* contextMenu = new QMenu(chartView);
-    contextMenu->addAction(saveImageAction);
-    contextMenu->addAction(saveTextAction);
-    contextMenu->addAction(copyAction);
-    contextMenu->addSeparator();
-    contextMenu->addAction(propertiesAction);
+    auto* context_menu = new QMenu(chart_view);
+    context_menu->addAction(save_image_action);
+    context_menu->addAction(save_text_action);
+    context_menu->addAction(copy_action);
+    context_menu->addSeparator();
+    context_menu->addAction(properties_action);
 
-    chartView->setContextMenuPolicy(Qt::CustomContextMenu);
-    QObject::connect(chartView, &QChartView::customContextMenuRequested, [contextMenu, chartView](const QPoint& pos) {
-        contextMenu->exec(chartView->mapToGlobal(pos));
-    });
-}
-
-void eraseLastSeries(QChart* chart) {
-    const auto all = chart->series();
-    for (auto i = all.size(); i > 0; --i) {
-        auto* s = all[i - 1];
-        if (s->name() == QLatin1String("hor-line") || s->name() == QLatin1String("ver-line"))
-            continue;
-        chart->removeSeries(s);
-        delete s;
-        chart->update();
-        return;
-    }
+    chart_view->setContextMenuPolicy(Qt::CustomContextMenu);
+    QObject::connect(chart_view, &QChartView::customContextMenuRequested,
+                     [context_menu, chart_view](const QPoint& pos) {
+                         context_menu->exec(chart_view->mapToGlobal(pos));
+                     });
 }
 
 void removeAllSeries(QChart* chart) {
-    for (auto* series : chart->series()) {
-        if (series->name() == QLatin1String("hor-line") || series->name() == QLatin1String("ver-line"))
+    const auto all = chart->series();
+    for (auto* series : all) {
+        if (isGuideSeries(series->name()))
             continue;
         chart->removeSeries(series);
         delete series;
@@ -132,43 +209,25 @@ void removeAllSeries(QChart* chart) {
     chart->update();
 }
 
-Pair computeAxesRange(double min, double max) {
-    const double range = max - min;
-    if (range <= 0)
-        return {min - 1, max + 1};
-    return {std::abs(min) < 1e-3 * range ? 0 : min - 0.05 * range,
-            std::abs(max) < 1e-3 * range ? 0 : max + 0.05 * range};
-}
-
 void updateAxes(QChart* chart, const Pair& range_x, const Pair& range_y) {
-    auto* axisX = qobject_cast<QValueAxis*>(chart->axes(Qt::Horizontal).value(0, nullptr));
-    auto* axisY = qobject_cast<QValueAxis*>(chart->axes(Qt::Vertical).value(0, nullptr));
-    if (!axisX || !axisY)
+    auto* axis_x = qobject_cast<QValueAxis*>(chart->axes(Qt::Horizontal).value(0, nullptr));
+    auto* axis_y = qobject_cast<QValueAxis*>(chart->axes(Qt::Vertical).value(0, nullptr));
+    if (!axis_x || !axis_y)
         return;
-    axisX->setRange(range_x.first, range_x.second);
-    axisY->setRange(range_y.first, range_y.second);
+    axis_x->setRange(range_x.first, range_x.second);
+    axis_y->setRange(range_y.first, range_y.second);
+
+    updateOriginGuides(chart, range_x, range_y);
+
     for (auto* series : chart->series()) {
-        if (!series->attachedAxes().contains(axisX))
-            series->attachAxis(axisX);
-        if (!series->attachedAxes().contains(axisY))
-            series->attachAxis(axisY);
+        if (!series->attachedAxes().contains(axis_x))
+            series->attachAxis(axis_x);
+        if (!series->attachedAxes().contains(axis_y))
+            series->attachAxis(axis_y);
     }
 }
 
-void addRealSeries(QChart* chart, const VecPair& points, const QString& title, std::size_t index,
-                   bool /*useOptimizedSubset*/) {
-    if (points.empty())
-        return;
-    // No Qt-side downsampling: show exactly what numina / loader produced.
-    auto* series = new QLineSeries;
-    series->setName(title);
-    series->setPen(penForIndex(index));
-    series->replace(toPoints(points));
-    chart->addSeries(series);
-}
-
-void addComplexSeries(QChart* chart, const VecComp& points, const QString& title, std::size_t index,
-                      bool /*useOptimizedSubset*/) {
+void addRealSeries(QChart* chart, const VecPair& points, const QString& title, std::size_t index) {
     if (points.empty())
         return;
     auto* series = new QLineSeries;
@@ -178,66 +237,32 @@ void addComplexSeries(QChart* chart, const VecComp& points, const QString& title
     chart->addSeries(series);
 }
 
-namespace {
-
-QLineSeries* lastDataSeries(QChart* chart) {
-    if (!chart)
-        return nullptr;
-    const auto all = chart->series();
-    for (auto i = all.size(); i > 0; --i) {
-        auto* s = qobject_cast<QLineSeries*>(all[i - 1]);
-        if (!s)
-            continue;
-        if (s->name() == QLatin1String("hor-line") || s->name() == QLatin1String("ver-line"))
-            continue;
-        return s;
-    }
-    return nullptr;
+void addComplexSeries(QChart* chart, const VecComp& points, const QString& title, std::size_t index) {
+    if (points.empty())
+        return;
+    auto* series = new QLineSeries;
+    series->setName(title);
+    series->setPen(penForIndex(index));
+    series->replace(toPoints(points));
+    chart->addSeries(series);
 }
 
-QList<QPointF> pointsForReal(const VecPair& points, bool /*useOptimizedSubset*/) {
-    return toPoints(points);
-}
-
-QList<QPointF> pointsForComplex(const VecComp& points, bool /*useOptimizedSubset*/) {
-    return toPoints(points);
-}
-
-} // namespace
-
-bool replaceLastRealSeries(QChart* chart, const VecPair& points, const QString& title,
-                           bool useOptimizedSubset) {
+bool replaceLastRealSeries(QChart* chart, const VecPair& points, const QString& title) {
     auto* series = lastDataSeries(chart);
     if (!series || points.empty())
         return false;
     series->setName(title);
-    series->replace(pointsForReal(points, useOptimizedSubset));
+    series->replace(toPoints(points));
     return true;
 }
 
-bool replaceLastComplexSeries(QChart* chart, const VecComp& points, const QString& title,
-                              bool useOptimizedSubset) {
+bool replaceLastComplexSeries(QChart* chart, const VecComp& points, const QString& title) {
     auto* series = lastDataSeries(chart);
     if (!series || points.empty())
         return false;
     series->setName(title);
-    series->replace(pointsForComplex(points, useOptimizedSubset));
+    series->replace(toPoints(points));
     return true;
-}
-
-double displayRefreshHz() {
-    qreal hz = 60.0;
-    if (QScreen* screen = QGuiApplication::primaryScreen()) {
-        const qreal r = screen->refreshRate();
-        if (r >= 30.0 && r <= 500.0)
-            hz = r;
-    }
-    return static_cast<double>(hz);
-}
-
-int frameIntervalMs() {
-    const double hz = displayRefreshHz();
-    return std::max(1, static_cast<int>(std::lround(1000.0 / hz)));
 }
 
 bool saveChartToFile(const QString& fileName, QChart* chart) {
@@ -246,7 +271,7 @@ bool saveChartToFile(const QString& fileName, QChart* chart) {
         return false;
     QTextStream out(&file);
     for (QAbstractSeries* series : chart->series()) {
-        if (series->name() == QLatin1String("hor-line") || series->name() == QLatin1String("ver-line"))
+        if (isGuideSeries(series->name()))
             continue;
         out << "Name: " << series->name() << '\n';
         if (auto* xy = qobject_cast<QXYSeries*>(series)) {
@@ -258,18 +283,21 @@ bool saveChartToFile(const QString& fileName, QChart* chart) {
     return true;
 }
 
-VecPair readVectorFromFile(const QString& fileName) {
-    // Robust path: '.' / ',' decimals, junk separators stripped (see data_file_parser).
-    auto opt = data_file_parser::readStepResponse(fileName);
-    return opt.value_or(VecPair{});
-}
-
 QChartView* makeChartView(QChart* chart, QWidget* parent, const QString& title, const QString& titleX,
                           const QString& titleY) {
     chart->setTitle(title);
-    // Instant redraw on data replace (no Qt Charts tweening).
     chart->setAnimationOptions(QChart::NoAnimation);
     createAxes(chart, titleX, titleY);
+
+    const Pair def_x{-1.0, 1.0};
+    const Pair def_y{-1.0, 1.0};
+    if (auto* axis_x = qobject_cast<QValueAxis*>(chart->axes(Qt::Horizontal).value(0, nullptr)))
+        axis_x->setRange(def_x.first, def_x.second);
+    if (auto* axis_y = qobject_cast<QValueAxis*>(chart->axes(Qt::Vertical).value(0, nullptr)))
+        axis_y->setRange(def_y.first, def_y.second);
+    // Guides first → data series drawn later sit on top
+    updateOriginGuides(chart, def_x, def_y);
+
     auto* view = new QChartView(chart, parent);
     view->setRenderHint(QPainter::Antialiasing, true);
     view->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);

@@ -19,15 +19,3 @@ inline void setProperty(QWidget* widget, const char* name, const QVariant& value
 }
 
 } // namespace style_util
-
-// Legacy name kept for includes that still reference StyleCore (font/property only).
-class StyleCore {
-public:
-    template <typename T>
-    static void setProperty(T* widget, const char* name, const QVariant& value) {
-        static_assert(std::is_base_of_v<QWidget, T>);
-        style_util::setProperty(widget, name, value);
-    }
-};
-
-#include <type_traits>

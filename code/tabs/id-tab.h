@@ -23,16 +23,6 @@ class IdTab;
 /// Идентификация: файл → Simoyu / Дюамель+Simoyu (+τ) → ПФ и графики.
 class IdTab : public QWidget {
     Q_OBJECT
-public:
-    explicit IdTab(QWidget* parent = nullptr);
-    ~IdTab() override;
-
-private slots:
-    void openFile();
-    void runIdentification();
-    void clearAll();
-    void openSettings();
-    void openIdSettings();
 
 private:
     enum class Method : int {
@@ -46,17 +36,15 @@ private:
     TfDisplayWidget* display_{nullptr};
     RegulationWidget* metrics_{nullptr};
     ResponseChartBank* charts_{nullptr};
-    QMenu* chartsMenu_{nullptr};
-    ModelParam modelParam_;
-    IdSettings idSettings_;
-    numina::TransferFunction identifiedTf_;
-    double identifiedTau_{0.0};
+    QMenu* charts_menu_{nullptr};
+    ModelParam model_param_;
+    IdSettings id_settings_;
 
-    QString filePath_;
-    Series stepSeries_;
-    Series valveSeries_;
-    Series signalSeries_;
-    bool hasData_{false};
+    QString file_path_;
+    Series step_series_;
+    Series valve_series_;
+    Series signal_series_;
+    bool has_data_{false};
 
     void install_custom_widgets();
     void setup_metrics();
@@ -64,4 +52,15 @@ private:
     [[nodiscard]] bool load_step_file(const QString& path);
     [[nodiscard]] bool load_valve_signal_file(const QString& path);
     void apply_result(const numina::TransferFunction& plant, double tau, const Series& experimental_h);
+
+private slots:
+    void openFile();
+    void runIdentification();
+    void clearAll();
+    void openSettings();
+    void openIdSettings();
+
+public:
+    explicit IdTab(QWidget* parent = nullptr);
+    ~IdTab() override;
 };

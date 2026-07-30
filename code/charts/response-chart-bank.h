@@ -2,9 +2,8 @@
 
 #include "code/charts/chart-panel.h"
 #include "code/model/model-param.hpp"
-#include "code/series/complex-series.hpp"
-#include "code/series/series.hpp"
-#include "code/series/set-series.hpp"
+#include "code/series/axis-bounds.hpp"
+#include "code/series/bounds-set.hpp"
 #include "code/util/tf-builder.hpp"
 
 #include "numina/classes/control/transfer-function.h"
@@ -33,6 +32,39 @@ struct ChartVisibility {
 /// Multi-plot host: h(t), w(t), Nyquist, АЧХ, ФЧХ + visibility menu.
 class ResponseChartBank : public QWidget {
     Q_OBJECT
+
+private:
+    struct Batch {
+        QString name;
+        tf_builder::VecPair transient;
+        tf_builder::VecPair impulse;
+        tf_builder::VecComp nyquist;
+        tf_builder::VecPair amplitude;
+        tf_builder::VecPair phase;
+    };
+
+    ChartVisibility vis_{};
+    QGridLayout* grid_{nullptr};
+
+    ChartPanel* chart_tran_{nullptr};
+    ChartPanel* chart_impulse_{nullptr};
+    ChartPanel* chart_nyquist_{nullptr};
+    ChartPanel* chart_amp_{nullptr};
+    ChartPanel* chart_phase_{nullptr};
+
+    BoundsSet tran_bounds_;
+    BoundsSet impulse_bounds_;
+    BoundsSet nyquist_bounds_;
+    BoundsSet amp_bounds_;
+    BoundsSet phase_bounds_;
+
+    std::vector<Batch> history_;
+
+    void rebuild_layout();
+    void refit_all();
+    void push_batch(Batch b, bool replace_last);
+    static Batch compute_batch(const numina::TransferFunction& tf, const ModelParam& params, const QString& name);
+
 public:
     explicit ResponseChartBank(QWidget* parent = nullptr);
 
@@ -51,39 +83,4 @@ public:
     void clearAll();
 
     [[nodiscard]] bool empty() const { return history_.empty(); }
-
-signals:
-    void visibilityChanged(ChartVisibility vis);
-
-private:
-    struct Batch {
-        QString name;
-        tf_builder::VecPair transient;
-        tf_builder::VecPair impulse;
-        tf_builder::VecComp nyquist;
-        tf_builder::VecPair amplitude;
-        tf_builder::VecPair phase;
-    };
-
-    void rebuildLayout();
-    void refitAll();
-    void pushBatch(Batch b, bool replaceLast);
-    static Batch computeBatch(const numina::TransferFunction& tf, const ModelParam& params, const QString& name);
-
-    ChartVisibility vis_{};
-    QGridLayout* grid_{nullptr};
-
-    ChartPanel* chartTran_{nullptr};
-    ChartPanel* chartImpulse_{nullptr};
-    ChartPanel* chartNyquist_{nullptr};
-    ChartPanel* chartAmp_{nullptr};
-    ChartPanel* chartPhase_{nullptr};
-
-    SetSeries<Series> tranSeries_;
-    SetSeries<Series> impulseSeries_;
-    SetSeries<ComplexSeries> nyquistSeries_;
-    SetSeries<Series> ampSeries_;
-    SetSeries<Series> phaseSeries_;
-
-    std::vector<Batch> history_;
 };

@@ -16,8 +16,8 @@
 
 SynthesisTab::SynthesisTab(QWidget* parent) : QWidget(parent), ui(new Ui::SynthesisTab) {
     ui->setupUi(this);
-    installCustomWidgets();
-    setupMetrics();
+    install_custom_widgets();
+    setup_metrics();
 
     charts_ = new ResponseChartBank(this);
     ui->chartsLayout->addWidget(charts_);
@@ -27,19 +27,19 @@ SynthesisTab::SynthesisTab(QWidget* parent) : QWidget(parent), ui(new Ui::Synthe
     ui->verticalLayout->setStretch(2, 0);
     ui->verticalLayout->setStretch(3, 1);
 
-    chartsMenu_ = new QMenu(this);
-    connect(chartsMenu_, &QMenu::aboutToShow, this, [this] { charts_->populateMenu(chartsMenu_); });
+    charts_menu_ = new QMenu(this);
+    connect(charts_menu_, &QMenu::aboutToShow, this, [this] { charts_->populateMenu(charts_menu_); });
 
-    auto* chartsBtn = new QToolButton(this);
-    chartsBtn->setObjectName(QStringLiteral("chartsButton"));
-    chartsBtn->setText(QStringLiteral("◫"));
-    chartsBtn->setToolTip(tr("Отображаемые графики"));
-    chartsBtn->setPopupMode(QToolButton::InstantPopup);
-    chartsBtn->setMenu(chartsMenu_);
-    chartsBtn->setFixedSize(40, 40);
-    ui->buttonLayout->insertWidget(ui->buttonLayout->indexOf(ui->settingsButton), chartsBtn);
+    auto* charts_btn = new QToolButton(this);
+    charts_btn->setObjectName(QStringLiteral("chartsButton"));
+    charts_btn->setText(QStringLiteral("◫"));
+    charts_btn->setToolTip(tr("Отображаемые графики"));
+    charts_btn->setPopupMode(QToolButton::InstantPopup);
+    charts_btn->setMenu(charts_menu_);
+    charts_btn->setFixedSize(40, 40);
+    ui->buttonLayout->insertWidget(ui->buttonLayout->indexOf(ui->settingsButton), charts_btn);
 
-    form_->setTransferFunction(&currentTf_);
+    form_->setTransferFunction(&current_tf_);
 
     connect(ui->helpButton, &QPushButton::clicked, this, &SynthesisTab::openHelp);
     connect(ui->settingsButton, &QPushButton::clicked, this, &SynthesisTab::openSettings);
@@ -51,18 +51,17 @@ SynthesisTab::~SynthesisTab() {
     delete ui;
 }
 
-void SynthesisTab::installCustomWidgets() {
+void SynthesisTab::install_custom_widgets() {
     form_ = new TranFuncForm(6, 6, QStringLiteral("W<sub>ОУ</sub>(p) = "), ui->formHost);
-    auto* formLayout = new QVBoxLayout(ui->formHost);
-    formLayout->setContentsMargins(0, 0, 0, 0);
-    formLayout->addWidget(form_, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    auto* form_layout = new QVBoxLayout(ui->formHost);
+    form_layout->setContentsMargins(0, 0, 0, 0);
+    form_layout->addWidget(form_, 0, Qt::AlignLeft | Qt::AlignVCenter);
 
     metrics_ = new RegulationWidget(3, 4, ui->metricsHost);
-    auto* metricsLayout = new QVBoxLayout(ui->metricsHost);
-    metricsLayout->setContentsMargins(0, 0, 0, 0);
-    metricsLayout->addWidget(metrics_, 0, Qt::AlignRight | Qt::AlignVCenter);
-    if (ui->topLayout)
-        ui->topLayout->insertStretch(1, 1);
+    auto* metrics_layout = new QVBoxLayout(ui->metricsHost);
+    metrics_layout->setContentsMargins(0, 0, 0, 0);
+    metrics_layout->addWidget(metrics_, 0, Qt::AlignRight | Qt::AlignVCenter);
+    ui->topLayout->insertStretch(1, 1);
 
     parameters_ = {
         new RegParameter(QStringLiteral("K<sub>p</sub>"), 0.05, 2000, 0.05, 5, this),
@@ -79,30 +78,28 @@ void SynthesisTab::installCustomWidgets() {
     }
 }
 
-void SynthesisTab::setupMetrics() {
+void SynthesisTab::setup_metrics() {
     metrics_->setLabels({
         QStringLiteral("t<sub>р</sub>:"),  QStringLiteral("ω<sub>n</sub>:"), QStringLiteral("h<sub>уст</sub>:"),
         QStringLiteral("ЛИК:"),            QStringLiteral("t<sub>н</sub>:"),  QStringLiteral("ω<sub>c</sub>:"),
         QStringLiteral("σ<sub>ст</sub>:"), QStringLiteral("ИКК:"),           QStringLiteral("t<sub>п</sub>:"),
         QStringLiteral("ζ:"),              QStringLiteral("σ<sub>пр</sub>:"), QStringLiteral("СКО:"),
     });
-    metrics_->setPrecisions({2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4});
     metrics_->setColors(
         {{1, 2}, {0, 0}, {0, 0}, {1, 2}, {1, 2}, {0, 0}, {0, 0}, {1, 2}, {1, 2}, {2, 1}, {1, 2}, {1, 2}});
 }
 
-void SynthesisTab::showError(const QString& message) {
+void SynthesisTab::show_error(const QString& message) {
     QMessageBox::critical(this, tr("Ошибка ввода"), message);
 }
 
 void SynthesisTab::openSettings() {
-    ModParDialog dialog(modelParam_, this);
+    ModParDialog dialog(model_param_, this);
     if (dialog.exec() != QDialog::Accepted)
         return;
-    modelParam_ = dialog.data();
-    // Rebuild last chart with new simulation/frequency params.
+    model_param_ = dialog.data();
     if (!charts_->empty())
-        applyCurrentRegulator(true);
+        apply_current_regulator(true);
 }
 
 void SynthesisTab::openHelp() {
@@ -110,10 +107,10 @@ void SynthesisTab::openHelp() {
     dialog.exec();
 }
 
-void SynthesisTab::applyCurrentRegulator(bool replaceLast) {
-    auto plantNum = form_->numerator();
-    auto plantDen = form_->denominator();
-    if (plantDen.empty())
+void SynthesisTab::apply_current_regulator(bool replace_last) {
+    auto plant_num = form_->numerator();
+    auto plant_den = form_->denominator();
+    if (!tf_builder::validInput(plant_num, plant_den))
         return;
 
     const auto reg = regulator_factory::make(parameters_[0]->enabled(), parameters_[1]->enabled(),
@@ -121,19 +118,17 @@ void SynthesisTab::applyCurrentRegulator(bool replaceLast) {
                                              parameters_[1]->value(), parameters_[2]->value());
 
     try {
-        currentTf_ =
-            tf_builder::closedLoop(std::move(plantNum), std::move(plantDen), reg.num, reg.den,
-                                   form_->hasDelay() ? form_->delayTime() : 0.0, modelParam_.approxOrder);
-        form_->setTransferFunction(&currentTf_);
+        current_tf_ = tf_builder::closedLoop(std::move(plant_num), std::move(plant_den), reg.num, reg.den,
+                                             form_->delayTime(), model_param_.approxOrder);
+        form_->setTransferFunction(&current_tf_);
 
-        // Honour model parameters (time/freq range) from settings dialog.
         const QString title = QString::fromStdString(reg.title);
-        if (replaceLast && !charts_->empty())
-            charts_->replaceLastFromTf(currentTf_, modelParam_, title);
+        if (replace_last && !charts_->empty())
+            charts_->replaceLastFromTf(current_tf_, model_param_, title);
         else
-            charts_->appendFromTf(currentTf_, modelParam_, title);
+            charts_->appendFromTf(current_tf_, model_param_, title);
 
-        numina::ResponseLab lab(currentTf_);
+        numina::ResponseLab lab(current_tf_);
         const auto q = lab.evaluate();
         if (q.is_settled) {
             metrics_->updateValues({
@@ -154,18 +149,18 @@ void SynthesisTab::applyCurrentRegulator(bool replaceLast) {
             metrics_->updateValues({});
         }
     } catch (const std::exception& ex) {
-        showError(QString::fromUtf8(ex.what()));
+        show_error(QString::fromUtf8(ex.what()));
     }
 }
 
 void SynthesisTab::addTransferFunction() {
-    applyCurrentRegulator(false);
+    apply_current_regulator(false);
 }
 
 void SynthesisTab::replaceTransferFunction() {
     if (charts_->empty())
         return;
-    applyCurrentRegulator(true);
+    apply_current_regulator(true);
 }
 
 void SynthesisTab::clearCharts() {

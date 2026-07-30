@@ -1,10 +1,10 @@
 #include "code/app/mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "code/tabs/id-tab.h"
 #include "code/tabs/analysis-tab.h"
-#include "code/tabs/synthesis-tab.h"
+#include "code/tabs/id-tab.h"
 #include "code/tabs/rim-tab.h"
+#include "code/tabs/synthesis-tab.h"
 
 #include <QApplication>
 #include <QFile>
@@ -15,26 +15,26 @@
 
 MainWindow::MainWindow(QWidget* parent) : QWidget(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
-    loadFonts();
-    applyStyles();
+    load_fonts();
+    apply_styles();
 
     ui->tabWidget->addTab(new IdTab(this), tr("Идентификация"));
     ui->tabWidget->addTab(new AnalysisTab(this), tr("Анализ"));
     ui->tabWidget->addTab(new SynthesisTab(this), tr("Синтез"));
     ui->tabWidget->addTab(new RimTab(this), tr("Настройка РИМ"));
 
-    centerWindow();
+    center_window();
 }
 
 MainWindow::~MainWindow() {
     delete ui;
 }
 
-void MainWindow::loadFonts() {
+void MainWindow::load_fonts() {
     QFontDatabase::addApplicationFont(QStringLiteral("data/fonts/font-awesome-6-free-solid-900.otf"));
 }
 
-void MainWindow::applyStyles() {
+void MainWindow::apply_styles() {
     const QStringList candidates = {
         QStringLiteral("data/styles/app.qss"),
         QStringLiteral("styles/app.qss"),
@@ -55,7 +55,7 @@ void MainWindow::applyStyles() {
     }
 }
 
-void MainWindow::centerWindow() {
+void MainWindow::center_window() {
     if (auto* screen = QGuiApplication::primaryScreen()) {
         const QRect g = screen->geometry();
         setGeometry((g.width() - 1200) / 2, (g.height() - 800) / 2, 1200, 800);

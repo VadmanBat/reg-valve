@@ -115,7 +115,7 @@ void TfDisplayWidget::clear() {
     set_polys({}, {}, 0.0);
 }
 
-QString TfDisplayWidget::humanText() const {
+QString TfDisplayWidget::human_text() const {
     if (empty_)
         return {};
     QString human = QStringLiteral("W(p) = (%1) / (%2)")
@@ -126,7 +126,7 @@ QString TfDisplayWidget::humanText() const {
     return human;
 }
 
-QString TfDisplayWidget::exportText() const {
+QString TfDisplayWidget::export_text() const {
     if (empty_)
         return {};
     QStringList num_parts, den_parts;
@@ -142,16 +142,15 @@ QString TfDisplayWidget::exportText() const {
                "\n"
                "%4\n")
         .arg(num_parts.join(QLatin1Char(' ')), den_parts.join(QLatin1Char(' ')), num_format::formatFull(tau_),
-             humanText());
+             human_text());
 }
 
 void TfDisplayWidget::copyToClipboard() {
     if (empty_)
         return;
-    QApplication::clipboard()->setText(exportText());
-    if (copyBtn_)
-        QToolTip::showText(copyBtn_->mapToGlobal(QPoint(0, copyBtn_->height())), tr("ПФ скопирована"), copyBtn_,
-                           QRect(), 1500);
+    QApplication::clipboard()->setText(export_text());
+    QToolTip::showText(copyBtn_->mapToGlobal(QPoint(0, copyBtn_->height())), tr("ПФ скопирована"), copyBtn_,
+                       QRect(), 1500);
 }
 
 void TfDisplayWidget::reposition_copy_button() {

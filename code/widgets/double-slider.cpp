@@ -4,28 +4,35 @@
 #include <QPainter>
 #include <QStyleOptionSlider>
 
-DoubleSlider::DoubleSlider(Qt::Orientation orientation, QWidget* parent)
-    : QSlider(orientation, parent) {
-    m_singleStep = (m_max - m_min) / m_intervals;
-    QSlider::setRange(0, m_intervals);
-    connect(this, &QSlider::valueChanged, this, &DoubleSlider::onIntValueChanged);
+#include <algorithm>
+
+DoubleSlider::DoubleSlider(Qt::Orientation orientation, QWidget* parent) : QSlider(orientation, parent) {
+    single_step_ = (max_ - min_) / static_cast<double>(intervals_);
+    QSlider::setRange(0, intervals_);
+    connect(this, &QSlider::valueChanged, this, &DoubleSlider::on_int_value_changed);
 }
 
 void DoubleSlider::setRange(double min, double max, int intervals) {
-    m_min = min;
-    m_max = max;
-    const int new_value = static_cast<int>(double(QSlider::value()) / m_intervals * intervals);
-    QSlider::setRange(0, m_intervals = intervals);
-    m_singleStep = (m_max - m_min) / m_intervals;
-    QSlider::setValue(new_value);
+    const double old_value = value();
+    min_                   = min;
+    max_                   = max;
+    intervals_             = std::max(1, intervals);
+    QSlider::setRange(0, intervals_);
+    single_step_ = (max_ - min_) / static_cast<double>(intervals_);
+    setValue(old_value);
 }
 
 double DoubleSlider::value() const {
-    return m_min + QSlider::value() * m_singleStep;
+    return min_ + QSlider::value() * single_step_;
 }
 
 void DoubleSlider::setValue(double value) {
-    QSlider::setValue(static_cast<int>((value - m_min) * m_intervals / (m_max - m_min)));
+    if (max_ <= min_) {
+        QSlider::setValue(0);
+        return;
+    }
+    const double t = (value - min_) / (max_ - min_);
+    QSlider::setValue(static_cast<int>(std::clamp(t, 0.0, 1.0) * intervals_ + 0.5));
 }
 
 void DoubleSlider::paintEvent(QPaintEvent* event) {
@@ -33,14 +40,14 @@ void DoubleSlider::paintEvent(QPaintEvent* event) {
     QStyleOptionSlider opt;
     initStyleOption(&opt);
     QPainter painter(this);
-    const QRect rect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, this);
-    const QRect textRect = rect.adjusted(-width() / 2, -55, width() / 2, height() / 2);
-    painter.drawText(textRect, Qt::AlignCenter, QString::number(this->value(), 'f', 2));
-    const QRect limitRect(0, 30, width(), height());
-    painter.drawText(limitRect, Qt::AlignLeft, QString::number(m_min, 'f', 2));
-    painter.drawText(limitRect, Qt::AlignRight, QString::number(m_max, 'f', 2));
+    const QRect rect      = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, this);
+    const QRect text_rect = rect.adjusted(-width() / 2, -55, width() / 2, height() / 2);
+    painter.drawText(text_rect, Qt::AlignCenter, QString::number(this->value(), 'f', 2));
+    const QRect limit_rect(0, 30, width(), height());
+    painter.drawText(limit_rect, Qt::AlignLeft, QString::number(min_, 'f', 2));
+    painter.drawText(limit_rect, Qt::AlignRight, QString::number(max_, 'f', 2));
 }
 
-void DoubleSlider::onIntValueChanged(int) {
+void DoubleSlider::on_int_value_changed(int) {
     emit doubleValueChanged(value());
 }

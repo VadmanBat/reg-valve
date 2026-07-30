@@ -15,12 +15,12 @@ ChartDialog::ChartDialog(QChart* chart, QWidget* parent)
     : QDialog(parent), ui(new Ui::ChartDialog), chart_(chart) {
     ui->setupUi(this);
     ui->titleEdit->setText(chart_->title());
-    if (auto* axis = getAxis(Qt::Horizontal))
-        ui->xAxisLabelEdit->setText(axis->titleText());
-    if (auto* axis = getAxis(Qt::Vertical))
-        ui->yAxisLabelEdit->setText(axis->titleText());
+    if (auto* ax = axis(Qt::Horizontal))
+        ui->xAxisLabelEdit->setText(ax->titleText());
+    if (auto* ax = axis(Qt::Vertical))
+        ui->yAxisLabelEdit->setText(ax->titleText());
 
-    buildSeriesEditors();
+    build_series_editors();
 
     connect(ui->applyButton, &QPushButton::clicked, this, &ChartDialog::applyChanges);
     connect(ui->cancelButton, &QPushButton::clicked, this, &ChartDialog::reject);
@@ -31,12 +31,12 @@ ChartDialog::~ChartDialog() {
     delete ui;
 }
 
-QAbstractAxis* ChartDialog::getAxis(Qt::Orientation orientation) const {
+QAbstractAxis* ChartDialog::axis(Qt::Orientation orientation) const {
     const auto axes = chart_->axes(orientation);
     return axes.isEmpty() ? nullptr : axes.first();
 }
 
-Qt::PenStyle ChartDialog::penStyleFromIndex(int index) {
+Qt::PenStyle ChartDialog::pen_style_from_index(int index) {
     switch (index) {
     case 1:
         return Qt::DashLine;
@@ -51,7 +51,7 @@ Qt::PenStyle ChartDialog::penStyleFromIndex(int index) {
     }
 }
 
-int ChartDialog::indexFromPenStyle(Qt::PenStyle style) {
+int ChartDialog::index_from_pen_style(Qt::PenStyle style) {
     switch (style) {
     case Qt::DashLine:
         return 1;
@@ -66,7 +66,7 @@ int ChartDialog::indexFromPenStyle(Qt::PenStyle style) {
     }
 }
 
-void ChartDialog::buildSeriesEditors() {
+void ChartDialog::build_series_editors() {
     auto* layout = new QGridLayout(ui->seriesHost);
     layout->addWidget(new QLabel(tr("Название")), 0, 0);
     layout->addWidget(new QLabel(tr("Цвет")), 0, 1);
@@ -75,80 +75,82 @@ void ChartDialog::buildSeriesEditors() {
 
     int index = 0;
     for (auto* series : chart_->series()) {
-        auto* lineSeries = qobject_cast<QLineSeries*>(series);
-        if (!lineSeries || lineSeries->name() == QLatin1String("hor-line") ||
-            lineSeries->name() == QLatin1String("ver-line"))
+        auto* line_series = qobject_cast<QLineSeries*>(series);
+        if (!line_series || line_series->name() == QLatin1String("hor-line") ||
+            line_series->name() == QLatin1String("ver-line"))
             continue;
 
-        auto* nameEdit = new QLineEdit(lineSeries->name());
-        auto* colorButton = new QPushButton;
-        auto* widthSpin = new QSpinBox;
-        auto* styleCombo = new QComboBox;
+        auto* name_edit    = new QLineEdit(line_series->name());
+        auto* color_button = new QPushButton;
+        auto* width_spin   = new QSpinBox;
+        auto* style_combo  = new QComboBox;
 
-        colorButton->setObjectName(QStringLiteral("seriesColorButton"));
-        colorButton->setAutoFillBackground(true);
+        color_button->setObjectName(QStringLiteral("seriesColorButton"));
+        color_button->setAutoFillBackground(true);
         {
-            QPalette pal = colorButton->palette();
-            pal.setColor(QPalette::Button, lineSeries->pen().color());
-            colorButton->setPalette(pal);
+            QPalette pal = color_button->palette();
+            pal.setColor(QPalette::Button, line_series->pen().color());
+            color_button->setPalette(pal);
         }
-        widthSpin->setRange(1, 10);
-        widthSpin->setValue(lineSeries->pen().width());
-        styleCombo->addItems({tr("Сплошная"), tr("Штриховая"), tr("Точечная"), tr("Штрих-точка"), tr("Штрих-точка-точка")});
-        styleCombo->setCurrentIndex(indexFromPenStyle(lineSeries->pen().style()));
+        width_spin->setRange(1, 10);
+        width_spin->setValue(line_series->pen().width());
+        style_combo->addItems(
+            {tr("Сплошная"), tr("Штриховая"), tr("Точечная"), tr("Штрих-точка"), tr("Штрих-точка-точка")});
+        style_combo->setCurrentIndex(index_from_pen_style(line_series->pen().style()));
 
-        connect(colorButton, &QPushButton::clicked, this, [this, index] { changeSeriesColor(index); });
-        connect(widthSpin, QOverload<int>::of(&QSpinBox::valueChanged), this, [this, index] { changeSeriesStyle(index); });
-        connect(styleCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
-                [this, index] { changeSeriesStyle(index); });
+        connect(color_button, &QPushButton::clicked, this, [this, index] { change_series_color(index); });
+        connect(width_spin, QOverload<int>::of(&QSpinBox::valueChanged), this,
+                [this, index] { change_series_style(index); });
+        connect(style_combo, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+                [this, index] { change_series_style(index); });
 
         ++index;
-        layout->addWidget(nameEdit, index, 0);
-        layout->addWidget(colorButton, index, 1);
-        layout->addWidget(widthSpin, index, 2);
-        layout->addWidget(styleCombo, index, 3);
+        layout->addWidget(name_edit, index, 0);
+        layout->addWidget(color_button, index, 1);
+        layout->addWidget(width_spin, index, 2);
+        layout->addWidget(style_combo, index, 3);
 
-        seriesNameEdits_.append(nameEdit);
-        colorButtons_.append(colorButton);
-        widthSpinBoxes_.append(widthSpin);
-        styleComboBoxes_.append(styleCombo);
-        lineSeriesPointers_.append(lineSeries);
-        initPens_.append(lineSeries->pen());
+        series_name_edits_.append(name_edit);
+        color_buttons_.append(color_button);
+        width_spin_boxes_.append(width_spin);
+        style_combo_boxes_.append(style_combo);
+        line_series_.append(line_series);
+        init_pens_.append(line_series->pen());
     }
-    currentPens_ = initPens_;
+    current_pens_ = init_pens_;
 }
 
-void ChartDialog::changeSeriesColor(int index) {
-    const QColor newColor = QColorDialog::getColor(lineSeriesPointers_[index]->pen().color(), this);
-    if (!newColor.isValid())
+void ChartDialog::change_series_color(int index) {
+    const QColor new_color = QColorDialog::getColor(line_series_[index]->pen().color(), this);
+    if (!new_color.isValid())
         return;
-    currentPens_[index].setColor(newColor);
-    lineSeriesPointers_[index]->setPen(currentPens_[index]);
-    QPalette pal = colorButtons_[index]->palette();
-    pal.setColor(QPalette::Button, newColor);
-    colorButtons_[index]->setPalette(pal);
+    current_pens_[index].setColor(new_color);
+    line_series_[index]->setPen(current_pens_[index]);
+    QPalette pal = color_buttons_[index]->palette();
+    pal.setColor(QPalette::Button, new_color);
+    color_buttons_[index]->setPalette(pal);
 }
 
-void ChartDialog::changeSeriesStyle(int index) {
-    currentPens_[index].setWidth(widthSpinBoxes_[index]->value());
-    currentPens_[index].setStyle(penStyleFromIndex(styleComboBoxes_[index]->currentIndex()));
-    lineSeriesPointers_[index]->setPen(currentPens_[index]);
+void ChartDialog::change_series_style(int index) {
+    current_pens_[index].setWidth(width_spin_boxes_[index]->value());
+    current_pens_[index].setStyle(pen_style_from_index(style_combo_boxes_[index]->currentIndex()));
+    line_series_[index]->setPen(current_pens_[index]);
 }
 
 void ChartDialog::applyChanges() {
     chart_->setTitle(ui->titleEdit->text());
-    if (auto* axis = getAxis(Qt::Horizontal))
-        axis->setTitleText(ui->xAxisLabelEdit->text());
-    if (auto* axis = getAxis(Qt::Vertical))
-        axis->setTitleText(ui->yAxisLabelEdit->text());
-    for (int i = 0; i < lineSeriesPointers_.size(); ++i) {
-        lineSeriesPointers_[i]->setName(seriesNameEdits_[i]->text());
-        lineSeriesPointers_[i]->setPen(currentPens_[i]);
+    if (auto* ax = axis(Qt::Horizontal))
+        ax->setTitleText(ui->xAxisLabelEdit->text());
+    if (auto* ax = axis(Qt::Vertical))
+        ax->setTitleText(ui->yAxisLabelEdit->text());
+    for (int i = 0; i < line_series_.size(); ++i) {
+        line_series_[i]->setName(series_name_edits_[i]->text());
+        line_series_[i]->setPen(current_pens_[i]);
     }
     accept();
 }
 
 void ChartDialog::restoreChart() {
-    for (int i = 0; i < lineSeriesPointers_.size(); ++i)
-        lineSeriesPointers_[i]->setPen(initPens_[i]);
+    for (int i = 0; i < line_series_.size(); ++i)
+        line_series_[i]->setPen(init_pens_[i]);
 }

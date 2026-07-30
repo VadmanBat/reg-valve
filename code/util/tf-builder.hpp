@@ -96,8 +96,6 @@ inline FrequencyBundle frequencyBundle(const numina::TransferFunction& tf, const
     // Free term D(0)=0 → W(j0) undefined / infinite; never sample ω=0.
     if (hasZeroDenConstant(tf)) {
         constexpr double w_min_floor = 1e-4;
-        if (!(range.first > 0.0))
-            range.first = w_min_floor;
         range.first = std::max(range.first, w_min_floor);
         if (!(range.second > range.first))
             range.second = range.first * 1e3;

@@ -20,9 +20,8 @@ RegulationWidget::RegulationWidget(int rows, int cols, QWidget* parent) : QWidge
 
     const auto size = rows * cols;
     labels_.reserve(size);
-    lineEdits_.reserve(size);
-    lastValues_.assign(size, -1);
-    precisions_.assign(size, 0);
+    line_edits_.reserve(size);
+    last_values_.assign(size, -1);
     colors_.assign(size, {1, 2});
 
     for (int i = 0; i < rows; ++i) {
@@ -42,7 +41,7 @@ RegulationWidget::RegulationWidget(int rows, int cols, QWidget* parent) : QWidge
             style_util::setProperty(edit, "metricFlash", 0);
 
             labels_.push_back(label);
-            lineEdits_.push_back(edit);
+            line_edits_.push_back(edit);
             layout_->addWidget(label, i, j * 2);
             layout_->addWidget(edit, i, j * 2 + 1);
         }
@@ -54,45 +53,44 @@ RegulationWidget::RegulationWidget(int rows, int cols, QWidget* parent) : QWidge
         layout_->setColumnStretch(j * 2 + 1, 0);
     }
 
-    applyDefaultStyle();
+    apply_default_style();
 }
 
-void RegulationWidget::applyDefaultStyle() {
+void RegulationWidget::apply_default_style() {
     const QFontMetrics fm(font());
-    const int rowH = qMax(24, fm.height() + fm.descent() + 8);
-    // Fixed width + 1 extra glyph for scientific like -1.23456e+123
-    const int valW = fm.horizontalAdvance(QStringLiteral("-1.23456e+1230")) + 16;
+    const int row_h = qMax(24, fm.height() + fm.descent() + 8);
+    const int val_w = fm.horizontalAdvance(QStringLiteral("-1.23456e+1230")) + 16;
 
     for (auto* label : labels_) {
         label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
         label->setTextFormat(Qt::RichText);
-        label->setMinimumHeight(rowH);
+        label->setMinimumHeight(row_h);
         label->setMinimumWidth(0);
     }
-    for (auto* edit : lineEdits_) {
+    for (auto* edit : line_edits_) {
         edit->setReadOnly(true);
-        edit->setMinimumHeight(rowH);
-        edit->setFixedWidth(valW);
+        edit->setMinimumHeight(row_h);
+        edit->setFixedWidth(val_w);
     }
 }
 
-QString RegulationWidget::formatDouble(double value, int /*precision*/) {
+QString RegulationWidget::format_double(double value) {
     return num_format::format(value, num_format::SIGNIFICANT_DIGITS);
 }
 
-int RegulationWidget::getColorIndex(std::size_t index, double oldValue, double newValue) const {
-    if (oldValue == -1)
+int RegulationWidget::color_index(std::size_t index, double old_value, double new_value) const {
+    if (old_value == -1)
         return 0;
-    if (newValue < oldValue)
+    if (new_value < old_value)
         return colors_[index].first;
-    if (newValue > oldValue)
+    if (new_value > old_value)
         return colors_[index].second;
     return 0;
 }
 
-void RegulationWidget::updateCellStyle(std::size_t index, double newValue) {
-    const int flash = getColorIndex(index, lastValues_[index], newValue);
-    style_util::setProperty(lineEdits_[index], "metricFlash", flash);
+void RegulationWidget::update_cell_style(std::size_t index, double new_value) {
+    const int flash = color_index(index, last_values_[index], new_value);
+    style_util::setProperty(line_edits_[index], "metricFlash", flash);
 }
 
 void RegulationWidget::setLabels(const std::vector<QString>& labelNames) {
@@ -105,12 +103,6 @@ void RegulationWidget::setLabels(const std::vector<QString>& labelNames) {
     updateGeometry();
 }
 
-void RegulationWidget::setPrecisions(const std::vector<int>& valuePrecisions) {
-    const auto n = std::min(precisions_.size(), valuePrecisions.size());
-    for (std::size_t i = 0; i < n; ++i)
-        precisions_[i] = valuePrecisions[i];
-}
-
 void RegulationWidget::setColors(const std::vector<std::pair<int, int>>& valueColors) {
     const auto n = std::min(colors_.size(), valueColors.size());
     for (std::size_t i = 0; i < n; ++i)
@@ -119,17 +111,17 @@ void RegulationWidget::setColors(const std::vector<std::pair<int, int>>& valueCo
 
 void RegulationWidget::updateValues(const std::vector<double>& values) {
     if (values.empty()) {
-        for (std::size_t i = 0; i < lineEdits_.size(); ++i) {
-            lineEdits_[i]->setText({});
-            lastValues_[i] = -1;
-            style_util::setProperty(lineEdits_[i], "metricFlash", 0);
+        for (std::size_t i = 0; i < line_edits_.size(); ++i) {
+            line_edits_[i]->setText({});
+            last_values_[i] = -1;
+            style_util::setProperty(line_edits_[i], "metricFlash", 0);
         }
         return;
     }
-    const auto n = std::min(lineEdits_.size(), values.size());
+    const auto n = std::min(line_edits_.size(), values.size());
     for (std::size_t i = 0; i < n; ++i) {
-        updateCellStyle(i, values[i]);
-        lineEdits_[i]->setText(formatDouble(values[i], precisions_[i]));
-        lastValues_[i] = values[i];
+        update_cell_style(i, values[i]);
+        line_edits_[i]->setText(format_double(values[i]));
+        last_values_[i] = values[i];
     }
 }

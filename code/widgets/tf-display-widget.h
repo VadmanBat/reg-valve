@@ -29,6 +29,8 @@ private:
 
     void set_polys(const Vec& num, const Vec& den, double tau);
     void reposition_copy_button();
+    [[nodiscard]] QString human_text() const;
+    [[nodiscard]] QString export_text() const;
 
 private slots:
     void copyToClipboard();
@@ -40,9 +42,6 @@ public:
     void clear();
 
     [[nodiscard]] bool isEmpty() const noexcept { return empty_; }
-    [[nodiscard]] double delayTime() const noexcept { return tau_; }
-    [[nodiscard]] QString exportText() const;
-    [[nodiscard]] QString humanText() const;
 
 protected:
     void resizeEvent(QResizeEvent* event) override;

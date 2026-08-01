@@ -90,7 +90,7 @@
    <item>
     <widget class="QLabel" name="htLabel">
      <property name="text">
-      <string>&lt;b&gt;Переходная функция h(t):&lt;/b&gt;</string>
+      <string>&lt;b&gt;Переходная характеристика h(t):&lt;/b&gt;</string>
      </property>
     </widget>
    </item>
@@ -104,7 +104,7 @@
    <item>
     <widget class="QLabel" name="wtLabel">
      <property name="text">
-      <string>&lt;b&gt;Импульсная функция w(t):&lt;/b&gt;</string>
+      <string>&lt;b&gt;Импульсная характеристика w(t):&lt;/b&gt;</string>
      </property>
     </widget>
    </item>

@@ -3,7 +3,7 @@
 #include "code/charts/response-chart-bank.h"
 #include "code/model/model-param.hpp"
 #include "code/widgets/regulation-widget.h"
-#include "code/widgets/tran-func-form.h"
+#include "code/widgets/tf-form/tran-func-form.h"
 
 #include "numina/classes/control/transfer-function.h"
 

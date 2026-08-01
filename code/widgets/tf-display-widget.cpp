@@ -80,7 +80,7 @@ TfDisplayWidget::TfDisplayWidget(const QString& title, QWidget* parent) : QWidge
     row->addStretch(1);
 
     auto* root = new QVBoxLayout(this);
-    root->setContentsMargins(0, 0, 0, 12); // room for overlay copy under delay
+    root->setContentsMargins(0, 0, 0, 12); // room for overlay copy
     root->addLayout(row);
 }
 
@@ -99,9 +99,11 @@ void TfDisplayWidget::set_polys(const Vec& num, const Vec& den, double tau) {
         delayLabel_->setText(QStringLiteral("· e<sup>−%1 p</sup>")
                                  .arg(num_format::format(tau_, num_format::SIGNIFICANT_DIGITS)));
         delayLabel_->setVisible(true);
+        delayGroup_->setVisible(true);
     } else {
         delayLabel_->clear();
         delayLabel_->setVisible(false);
+        delayGroup_->setVisible(false);
     }
     copyBtn_->setEnabled(!empty_);
     QTimer::singleShot(0, this, &TfDisplayWidget::reposition_copy_button);
@@ -154,19 +156,34 @@ void TfDisplayWidget::copyToClipboard() {
 }
 
 void TfDisplayWidget::reposition_copy_button() {
-    if (!delayGroup_ || !copyBtn_)
+    if (!copyBtn_)
         return;
-    const QRect g = delayGroup_->geometry();
     constexpr int btn = 28;
-    int x = g.right() - btn;
-    int y = g.bottom() + 2;
+
+    int x = 0;
+    int y = 0;
+
+    if (tau_ > 0.0 && delayGroup_->isVisible() && delayLabel_->isVisible()) {
+        // With e^{−τp}: under the delay block (same as before).
+        const QRect g = delayGroup_->geometry();
+        x             = g.right() - btn;
+        y             = g.bottom() + 2;
+    } else {
+        // No delay: well to the right of N/D so the button never sits on the fraction.
+        constexpr int gap = 32;
+        const QRect den = denLabel_->geometry();
+        x               = den.right() + gap;
+        y               = den.bottom() - btn;
+        if (y < den.top())
+            y = den.bottom() + 2;
+        // Ensure the widget is wide enough; do not clamp back onto the poly text.
+        const int need_w = x + btn + 8;
+        if (need_w > width())
+            setMinimumWidth(need_w);
+    }
+
     if (y + btn > height())
         y = qMax(0, height() - btn);
-    if (g.width() < 8) {
-        // no delay visible — place under denominator area
-        x = width() - btn - 8;
-        y = height() - btn - 2;
-    }
     copyBtn_->move(qMax(0, x), y);
     copyBtn_->raise();
 }

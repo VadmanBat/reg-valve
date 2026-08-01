@@ -68,6 +68,9 @@ private:
 public:
     explicit ResponseChartBank(QWidget* parent = nullptr);
 
+    /// Override title of the transient chart (e.g. synthesis: «Переходный процесс»).
+    void setTransientTitle(const QString& title);
+
     [[nodiscard]] ChartVisibility visibility() const { return vis_; }
     void setVisibility(ChartVisibility vis);
 

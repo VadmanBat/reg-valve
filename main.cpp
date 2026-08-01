@@ -11,10 +11,10 @@ int main(int argc, char* argv[]) {
 
     QLocale::setDefault(QLocale(QLocale::Russian));
 
-    QFont app_font = app.font();
+    QFont app_font = QApplication::font();
     if (app_font.pointSize() <= 0)
         app_font.setPointSize(10);
-    app.setFont(app_font);
+    QApplication::setFont(app_font);
 
     QTranslator translator;
     if (translator.load(QStringLiteral("qt_ru"), QLibraryInfo::path(QLibraryInfo::TranslationsPath)))

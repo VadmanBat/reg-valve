@@ -14,6 +14,11 @@ ChartPanel::ChartPanel(const QString& title, const QString& titleX, const QStrin
     layout_->addWidget(view_);
 }
 
+void ChartPanel::setChartTitle(const QString& title) {
+    if (chart_)
+        chart_->setTitle(title);
+}
+
 void ChartPanel::addRealCurve(const VecPair& points, const QString& name) {
     chart_utils::addRealSeries(chart_, points, name, curve_count_);
     ++curve_count_;

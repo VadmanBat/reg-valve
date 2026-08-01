@@ -54,6 +54,15 @@ code/util/          # tf-builder, format.hxx, data-file-parser
 3. **Синтез** (`SynthesisTab`) — регулятор, замкнутый контур
 4. **Настройка РИМ** (`RimTab`) — заглушка
 
+## Документация
+
+- [Архитектура](docs/architecture.md) — слои, потоки данных, карта файлов (для разработки / Grok Build)
+- [AGENTS.md](AGENTS.md) — краткие правила для AI-агентов
+- [UX/UI-рекомендации](docs/ux-ui-recommendations.md) — компоновка экранов, форма ПФ, roadmap
+- [Эскизы UI](docs/sketches/index.html) — wireframes вариантов (открыть в браузере)
+
+
 ## License
 
 См. `LICENSE`.
+

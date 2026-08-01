@@ -15,7 +15,9 @@ set(SOURCES
         ${CMAKE_SOURCE_DIR}/main.cpp
 
         ${CMAKE_SOURCE_DIR}/code/app/mainwindow.cpp
+
         ${CMAKE_SOURCE_DIR}/code/tabs/id-tab.cpp
+        ${CMAKE_SOURCE_DIR}/code/tabs/id-tab-run.cpp
         ${CMAKE_SOURCE_DIR}/code/tabs/analysis-tab.cpp
         ${CMAKE_SOURCE_DIR}/code/tabs/synthesis-tab.cpp
         ${CMAKE_SOURCE_DIR}/code/tabs/rim-tab.cpp
@@ -25,16 +27,25 @@ set(SOURCES
         ${CMAKE_SOURCE_DIR}/code/dialogs/help-dialog.cpp
         ${CMAKE_SOURCE_DIR}/code/dialogs/chart-dialog.cpp
         ${CMAKE_SOURCE_DIR}/code/dialogs/tran-func-dialog.cpp
+        ${CMAKE_SOURCE_DIR}/code/dialogs/chart-viewer/chart-viewer-window.cpp
+        ${CMAKE_SOURCE_DIR}/code/dialogs/chart-viewer/chart-viewer-window-ui.cpp
 
         ${CMAKE_SOURCE_DIR}/code/widgets/double-slider.cpp
         ${CMAKE_SOURCE_DIR}/code/widgets/reg-parameter.cpp
         ${CMAKE_SOURCE_DIR}/code/widgets/regulation-widget.cpp
-        ${CMAKE_SOURCE_DIR}/code/widgets/tran-func-form.cpp
         ${CMAKE_SOURCE_DIR}/code/widgets/tf-display-widget.cpp
+        ${CMAKE_SOURCE_DIR}/code/widgets/tf-form/tran-func-form.cpp
+        ${CMAKE_SOURCE_DIR}/code/widgets/tf-form/tran-func-form-edit.cpp
+        ${CMAKE_SOURCE_DIR}/code/widgets/tf-form/tran-func-form-io.cpp
+        ${CMAKE_SOURCE_DIR}/code/widgets/tf-form/tran-func-form-name.cpp
 
-        ${CMAKE_SOURCE_DIR}/code/charts/chart-utils.cpp
         ${CMAKE_SOURCE_DIR}/code/charts/chart-panel.cpp
         ${CMAKE_SOURCE_DIR}/code/charts/response-chart-bank.cpp
+        ${CMAKE_SOURCE_DIR}/code/charts/response-chart-bank-data.cpp
+        ${CMAKE_SOURCE_DIR}/code/charts/interactive-chart-view.cpp
+        ${CMAKE_SOURCE_DIR}/code/charts/utils/chart-utils.cpp
+        ${CMAKE_SOURCE_DIR}/code/charts/utils/chart-utils-series.cpp
+        ${CMAKE_SOURCE_DIR}/code/charts/utils/chart-utils-menu.cpp
 
         ${UI_FILES}
 )

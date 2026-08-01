@@ -55,28 +55,39 @@ inline numina::TransferFunction closedLoop(std::vector<double> plantNum, std::ve
     return open;
 }
 
+inline std::pair<double, double> timeRange(const ModelParam& p) {
+    double t0 = p.timeMin;
+    double t1 = p.timeMax;
+    if (!(t1 > t0))
+        std::swap(t0, t1);
+    if (!(t1 > t0))
+        t1 = t0 + 1.0;
+    return {t0, t1};
+}
+
 inline VecPair transient(const numina::TransferFunction& tf, const ModelParam& p) {
     numina::ResponseLab lab(tf);
-    if (p.autoSimTime)
+    if (p.autoTimeRange)
         return lab.transient();
+    const auto range = timeRange(p);
     if (p.autoTimeIntervals)
-        return lab.transient({0.0, static_cast<double>(p.simTime)});
-    return lab.transient({0.0, static_cast<double>(p.simTime)}, static_cast<std::size_t>(p.timeIntervals));
+        return lab.transient(range);
+    return lab.transient(range, static_cast<std::size_t>(std::max(2, p.timeIntervals)));
 }
 
 inline VecPair impulse(const numina::TransferFunction& tf, const ModelParam& p) {
     numina::ResponseLab lab(tf);
-    if (p.autoSimTime)
+    if (p.autoTimeRange)
         return lab.impulse();
+    const auto range = timeRange(p);
     if (p.autoTimeIntervals)
-        return lab.impulse({0.0, static_cast<double>(p.simTime)});
-    return lab.impulse({0.0, static_cast<double>(p.simTime)}, static_cast<std::size_t>(p.timeIntervals));
+        return lab.impulse(range);
+    return lab.impulse(range, static_cast<std::size_t>(std::max(2, p.timeIntervals)));
 }
 
 /// True when free term of denominator is ~0 (pole at s=0 / free integrator) — avoid ω=0.
 inline bool hasZeroDenConstant(const numina::TransferFunction& tf) noexcept {
     const auto& den = tf.getDenominator();
-    // high→low: last coeff is free term a0
     if (den.degree() < 0)
         return true;
     const auto v = den.vector();
@@ -85,28 +96,27 @@ inline bool hasZeroDenConstant(const numina::TransferFunction& tf) noexcept {
     return std::abs(v.back()) <= 1e-14 * (1.0 + std::abs(v.front()));
 }
 
-/// КЧХ + АЧХ + ФЧХ from one sweep of numina::TransferFunction::frequencyResponse(jω).
-/// ω-grid: ResponseLab::frequencyRange() (or model params) + logspace/linspace.
-/// If den free term is 0, ω starts strictly above 0 (no DC).
+/// КЧХ + АЧХ + ФЧХ — always logarithmic ω-grid.
 inline FrequencyBundle frequencyBundle(const numina::TransferFunction& tf, const ModelParam& p) {
     numina::ResponseLab lab(tf);
     std::pair<double, double> range =
         p.autoFreqRange ? lab.frequencyRange() : std::make_pair(p.freqMin, p.freqMax);
 
-    // Free term D(0)=0 → W(j0) undefined / infinite; never sample ω=0.
     if (hasZeroDenConstant(tf)) {
         constexpr double w_min_floor = 1e-4;
         range.first = std::max(range.first, w_min_floor);
         if (!(range.second > range.first))
             range.second = range.first * 1e3;
     }
+    if (!(range.first > 0.0))
+        range.first = 1e-4;
+    if (!(range.second > range.first))
+        range.second = range.first * 1e3;
 
     const std::size_t n =
         p.autoFreqIntervals ? 120 : static_cast<std::size_t>(std::max(2, p.freqIntervals));
 
-    const std::vector<double> omegas =
-        (p.freqScale == 1 && !p.autoFreqIntervals) ? numina::core::linspace(range, n)
-                                                   : numina::core::logspace(range, n, /*from_scratch=*/true);
+    const std::vector<double> omegas = numina::core::logspace(range, n, /*from_scratch=*/true);
 
     FrequencyBundle out;
     out.nyquist.reserve(omegas.size());

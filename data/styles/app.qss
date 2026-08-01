@@ -8,7 +8,8 @@ QPushButton#settingsButton,
 QPushButton#idSettingsButton,
 QPushButton#helpButton,
 QPushButton#openFileButton,
-QPushButton#identifyButton {
+QPushButton#identifyButton,
+QPushButton#autoSynthButton {
     background-color: #2e7d32;
     color: white;
     border: 2px solid #1b5e20;
@@ -26,7 +27,8 @@ QPushButton#settingsButton:hover,
 QPushButton#idSettingsButton:hover,
 QPushButton#helpButton:hover,
 QPushButton#openFileButton:hover,
-QPushButton#identifyButton:hover {
+QPushButton#identifyButton:hover,
+QPushButton#autoSynthButton:hover {
     background-color: #388e3c;
     border-style: inset;
 }
@@ -37,10 +39,23 @@ QPushButton#settingsButton:pressed,
 QPushButton#idSettingsButton:pressed,
 QPushButton#helpButton:pressed,
 QPushButton#openFileButton:pressed,
-QPushButton#identifyButton:pressed {
+QPushButton#identifyButton:pressed,
+QPushButton#autoSynthButton:pressed {
     background-color: #1b5e20;
     border-style: inset;
     padding: 3px;
+}
+
+/* Автосинтез — янтарный акцент */
+QPushButton#autoSynthButton {
+    background-color: #ef6c00;
+    border-color: #e65100;
+}
+QPushButton#autoSynthButton:hover {
+    background-color: #fb8c00;
+}
+QPushButton#autoSynthButton:pressed {
+    background-color: #e65100;
 }
 
 QPushButton#idSettingsButton {
@@ -267,9 +282,16 @@ RegulationWidget QLineEdit#metricValue[metricFlash="2"] {
     background-color: rgba(198, 40, 40, 0.35);
 }
 
-/* ---- Regulator parameter row ---- */
+/* ---- Regulator parameter row: [✓] Kp  value  от  до  ──slider── ---- */
 QLabel#regParamLabel {
     font-size: 14pt;
+}
+
+QLabel#regParamValue {
+    font-size: 11pt;
+    font-family: "Consolas", "Cascadia Mono", "Courier New", monospace;
+    color: palette(window-text);
+    padding: 0 4px;
 }
 
 QCheckBox#regParamCheck {
@@ -279,7 +301,6 @@ QCheckBox#regParamCheck {
 }
 
 QDoubleSpinBox#regParamMin,
-QDoubleSpinBox#regParamMax,
-QSpinBox#regParamPoints {
+QDoubleSpinBox#regParamMax {
     font-size: 9pt;
 }

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RegValve — эскизы UI</title>
+  <link rel="stylesheet" href="sketches.css" />
+</head>
+<body>
+  <header class="page-header">
+    <h1>RegValve — эскизы компоновки</h1>
+    <p>
+      Варианты по <a href="../ux-ui-recommendations.md">UX/UI-рекомендациям</a>.
+      Не финальный дизайн, а <strong>структура экранов</strong>: зоны «модель → действие → результат».
+    </p>
+    <nav class="toc">
+      <a href="#v0">0. Сейчас</a>
+      <a href="#v1">1. Карточки</a>
+      <a href="#v2">2. Анализ</a>
+      <a href="#v3">3. Идентификация</a>
+      <a href="#v4">4. Синтез + РКЧХ</a>
+      <a href="#v5">5. ПФ: формула / редактор</a>
+      <a href="#compare">Сравнение</a>
+    </nav>
+  </header>
+
+  <!-- ========== V0 CURRENT ========== -->
+  <section id="v0" class="variant">
+    <div class="variant-meta">
+      <h2>Вариант 0 — «Как сейчас» <span class="tag tag-base">базовый</span></h2>
+      <p class="desc">
+        ПФ и метрики в одном ряду сверху, иконки-действия, графики снизу на всю ширину.
+        Проблема: нет сцены, верх перегружен, метрики конкурируют с формулой.
+      </p>
+    </div>
+    <div class="window">
+      <div class="titlebar">
+        <span class="dots"></span>
+        <span class="win-title">RegValve — Анализ</span>
+      </div>
+      <div class="tabs">
+        <span>Идентификация</span>
+        <span class="on">Анализ</span>
+        <span>Синтез</span>
+        <span>РИМ</span>
+      </div>
+      <div class="body v0">
+        <div class="row top">
+          <div class="box tf dense">
+            <div class="label">ПФ (поля по степеням)</div>
+            <div class="fake-tf">
+              <span class="w">W(p) =</span>
+              <div class="frac">
+                <div class="num">[·][·][·][·][·][·]</div>
+                <div class="bar"></div>
+                <div class="den">[·][·][·][·][·][·]</div>
+              </div>
+              <span class="delay">· e<sup>−τp</sup></span>
+            </div>
+          </div>
+          <div class="box metrics small">
+            <div class="label">Метрики (6–12)</div>
+            <div class="grid-m">
+              <i></i><i></i><i></i><i></i><i></i><i></i>
+            </div>
+          </div>
+        </div>
+        <div class="row actions right">
+          <span class="chip muted">тип звена…</span>
+          <span class="spacer"></span>
+          <button class="ico">◫</button>
+          <button class="ico">⚙</button>
+          <button class="ico">+</button>
+          <button class="ico">↻</button>
+          <button class="ico danger">×</button>
+        </div>
+        <div class="row charts grow">
+          <div class="chart"><span>h(t)</span></div>
+          <div class="chart"><span>КЧХ</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== V1 CARDS ========== -->
+  <section id="v1" class="variant">
+    <div class="variant-meta">
+      <h2>Вариант 1 — «Карточки + сцена» <span class="tag tag-rec">рекомендуемый старт</span></h2>
+      <p class="desc">
+        Этап 1–2 roadmap: карточка «Модель», одна полоса действий, графики + метрики справа.
+        Минимальные изменения логики, максимальный эффект «приятности».
+      </p>
+    </div>
+    <div class="window">
+      <div class="titlebar">
+        <span class="dots"></span>
+        <span class="win-title">RegValve — Анализ</span>
+      </div>
+      <div class="tabs">
+        <span>Идентификация</span>
+        <span class="on">Анализ</span>
+        <span>Синтез</span>
+        <span>РИМ</span>
+      </div>
+      <div class="body v1">
+        <div class="card model">
+          <div class="card-h">Модель <span class="hint">объект</span></div>
+          <div class="fake-tf clean">
+            <span class="w">W(p) =</span>
+            <div class="frac">
+              <div class="num-t">2p + 1</div>
+              <div class="bar"></div>
+              <div class="den-t">p² + 3p + 2</div>
+            </div>
+            <span class="sub">Тип: инерционное 1-го порядка · τ = 0</span>
+          </div>
+          <div class="card-actions">
+            <button class="txt">Изменить</button>
+            <button class="txt ghost">Копировать</button>
+            <button class="txt ghost">Вставить</button>
+          </div>
+        </div>
+        <div class="toolbar">
+          <div class="grp">
+            <button class="txt">Параметры</button>
+            <button class="txt">Графики ▾</button>
+          </div>
+          <div class="grp primary">
+            <button class="txt primary">+ Добавить</button>
+            <button class="txt">↻ Заменить</button>
+          </div>
+          <div class="grp">
+            <button class="txt danger">Очистить</button>
+          </div>
+          <span class="status">Кривых: 2 · авто-время</span>
+        </div>
+        <div class="result">
+          <div class="charts-area">
+            <div class="chart tall"><span>Переходная h(t)</span><div class="spark"></div></div>
+            <div class="chart tall"><span>КЧХ (Найквист)</span><div class="spark nyq"></div></div>
+          </div>
+          <aside class="metrics-col">
+            <div class="card-h">Качество</div>
+            <ul class="m-list">
+              <li><b>t<sub>р</sub></b> <span>4.2 с</span></li>
+              <li><b>σ</b> <span>12 %</span></li>
+              <li><b>h<sub>уст</sub></b> <span>1.00</span></li>
+              <li><b>ζ</b> <span>0.48</span></li>
+            </ul>
+            <button class="txt ghost full">Подробнее…</button>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== V2 ANALYSIS FOCUS ========== -->
+  <section id="v2" class="variant">
+    <div class="variant-meta">
+      <h2>Вариант 2 — «Анализ: холст графиков» <span class="tag">scientific</span></h2>
+      <p class="desc">
+        Графики ~65% высоты. Модель — одна строка-preview. Редактирование ПФ — в выезжающей
+        панели или диалоге. Близко к MATLAB Control System Designer.
+      </p>
+    </div>
+    <div class="window">
+      <div class="titlebar">
+        <span class="dots"></span>
+        <span class="win-title">RegValve — Анализ</span>
+      </div>
+      <div class="tabs">
+        <span>Идентификация</span>
+        <span class="on">Анализ</span>
+        <span>Синтез</span>
+        <span>РИМ</span>
+      </div>
+      <div class="body v2">
+        <div class="strip model-strip">
+          <span class="badge">ОУ</span>
+          <code class="formula">W(p) = (2p+1) / (p²+3p+2)</code>
+          <button class="txt sm">✎ Править</button>
+          <span class="spacer"></span>
+          <button class="txt sm">Параметры</button>
+          <button class="txt sm primary">+ Добавить</button>
+          <button class="txt sm">↻</button>
+          <button class="txt sm danger">×</button>
+        </div>
+        <div class="result grow">
+          <div class="charts-area multi">
+            <div class="chart tall"><span>h(t)</span><div class="spark"></div></div>
+            <div class="chart tall"><span>КЧХ</span><div class="spark nyq"></div></div>
+            <div class="chart tall"><span>АЧХ</span><div class="spark"></div></div>
+            <div class="chart tall"><span>ФЧХ</span><div class="spark"></div></div>
+          </div>
+          <aside class="metrics-col slim">
+            <div class="card-h">Качество</div>
+            <ul class="m-list compact">
+              <li><b>t<sub>р</sub></b> 4.2</li>
+              <li><b>σ</b> 12%</li>
+              <li><b>ζ</b> 0.48</li>
+              <li><b>ω<sub>n</sub></b> 1.4</li>
+            </ul>
+          </aside>
+        </div>
+        <div class="statusbar">
+          Сессия: ОУ из идентификации · двойной клик по графику — окно просмотра
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== V3 IDENTIFICATION ========== -->
+  <section id="v3" class="variant">
+    <div class="variant-meta">
+      <h2>Вариант 3 — «Идентификация: сайдбар ввода» <span class="tag">workflow</span></h2>
+      <p class="desc">
+        Слева — метод, файл, настройки, «Считать». Справа — результат: формула + графики
+        (эксперимент / модель). Ввод не смешивается с моделью.
+      </p>
+    </div>
+    <div class="window">
+      <div class="titlebar">
+        <span class="dots"></span>
+        <span class="win-title">RegValve — Идентификация</span>
+      </div>
+      <div class="tabs">
+        <span class="on">Идентификация</span>
+        <span>Анализ</span>
+        <span>Синтез</span>
+        <span>РИМ</span>
+      </div>
+      <div class="body v3">
+        <aside class="sidebar">
+          <div class="card-h">Данные</div>
+          <label class="field">Метод
+            <select disabled><option>По переходной h(t)</option></select>
+          </label>
+          <div class="file-row">
+            <button class="txt">📂 Файл</button>
+            <span class="file-name">step_ht.txt</span>
+          </div>
+          <button class="txt full">⚙ Моделирование</button>
+          <button class="txt full">∑ Структура ПФ</button>
+          <button class="txt full primary big">▶ Идентифицировать</button>
+          <hr />
+          <button class="txt full ghost">→ В анализ</button>
+          <button class="txt full ghost">→ В синтез</button>
+        </aside>
+        <div class="main-col">
+          <div class="card model compact">
+            <div class="card-h">Идентифицированная ПФ</div>
+            <div class="fake-tf clean">
+              <span class="w">W(p) =</span>
+              <div class="frac">
+                <div class="num-t">1.02</div>
+                <div class="bar"></div>
+                <div class="den-t">4.1p + 1</div>
+              </div>
+              <span class="delay-t">· e<sup>−0.8p</sup></span>
+            </div>
+          </div>
+          <div class="charts-area pair">
+            <div class="chart tall"><span>h(t): эксперимент / модель</span><div class="spark"></div></div>
+            <div class="chart tall"><span>КЧХ</span><div class="spark nyq"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== V4 SYNTHESIS ========== -->
+  <section id="v4" class="variant">
+    <div class="variant-meta">
+      <h2>Вариант 4 — «Синтез: режимы + регулятор» <span class="tag">product</span></h2>
+      <p class="desc">
+        Подрежимы Вручную / Авто / РКЧХ в одной вкладке. ОУ сверху, параметры регулятора
+        компактной таблицей, графики контура + ключевые метрики.
+      </p>
+    </div>
+    <div class="window">
+      <div class="titlebar">
+        <span class="dots"></span>
+        <span class="win-title">RegValve — Синтез</span>
+      </div>
+      <div class="tabs">
+        <span>Идентификация</span>
+        <span>Анализ</span>
+        <span class="on">Синтез</span>
+        <span>РИМ</span>
+      </div>
+      <div class="body v4">
+        <div class="seg">
+          <button class="on">Вручную</button>
+          <button>Авто ✨</button>
+          <button>РКЧХ</button>
+        </div>
+        <div class="row top-syn">
+          <div class="card model compact">
+            <div class="card-h">W<sub>ОУ</sub>(p)</div>
+            <code class="formula">1 / (4.1p + 1) · e^{−0.8p}</code>
+          </div>
+          <div class="card reg">
+            <div class="card-h">Регулятор</div>
+            <table class="reg-table">
+              <tr><td>☐</td><td>K<sub>p</sub></td><td class="v">1.20</td><td>от 0.05</td><td>до 20</td><td class="sl"></td></tr>
+              <tr><td>☑</td><td>T<sub>u</sub></td><td class="v">8.0</td><td>от 0.5</td><td>до 120</td><td class="sl"></td></tr>
+              <tr><td>☐</td><td>T<sub>d</sub></td><td class="v">1.0</td><td>от 0.05</td><td>до 60</td><td class="sl"></td></tr>
+            </table>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="txt">Параметры</button>
+          <button class="txt">?</button>
+          <span class="spacer"></span>
+          <button class="txt primary">+ Добавить кривую</button>
+          <button class="txt danger">Очистить</button>
+        </div>
+        <div class="result">
+          <div class="charts-area">
+            <div class="chart tall"><span>Переходный процесс</span><div class="spark"></div></div>
+            <div class="chart tall"><span>КЧХ замкнутого</span><div class="spark nyq"></div></div>
+          </div>
+          <aside class="metrics-col">
+            <div class="card-h">Качество</div>
+            <ul class="m-list">
+              <li><b>t<sub>р</sub></b> <span>6.1</span></li>
+              <li><b>σ</b> <span>8 %</span></li>
+              <li><b>ЛИК</b> <span>1.4</span></li>
+              <li><b>ζ</b> <span>0.55</span></li>
+            </ul>
+            <button class="txt ghost full">Все 12…</button>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== V5 TF EDITOR ========== -->
+  <section id="v5" class="variant">
+    <div class="variant-meta">
+      <h2>Вариант 5 — «ПФ: чтение vs правка» <span class="tag tag-rec">форма</span></h2>
+      <p class="desc">
+        Два состояния одного блока. Слева — спокойная формула (по умолчанию).
+        Справа — компактный редактор (строки коэффициентов, порядок, τ).
+      </p>
+    </div>
+    <div class="pair-windows">
+      <div class="window mini">
+        <div class="titlebar"><span class="win-title">Режим чтения</span></div>
+        <div class="body pad">
+          <div class="card model">
+            <div class="card-h">Модель <button class="txt sm right">✎ Изменить</button></div>
+            <div class="fake-tf clean big">
+              <span class="w">W(p) =</span>
+              <div class="frac">
+                <div class="num-t">2.0 p + 1.0</div>
+                <div class="bar"></div>
+                <div class="den-t">1.0 p² + 3.0 p + 2.0</div>
+              </div>
+            </div>
+            <p class="sub center">Инерционное 1-го порядка · запаздывание выкл.</p>
+            <div class="card-actions center">
+              <button class="txt ghost">Копировать</button>
+              <button class="txt ghost">Вставить</button>
+              <button class="txt ghost">Подробнее (корни)…</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="window mini">
+        <div class="titlebar"><span class="win-title">Режим редактора</span></div>
+        <div class="body pad">
+          <div class="card model">
+            <div class="card-h">Модель <button class="txt sm right primary">Готово</button></div>
+            <div class="edit-form">
+              <label>Числитель (high → low)
+                <input value="2  1" readonly />
+              </label>
+              <label>Знаменатель (high → low)
+                <input value="1  3  2" readonly />
+              </label>
+              <div class="edit-row">
+                <label>deg N <input class="sm" value="1" readonly /></label>
+                <label>deg D <input class="sm" value="2" readonly /></label>
+              </div>
+              <label class="check">
+                <input type="checkbox" disabled /> Запаздывание τ
+                <input class="sm" value="0.00" readonly /> с
+              </label>
+              <button class="txt ghost sm">Расширенный вид (поля по pᵏ)…</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== COMPARE ========== -->
+  <section id="compare" class="variant">
+    <div class="variant-meta">
+      <h2>Сравнение вариантов</h2>
+    </div>
+    <table class="compare">
+      <thead>
+        <tr>
+          <th>Вариант</th>
+          <th>Фокус</th>
+          <th>Сложность внедрения</th>
+          <th>Когда брать</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>0. Сейчас</strong></td>
+          <td>Всё на виду</td>
+          <td>—</td>
+          <td>База до рефакторинга UI</td>
+        </tr>
+        <tr class="hl">
+          <td><strong>1. Карточки + сцена</strong></td>
+          <td>Иерархия модель / действие / результат</td>
+          <td>Низкая</td>
+          <td><strong>Первый шаг</strong> после РКЧХ</td>
+        </tr>
+        <tr>
+          <td><strong>2. Холст графиков</strong></td>
+          <td>Максимум площади под отклики</td>
+          <td>Средняя</td>
+          <td>Если анализ — главный сценарий</td>
+        </tr>
+        <tr>
+          <td><strong>3. Сайдбар ID</strong></td>
+          <td>Workflow «файл → модель»</td>
+          <td>Средняя</td>
+          <td>Идентификация как вход в сессию</td>
+        </tr>
+        <tr>
+          <td><strong>4. Синтез + режимы</strong></td>
+          <td>Вручную / авто / РКЧХ в одной вкладке</td>
+          <td>Средняя</td>
+          <td>Когда РКЧХ готов</td>
+        </tr>
+        <tr class="hl">
+          <td><strong>5. ПФ чтение/правка</strong></td>
+          <td>Красивая формула + компактный edit</td>
+          <td>Средняя–высокая</td>
+          <td>Главная «боль» формы ПФ</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="footer-note">
+      Практичная комбинация: <strong>1 + 5</strong> на всех вкладках, <strong>3</strong> для
+      идентификации, <strong>4</strong> для синтеза. Вариант <strong>2</strong> — опционально
+      как «режим фокуса» на анализе.
+    </p>
+  </section>
+
+  <footer class="page-footer">
+    Эскизы: wireframe, не привязаны к QSS. Откройте этот файл в браузере.
+    Путь: <code>docs/sketches/index.html</code>
+  </footer>
+</body>
+</html>

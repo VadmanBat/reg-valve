@@ -1,8 +1,6 @@
 #include "code/widgets/double-slider.h"
 
 #include <QPaintEvent>
-#include <QPainter>
-#include <QStyleOptionSlider>
 
 #include <algorithm>
 
@@ -36,16 +34,8 @@ void DoubleSlider::setValue(double value) {
 }
 
 void DoubleSlider::paintEvent(QPaintEvent* event) {
+    // Value / limits shown in RegParameter row — keep the track clean.
     QSlider::paintEvent(event);
-    QStyleOptionSlider opt;
-    initStyleOption(&opt);
-    QPainter painter(this);
-    const QRect rect      = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, this);
-    const QRect text_rect = rect.adjusted(-width() / 2, -55, width() / 2, height() / 2);
-    painter.drawText(text_rect, Qt::AlignCenter, QString::number(this->value(), 'f', 2));
-    const QRect limit_rect(0, 30, width(), height());
-    painter.drawText(limit_rect, Qt::AlignLeft, QString::number(min_, 'f', 2));
-    painter.drawText(limit_rect, Qt::AlignRight, QString::number(max_, 'f', 2));
 }
 
 void DoubleSlider::on_int_value_changed(int) {

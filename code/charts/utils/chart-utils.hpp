@@ -1,6 +1,6 @@
 #pragma once
 
-#include "code/charts/nice-axis.hpp"
+#include "code/charts/utils/nice-axis.hpp"
 
 #include <QChart>
 #include <QChartView>
@@ -25,6 +25,8 @@ QPen penForIndex(std::size_t index);
 
 void createAxes(QChart* chart, const QString& titleX, const QString& titleY);
 void createChartContextMenu(QChartView* chartView);
+/// Open detached interactive viewer (non-modal). Safe if chart is null.
+void openChartViewer(QChart* chart, QWidget* parent = nullptr);
 void removeAllSeries(QChart* chart);
 
 /// Legacy alias → niceAxisRange(..., include_zero=true).

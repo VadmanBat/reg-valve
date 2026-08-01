@@ -14,12 +14,16 @@
 #include <QToolButton>
 #include <QVBoxLayout>
 
+#include <algorithm>
+#include <cmath>
+
 SynthesisTab::SynthesisTab(QWidget* parent) : QWidget(parent), ui(new Ui::SynthesisTab) {
     ui->setupUi(this);
     install_custom_widgets();
     setup_metrics();
 
     charts_ = new ResponseChartBank(this);
+    charts_->setTransientTitle(tr("Переходный процесс"));
     ui->chartsLayout->addWidget(charts_);
 
     ui->verticalLayout->setStretch(0, 0);
@@ -43,6 +47,7 @@ SynthesisTab::SynthesisTab(QWidget* parent) : QWidget(parent), ui(new Ui::Synthe
 
     connect(ui->helpButton, &QPushButton::clicked, this, &SynthesisTab::openHelp);
     connect(ui->settingsButton, &QPushButton::clicked, this, &SynthesisTab::openSettings);
+    connect(ui->autoSynthButton, &QPushButton::clicked, this, &SynthesisTab::autoSynthesize);
     connect(ui->addButton, &QPushButton::clicked, this, &SynthesisTab::addTransferFunction);
     connect(ui->clearButton, &QPushButton::clicked, this, &SynthesisTab::clearCharts);
 }
@@ -105,6 +110,61 @@ void SynthesisTab::openSettings() {
 void SynthesisTab::openHelp() {
     HelpDialog dialog(this);
     dialog.exec();
+}
+
+void SynthesisTab::autoSynthesize() {
+    auto plant_num = form_->numerator();
+    auto plant_den = form_->denominator();
+    if (!tf_builder::validInput(plant_num, plant_den)) {
+        show_error(tr("Задайте корректную ПФ объекта управления."));
+        return;
+    }
+
+    try {
+        const auto plant =
+            tf_builder::plant(std::move(plant_num), std::move(plant_den), form_->delayTime(),
+                              model_param_.approxOrder);
+        numina::ResponseLab lab(plant);
+        const auto q = lab.evaluate();
+
+        // Эвристика PI по DC-усилению и времени переходного процесса ОУ
+        // (numina::RegulatorDesigner пока TODO).
+        double K = 1.0;
+        if (q.is_settled && std::abs(q.steady_state) > 1e-9)
+            K = std::abs(q.steady_state);
+        else {
+            // fallback: free terms N(0)/D(0)
+            const auto n = plant.getNumerator().vector();
+            const auto d = plant.getDenominator().vector();
+            if (!n.empty() && !d.empty() && std::abs(d.back()) > 1e-14)
+                K = std::max(1e-6, std::abs(n.back() / d.back()));
+        }
+
+        double T = q.is_settled && q.settling_time > 1e-6 ? q.settling_time : 10.0;
+        if (q.is_settled && q.rise_time > 1e-6)
+            T = std::max(T, q.rise_time * 4.0);
+
+        // Rough PI (open-loop style): Kp ~ 1/K, Tu ~ T/2
+        double Kp = std::clamp(1.0 / K, 0.05, 2000.0);
+        double Tu = std::clamp(T / 2.0, 0.05, 2000.0);
+        double Td = std::clamp(T / 8.0, 0.05, 2000.0);
+
+        auto set_param = [](RegParameter* p, double v, bool on) {
+            const double lo = std::max(0.05, v / 20.0);
+            const double hi = std::min(2000.0, std::max(v * 20.0, lo + 1.0));
+            p->setRange(lo, hi);
+            p->setEnabled(on);
+            p->setValue(v);
+        };
+
+        set_param(parameters_[0], Kp, true);  // P
+        set_param(parameters_[1], Tu, true);  // I
+        set_param(parameters_[2], Td, false); // D off by default
+
+        apply_current_regulator(!charts_->empty());
+    } catch (const std::exception& ex) {
+        show_error(tr("Автосинтез: %1").arg(QString::fromUtf8(ex.what())));
+    }
 }
 
 void SynthesisTab::apply_current_regulator(bool replace_last) {

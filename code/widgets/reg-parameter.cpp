@@ -1,15 +1,19 @@
 #include "code/widgets/reg-parameter.h"
 
+#include "code/util/format.hxx"
+
 #include <QAbstractSpinBox>
 #include <QCheckBox>
 #include <QDoubleSpinBox>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QSpinBox>
+
+#include <algorithm>
 
 namespace {
 constexpr int kLabelW = 40;
 constexpr int kCheckW = 22;
+constexpr int kValueW = 72;
 constexpr int kSpinW  = 100;
 constexpr int kSpinH  = 28;
 } // namespace
@@ -17,24 +21,31 @@ constexpr int kSpinH  = 28;
 RegParameter::RegParameter(const QString& title, double min, double max, double minValue, double maxValue,
                            QObject* parent)
     : QObject(parent),
-      label_(new QLabel(title)),
       check_box_(new QCheckBox),
+      label_(new QLabel(title)),
+      value_label_(new QLabel),
       min_spin_(new QDoubleSpinBox),
       max_spin_(new QDoubleSpinBox),
-      points_spin_(new QSpinBox),
       slider_(new DoubleSlider(Qt::Horizontal)),
       layout_(new QHBoxLayout) {
-    label_->setObjectName(QStringLiteral("regParamLabel"));
     check_box_->setObjectName(QStringLiteral("regParamCheck"));
+    label_->setObjectName(QStringLiteral("regParamLabel"));
+    value_label_->setObjectName(QStringLiteral("regParamValue"));
     min_spin_->setObjectName(QStringLiteral("regParamMin"));
     max_spin_->setObjectName(QStringLiteral("regParamMax"));
-    points_spin_->setObjectName(QStringLiteral("regParamPoints"));
     slider_->setObjectName(QStringLiteral("regParamSlider"));
+
+    // Order: checkbox | symbol | current | from | to | slider
+    check_box_->setFixedWidth(kCheckW);
+    check_box_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
     label_->setFixedWidth(kLabelW);
     label_->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    check_box_->setFixedWidth(kCheckW);
-    check_box_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    label_->setTextFormat(Qt::RichText);
+
+    value_label_->setFixedWidth(kValueW);
+    value_label_->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    value_label_->setMinimumHeight(kSpinH);
 
     min_spin_->setRange(min, max);
     min_spin_->setDecimals(2);
@@ -50,67 +61,68 @@ RegParameter::RegParameter(const QString& title, double min, double max, double 
     max_spin_->setButtonSymbols(QAbstractSpinBox::NoButtons);
     max_spin_->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
-    points_spin_->setRange(10, 2000);
-    points_spin_->setPrefix(tr("точки: "));
-    points_spin_->setValue(1000);
-    points_spin_->setButtonSymbols(QAbstractSpinBox::NoButtons);
-    points_spin_->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-
     update_slider_range();
     enable(false);
 
     connect(min_spin_, &QDoubleSpinBox::editingFinished, this, [this] {
         if (min_spin_->value() > max_spin_->value())
             max_spin_->setValue(min_spin_->value());
-        else
-            update_slider_range();
+        update_slider_range();
     });
     connect(max_spin_, &QDoubleSpinBox::editingFinished, this, [this] {
         if (min_spin_->value() > max_spin_->value())
             min_spin_->setValue(max_spin_->value());
-        else
-            update_slider_range();
+        update_slider_range();
     });
-    connect(points_spin_, &QSpinBox::editingFinished, this, &RegParameter::update_slider_range);
     connect(check_box_, &QCheckBox::toggled, this, &RegParameter::enable);
+    connect(slider_, &DoubleSlider::doubleValueChanged, this, &RegParameter::on_slider_moved);
 
     auto* row = qobject_cast<QHBoxLayout*>(layout_);
     row->setContentsMargins(0, 4, 0, 4);
     row->setSpacing(8);
     row->setAlignment(Qt::AlignVCenter);
 
-    row->addWidget(label_, 0, Qt::AlignVCenter);
     row->addWidget(check_box_, 0, Qt::AlignVCenter);
+    row->addWidget(label_, 0, Qt::AlignVCenter);
+    row->addWidget(value_label_, 0, Qt::AlignVCenter);
     row->addWidget(min_spin_, 0, Qt::AlignVCenter);
     row->addWidget(max_spin_, 0, Qt::AlignVCenter);
-    row->addWidget(points_spin_, 0, Qt::AlignVCenter);
     row->addWidget(slider_, 1);
 
     apply_default_style();
+    refresh_value_label();
 }
 
 void RegParameter::update_slider_range() {
-    const auto min    = min_spin_->value();
-    const auto max    = max_spin_->value();
-    const auto points = points_spin_->value();
-    if (min < max) {
-        const auto value = slider_->value();
-        slider_->setRange(min, max, points - 1);
-        slider_->setValue(value);
-    }
+    const auto min = min_spin_->value();
+    const auto max = max_spin_->value();
+    if (!(min < max))
+        return;
+    const auto value = slider_->value();
+    slider_->setRange(min, max, kSliderIntervals);
+    slider_->setValue(value);
+    refresh_value_label();
 }
 
 void RegParameter::enable(bool checked) {
+    label_->setEnabled(checked);
+    value_label_->setEnabled(checked);
     min_spin_->setEnabled(checked);
     max_spin_->setEnabled(checked);
-    points_spin_->setEnabled(checked);
     slider_->setEnabled(checked);
+}
+
+void RegParameter::on_slider_moved(double) {
+    refresh_value_label();
+}
+
+void RegParameter::refresh_value_label() {
+    value_label_->setText(num_format::format(slider_->value(), num_format::SIGNIFICANT_DIGITS));
 }
 
 void RegParameter::apply_default_style() {
     min_spin_->setFixedSize(kSpinW, kSpinH);
     max_spin_->setFixedSize(kSpinW, kSpinH);
-    points_spin_->setFixedSize(kSpinW, kSpinH);
 }
 
 bool RegParameter::enabled() const {
@@ -119,4 +131,30 @@ bool RegParameter::enabled() const {
 
 double RegParameter::value() const {
     return slider_->value();
+}
+
+void RegParameter::setEnabled(bool on) {
+    check_box_->setChecked(on);
+}
+
+void RegParameter::setValue(double v) {
+    slider_->setValue(v);
+    refresh_value_label();
+}
+
+void RegParameter::setRange(double min, double max) {
+    if (max < min)
+        std::swap(min, max);
+    if (!(max > min))
+        max = min + 1.0;
+    min_spin_->setValue(min);
+    max_spin_->setValue(max);
+    update_slider_range();
+}
+
+void RegParameter::setLimits(double hard_min, double hard_max) {
+    if (hard_max < hard_min)
+        std::swap(hard_min, hard_max);
+    min_spin_->setRange(hard_min, hard_max);
+    max_spin_->setRange(hard_min, hard_max);
 }

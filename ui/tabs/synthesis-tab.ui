@@ -44,8 +44,8 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>36</width>
-         <height>36</height>
+         <width>40</width>
+         <height>40</height>
         </size>
        </property>
       </widget>
@@ -63,8 +63,27 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>36</width>
-         <height>36</height>
+         <width>40</width>
+         <height>40</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="autoSynthButton">
+       <property name="objectName">
+        <string notr="true">autoSynthButton</string>
+       </property>
+       <property name="toolTip">
+        <string>Автосинтез регулятора (PI по переходной ОУ)</string>
+       </property>
+       <property name="text">
+        <string>✨</string>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>40</width>
+         <height>40</height>
         </size>
        </property>
       </widget>
@@ -82,8 +101,8 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>36</width>
-         <height>36</height>
+         <width>40</width>
+         <height>40</height>
         </size>
        </property>
       </widget>
@@ -101,8 +120,8 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>36</width>
-         <height>36</height>
+         <width>40</width>
+         <height>40</height>
         </size>
        </property>
       </widget>

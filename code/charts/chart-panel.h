@@ -1,6 +1,6 @@
 #pragma once
 
-#include "code/charts/chart-utils.hpp"
+#include "code/charts/utils/chart-utils.hpp"
 
 #include <QWidget>
 
@@ -29,6 +29,8 @@ public:
     [[nodiscard]] QChart* chart() const { return chart_; }
     [[nodiscard]] QChartView* view() const { return view_; }
     [[nodiscard]] std::size_t curveCount() const { return curve_count_; }
+
+    void setChartTitle(const QString& title);
 
     void addRealCurve(const VecPair& points, const QString& name);
     void addComplexCurve(const VecComp& points, const QString& name);

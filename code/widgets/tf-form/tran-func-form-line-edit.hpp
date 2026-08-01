@@ -45,10 +45,11 @@ public:
         const QString t = text().trimmed();
         if (cleared || t.isEmpty() || t == QLatin1String("+") || t == QLatin1String("-")) {
             stored = 0.0;
-        } else {
-            bool ok = false;
+        }
+        else {
+            bool ok        = false;
             const double v = num_format::parse(t, &ok);
-            stored = ok ? num_format::roundSignificant(v, num_format::STORED_DIGITS) : 0.0;
+            stored         = ok ? num_format::roundSignificant(v, num_format::STORED_DIGITS) : 0.0;
         }
         dirty   = false;
         cleared = false;

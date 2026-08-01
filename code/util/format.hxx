@@ -1,9 +1,8 @@
 #pragma once
 
-#include <QString>
-
 #include <cmath>
 #include <limits>
+#include <QString>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -21,7 +20,7 @@ inline constexpr int FULL_DIGITS = std::numeric_limits<double>::max_digits10; //
 [[nodiscard]] inline double roundSignificant(double value, int digits = STORED_DIGITS) noexcept {
     if (!std::isfinite(value) || value == 0.0 || digits < 1)
         return value;
-    const double ax = std::abs(value);
+    const double ax    = std::abs(value);
     const double exp10 = std::floor(std::log10(ax));
     const double scale = std::pow(10.0, static_cast<double>(digits) - 1.0 - exp10);
     return std::copysign(std::round(ax * scale) / scale, value);
@@ -81,7 +80,7 @@ inline constexpr int FULL_DIGITS = std::numeric_limits<double>::max_digits10; //
             *ok = true;
         return text.startsWith(QLatin1Char('-')) ? -1.0 : 1.0;
     }
-    bool local_ok = false;
+    bool local_ok  = false;
     const double v = text.toDouble(&local_ok);
     if (ok)
         *ok = local_ok;
@@ -105,14 +104,16 @@ inline constexpr int FULL_DIGITS = std::numeric_limits<double>::max_digits10; //
         QString term;
         if (power == 0) {
             term = format(c, digits);
-        } else if (power == 1) {
+        }
+        else if (power == 1) {
             if (c == 1.0)
                 term = QStringLiteral("p");
             else if (c == -1.0)
                 term = QStringLiteral("−p");
             else
                 term = format(c, digits) + QStringLiteral("·p");
-        } else {
+        }
+        else {
             if (c == 1.0)
                 term = QStringLiteral("p<sup>%1</sup>").arg(power);
             else if (c == -1.0)
@@ -137,7 +138,8 @@ inline constexpr int FULL_DIGITS = std::numeric_limits<double>::max_digits10; //
 }
 
 /// Plain (non-HTML) poly for clipboard human line, low→high.
-[[nodiscard]] inline QString polyPlainLowFirst(const std::vector<double>& high_to_low, int digits = SIGNIFICANT_DIGITS) {
+[[nodiscard]] inline QString polyPlainLowFirst(const std::vector<double>& high_to_low,
+                                               int digits = SIGNIFICANT_DIGITS) {
     QString html = polyHtmlLowFirst(high_to_low, digits);
     html.replace(QStringLiteral("<sup>"), QStringLiteral("^"));
     html.replace(QStringLiteral("</sup>"), QString());

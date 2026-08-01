@@ -3,7 +3,6 @@
 #include "numina/classes/control/transfer-function.h"
 
 #include <QWidget>
-
 #include <vector>
 
 class QDoubleSpinBox;

@@ -2,13 +2,12 @@
 
 #include "code/util/format.hxx"
 
+#include <algorithm>
 #include <QAbstractSpinBox>
 #include <QCheckBox>
 #include <QDoubleSpinBox>
 #include <QHBoxLayout>
 #include <QLabel>
-
-#include <algorithm>
 
 namespace {
 constexpr int kLabelW = 40;

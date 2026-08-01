@@ -1,24 +1,22 @@
 #include "code/tabs/id-tab.h"
-#include "ui_id-tab.h"
-
 #include "code/util/data-file-parser.hpp"
 #include "code/util/tf-builder.hpp"
-
 #include "numina/classes/control/duhamel-solver.h"
 #include "numina/classes/control/simoyu-identifier.h"
 #include "numina/classes/control/transfer-function/response-lab.h"
-
-#include <QFileInfo>
-#include <QMessageBox>
+#include "ui_id-tab.h"
 
 #include <algorithm>
+#include <QFileInfo>
+#include <QMessageBox>
 #include <utility>
 
 bool IdTab::load_step_file(const QString& path) {
     auto opt = data_file_parser::readStepResponse(path);
     if (!opt) {
-        show_error(tr("Не удалось прочитать пары time, value.\n"
-                      "Числа с «.»/«,» и научной записью; мусор отбрасывается."));
+        show_error(
+            tr("Не удалось прочитать пары time, value.\n"
+               "Числа с «.»/«,» и научной записью; мусор отбрасывается."));
         return false;
     }
     step_series_ = std::move(*opt);
@@ -64,14 +62,12 @@ void IdTab::runIdentification() {
     try {
         numina::SimoyuIdentifier simoyu;
         Series experimental_h;
-        const bool auto_order = id_settings_.autoOrder;
-        const std::size_t den_n =
-            static_cast<std::size_t>(std::clamp(id_settings_.denOrder, 1, 12));
+        const bool auto_order   = id_settings_.autoOrder;
+        const std::size_t den_n = static_cast<std::size_t>(std::clamp(id_settings_.denOrder, 1, 12));
         const std::size_t num_m =
             static_cast<std::size_t>(std::clamp(id_settings_.numOrder, 0, static_cast<int>(den_n)));
-        const std::size_t max_order =
-            static_cast<std::size_t>(std::clamp(model_param_.approxOrder, 2, 12));
-        const bool want_tau = id_settings_.estimateTau;
+        const std::size_t max_order = static_cast<std::size_t>(std::clamp(model_param_.approxOrder, 2, 12));
+        const bool want_tau         = id_settings_.estimateTau;
 
         if (method == Method::StepResponse) {
             if (step_series_.size() < 2) {
@@ -79,10 +75,10 @@ void IdTab::runIdentification() {
                 return;
             }
             experimental_h = step_series_;
-        } else {
+        }
+        else {
             if (valve_series_.size() < 2 || signal_series_.size() < 2) {
-                show_error(tr("Недостаточно точек клапана/сигнала (строк: %1).")
-                               .arg(valve_series_.size()));
+                show_error(tr("Недостаточно точек клапана/сигнала (строк: %1).").arg(valve_series_.size()));
                 return;
             }
             for (std::size_t i = 1; i < valve_series_.size(); ++i) {
@@ -108,7 +104,8 @@ void IdTab::runIdentification() {
                 fit = simoyu.identifyDelayAuto(experimental_h, max_order, max_order);
             else
                 fit = simoyu.identifyDelay(experimental_h, den_n, num_m);
-        } else {
+        }
+        else {
             fit.tau = 0.0;
             if (auto_order)
                 fit.plant = simoyu.identifyAuto(experimental_h, max_order, max_order);
@@ -126,7 +123,8 @@ void IdTab::runIdentification() {
         const double tau = fit.tau > 0.0 ? fit.tau : 0.0;
         apply_result(fit.plant, tau, experimental_h);
         ui->fileLabel->setText(QFileInfo(file_path_).fileName());
-    } catch (const std::exception& ex) {
+    }
+    catch (const std::exception& ex) {
         show_error(tr("Ошибка идентификации: %1").arg(QString::fromUtf8(ex.what())));
     }
 }
@@ -146,12 +144,14 @@ void IdTab::apply_result(const numina::TransferFunction& plant, double tau, cons
         numina::ResponseLab lab(model);
         const auto q = lab.evaluate();
         if (q.is_settled) {
-            metrics_->updateValues({q.settling_time, q.natural_frequency, q.rise_time, q.cut_frequency,
-                                    q.damping_ratio, q.steady_state});
-        } else {
+            metrics_->updateValues(
+                {q.settling_time, q.natural_frequency, q.rise_time, q.cut_frequency, q.damping_ratio, q.steady_state});
+        }
+        else {
             metrics_->updateValues({});
         }
-    } catch (...) {
+    }
+    catch (...) {
         metrics_->updateValues({});
     }
 }

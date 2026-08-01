@@ -1,8 +1,8 @@
 #include "code/tabs/id-tab.h"
-#include "ui_id-tab.h"
 
 #include "code/dialogs/id-settings-dialog.h"
 #include "code/dialogs/mod-par-dialog.h"
+#include "ui_id-tab.h"
 
 #include <QComboBox>
 #include <QFileDialog>
@@ -41,9 +41,9 @@ IdTab::IdTab(QWidget* parent) : QWidget(parent), ui(new Ui::IdTab) {
     charts_btn->setFixedSize(40, 40);
     ui->buttonLayout->insertWidget(ui->buttonLayout->indexOf(ui->idSettingsButton), charts_btn);
 
-    ui->methodCombo->setToolTip(tr(
-        "По переходной: time, value.\n"
-        "По клапану/сигналу: time, valve, value (табы/пробелы/; и т.п.)."));
+    ui->methodCombo->setToolTip(
+        tr("По переходной: time, value.\n"
+           "По клапану/сигналу: time, valve, value (табы/пробелы/; и т.п.)."));
 
     connect(ui->openFileButton, &QPushButton::clicked, this, &IdTab::openFile);
     connect(ui->identifyButton, &QPushButton::clicked, this, &IdTab::runIdentification);

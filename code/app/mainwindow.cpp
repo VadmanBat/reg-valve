@@ -1,10 +1,10 @@
 #include "code/app/mainwindow.h"
-#include "ui_mainwindow.h"
 
 #include "code/tabs/analysis-tab.h"
 #include "code/tabs/id-tab.h"
 #include "code/tabs/rim-tab.h"
 #include "code/tabs/synthesis-tab.h"
+#include "ui_mainwindow.h"
 
 #include <QApplication>
 #include <QFile>

@@ -1,16 +1,15 @@
 #include "code/dialogs/tran-func-dialog.h"
-#include "ui_tran-func-dialog.h"
 
 #include "code/util/format.hxx"
-
-#include <QAbstractItemView>
-#include <QBrush>
-#include <QHeaderView>
-#include <QTableWidgetItem>
+#include "ui_tran-func-dialog.h"
 
 #include <cmath>
 #include <complex>
 #include <numbers>
+#include <QAbstractItemView>
+#include <QBrush>
+#include <QHeaderView>
+#include <QTableWidgetItem>
 
 TranFuncDialog::TranFuncDialog(const numina::TransferFunction& tf, QWidget* parent)
     : QDialog(parent), ui(new Ui::TranFuncDialog), tf_(tf) {
@@ -75,9 +74,8 @@ void TranFuncDialog::fill_poles() {
         const int row = ui->polesTable->rowCount();
         ui->polesTable->insertRow(row);
 
-        auto* re_item = new QTableWidgetItem(
-            pole.real() < 0 ? num_format::format(pole.real())
-                            : QStringLiteral("+") + num_format::format(pole.real()));
+        auto* re_item = new QTableWidgetItem(pole.real() < 0 ? num_format::format(pole.real())
+                                                             : QStringLiteral("+") + num_format::format(pole.real()));
         re_item->setForeground(QBrush(pole.real() < 0 ? QColor(0x80, 0xd8, 0xff) : QColor(0xff, 0xb0, 0xc8)));
         ui->polesTable->setItem(row, 0, re_item);
 
@@ -87,8 +85,7 @@ void TranFuncDialog::fill_poles() {
                                 new QTableWidgetItem(num_format::format(std::arg(pole) * 180.0 / std::numbers::pi)));
         ui->polesTable->setItem(
             row, 4,
-            new QTableWidgetItem(pole.real() != 0.0 ? num_format::format(-1.0 / pole.real())
-                                                    : QStringLiteral("∞")));
+            new QTableWidgetItem(pole.real() != 0.0 ? num_format::format(-1.0 / pole.real()) : QStringLiteral("∞")));
 
         if (std::abs(pole.imag()) > 1e-10) {
             ui->polesTable->setItem(

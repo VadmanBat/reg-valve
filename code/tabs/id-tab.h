@@ -5,12 +5,10 @@
 #include "code/model/model-param.hpp"
 #include "code/widgets/regulation-widget.h"
 #include "code/widgets/tf-display-widget.h"
-
 #include "numina/classes/control/transfer-function.h"
 
 #include <QString>
 #include <QWidget>
-
 #include <utility>
 #include <vector>
 

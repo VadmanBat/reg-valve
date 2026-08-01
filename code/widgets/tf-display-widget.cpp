@@ -96,11 +96,12 @@ void TfDisplayWidget::set_polys(const Vec& num, const Vec& den, double tau) {
                               : num_format::polyHtmlLowFirst(den_, num_format::SIGNIFICANT_DIGITS));
 
     if (!empty_ && tau_ > 0.0) {
-        delayLabel_->setText(QStringLiteral("· e<sup>−%1 p</sup>")
-                                 .arg(num_format::format(tau_, num_format::SIGNIFICANT_DIGITS)));
+        delayLabel_->setText(
+            QStringLiteral("· e<sup>−%1 p</sup>").arg(num_format::format(tau_, num_format::SIGNIFICANT_DIGITS)));
         delayLabel_->setVisible(true);
         delayGroup_->setVisible(true);
-    } else {
+    }
+    else {
         delayLabel_->clear();
         delayLabel_->setVisible(false);
         delayGroup_->setVisible(false);
@@ -151,8 +152,8 @@ void TfDisplayWidget::copyToClipboard() {
     if (empty_)
         return;
     QApplication::clipboard()->setText(export_text());
-    QToolTip::showText(copyBtn_->mapToGlobal(QPoint(0, copyBtn_->height())), tr("ПФ скопирована"), copyBtn_,
-                       QRect(), 1500);
+    QToolTip::showText(copyBtn_->mapToGlobal(QPoint(0, copyBtn_->height())), tr("ПФ скопирована"), copyBtn_, QRect(),
+                       1500);
 }
 
 void TfDisplayWidget::reposition_copy_button() {
@@ -168,12 +169,13 @@ void TfDisplayWidget::reposition_copy_button() {
         const QRect g = delayGroup_->geometry();
         x             = g.right() - btn;
         y             = g.bottom() + 2;
-    } else {
+    }
+    else {
         // No delay: well to the right of N/D so the button never sits on the fraction.
         constexpr int gap = 32;
-        const QRect den = denLabel_->geometry();
-        x               = den.right() + gap;
-        y               = den.bottom() - btn;
+        const QRect den   = denLabel_->geometry();
+        x                 = den.right() + gap;
+        y                 = den.bottom() - btn;
         if (y < den.top())
             y = den.bottom() + 2;
         // Ensure the widget is wide enough; do not clamp back onto the poly text.

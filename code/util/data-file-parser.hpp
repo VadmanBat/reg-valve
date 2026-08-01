@@ -1,10 +1,9 @@
 #pragma once
 
-#include <QFile>
-#include <QString>
-
 #include <cstdlib>
 #include <optional>
+#include <QFile>
+#include <QString>
 #include <utility>
 #include <vector>
 
@@ -99,7 +98,7 @@ inline Vec extractNumbers(const QString& text) {
             buf[i] = (start[i] == ',') ? '.' : start[i];
         buf[n] = '\0';
 
-        char* endptr = nullptr;
+        char* endptr   = nullptr;
         const double v = std::strtod(buf, &endptr);
         if (endptr != buf)
             out.push_back(v);

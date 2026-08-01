@@ -1,4 +1,5 @@
 #include "code/widgets/tf-form/tran-func-form.h"
+
 #include "code/widgets/tf-form/tran-func-form-line-edit.hpp"
 
 #include <QAbstractSpinBox>
@@ -92,11 +93,10 @@ TranFuncForm::TranFuncForm(std::size_t n, std::size_t m, const QString& title, Q
         opt.buttonSymbols = QAbstractSpinBox::NoButtons;
         opt.stepEnabled   = QAbstractSpinBox::StepNone;
         const QFontMetrics fm(delay_element_->font());
-        const int extra     = 2 * fm.horizontalAdvance(QLatin1Char('0'));
-        const int text_w    = fm.horizontalAdvance(QStringLiteral("30.00")) + extra;
+        const int extra  = 2 * fm.horizontalAdvance(QLatin1Char('0'));
+        const int text_w = fm.horizontalAdvance(QStringLiteral("30.00")) + extra;
         const QSize text_sz(text_w + 4, fm.height());
-        const QSize sz =
-            delay_element_->style()->sizeFromContents(QStyle::CT_SpinBox, &opt, text_sz, delay_element_);
+        const QSize sz = delay_element_->style()->sizeFromContents(QStyle::CT_SpinBox, &opt, text_sz, delay_element_);
         delay_element_->setFixedSize(sz.expandedTo(text_sz + QSize(14, 6)));
     }
 

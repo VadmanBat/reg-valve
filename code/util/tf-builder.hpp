@@ -1,11 +1,10 @@
 #pragma once
 
+#include "code/model/model-param.hpp"
 #include "numina/classes/control/transfer-function.h"
 #include "numina/classes/control/transfer-function/response-lab.h"
 #include "numina/classes/polynomial/polynomial.h"
 #include "numina/core/space.hpp"
-
-#include "code/model/model-param.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -99,12 +98,11 @@ inline bool hasZeroDenConstant(const numina::TransferFunction& tf) noexcept {
 /// КЧХ + АЧХ + ФЧХ — always logarithmic ω-grid.
 inline FrequencyBundle frequencyBundle(const numina::TransferFunction& tf, const ModelParam& p) {
     numina::ResponseLab lab(tf);
-    std::pair<double, double> range =
-        p.autoFreqRange ? lab.frequencyRange() : std::make_pair(p.freqMin, p.freqMax);
+    std::pair<double, double> range = p.autoFreqRange ? lab.frequencyRange() : std::make_pair(p.freqMin, p.freqMax);
 
     if (hasZeroDenConstant(tf)) {
         constexpr double w_min_floor = 1e-4;
-        range.first = std::max(range.first, w_min_floor);
+        range.first                  = std::max(range.first, w_min_floor);
         if (!(range.second > range.first))
             range.second = range.first * 1e3;
     }
@@ -113,8 +111,7 @@ inline FrequencyBundle frequencyBundle(const numina::TransferFunction& tf, const
     if (!(range.second > range.first))
         range.second = range.first * 1e3;
 
-    const std::size_t n =
-        p.autoFreqIntervals ? 120 : static_cast<std::size_t>(std::max(2, p.freqIntervals));
+    const std::size_t n = p.autoFreqIntervals ? 120 : static_cast<std::size_t>(std::max(2, p.freqIntervals));
 
     const std::vector<double> omegas = numina::core::logspace(range, n, /*from_scratch=*/true);
 

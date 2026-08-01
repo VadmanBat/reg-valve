@@ -1,4 +1,5 @@
 #include "code/dialogs/id-settings-dialog.h"
+
 #include "ui_id-settings-dialog.h"
 
 IdSettingsDialog::IdSettingsDialog(const IdSettings& values, QWidget* parent)

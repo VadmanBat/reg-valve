@@ -35,14 +35,14 @@ InteractiveChartView::InteractiveChartView(QChart* chart, QWidget* parent) : QCh
 
 void InteractiveChartView::apply_tool_cursor() {
     switch (tool_) {
-    case Tool::Pan:
-        setCursor(Qt::OpenHandCursor);
-        setRubberBand(QChartView::NoRubberBand);
-        break;
-    case Tool::ZoomRect:
-        setCursor(Qt::CrossCursor);
-        setRubberBand(QChartView::RectangleRubberBand);
-        break;
+        case Tool::Pan:
+            setCursor(Qt::OpenHandCursor);
+            setRubberBand(QChartView::NoRubberBand);
+            break;
+        case Tool::ZoomRect:
+            setCursor(Qt::CrossCursor);
+            setRubberBand(QChartView::RectangleRubberBand);
+            break;
     }
 }
 
@@ -111,13 +111,14 @@ void InteractiveChartView::mouseMoveEvent(QMouseEvent* event) {
         sync_guides_to_axes();
         emit viewChanged();
         event->accept();
-    } else {
+    }
+    else {
         QChartView::mouseMoveEvent(event);
     }
 
     if (chart()) {
-        const QPointF v     = chart()->mapToValue(event->pos());
-        const bool inside   = chart()->plotArea().contains(event->pos());
+        const QPointF v   = chart()->mapToValue(event->pos());
+        const bool inside = chart()->plotArea().contains(event->pos());
         emit cursorMoved(v.x(), v.y(), inside);
     }
 }

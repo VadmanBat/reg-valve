@@ -1,10 +1,10 @@
 #include "code/dialogs/mod-par-dialog.h"
+
 #include "ui_mod-par-dialog.h"
 
 #include <utility>
 
-ModParDialog::ModParDialog(const ModelParam& values, QWidget* parent)
-    : QDialog(parent), ui(new Ui::ModParDialog) {
+ModParDialog::ModParDialog(const ModelParam& values, QWidget* parent) : QDialog(parent), ui(new Ui::ModParDialog) {
     ui->setupUi(this);
 
     ui->autoTimeRangeCheckBox->setChecked(values.autoTimeRange);
@@ -20,11 +20,9 @@ ModParDialog::ModParDialog(const ModelParam& values, QWidget* parent)
     ui->approxOrderSpinBox->setValue(values.approxOrder);
 
     connect(ui->autoTimeRangeCheckBox, &QCheckBox::toggled, this, &ModParDialog::on_auto_time_range_toggled);
-    connect(ui->autoTimeIntervalsCheckBox, &QCheckBox::toggled, this,
-            &ModParDialog::on_auto_time_intervals_toggled);
+    connect(ui->autoTimeIntervalsCheckBox, &QCheckBox::toggled, this, &ModParDialog::on_auto_time_intervals_toggled);
     connect(ui->autoFreqRangeCheckBox, &QCheckBox::toggled, this, &ModParDialog::on_auto_freq_range_toggled);
-    connect(ui->autoFreqIntervalsCheckBox, &QCheckBox::toggled, this,
-            &ModParDialog::on_auto_freq_intervals_toggled);
+    connect(ui->autoFreqIntervalsCheckBox, &QCheckBox::toggled, this, &ModParDialog::on_auto_freq_intervals_toggled);
     connect(ui->applyButton, &QPushButton::clicked, this, &ModParDialog::accept);
     connect(ui->cancelButton, &QPushButton::clicked, this, &ModParDialog::reject);
 

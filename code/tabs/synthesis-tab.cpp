@@ -1,21 +1,19 @@
 #include "code/tabs/synthesis-tab.h"
-#include "ui_synthesis-tab.h"
 
 #include "code/control/regulator-factory.hpp"
 #include "code/dialogs/help-dialog.h"
 #include "code/dialogs/mod-par-dialog.h"
 #include "code/util/tf-builder.hpp"
-
 #include "numina/classes/control/transfer-function/response-lab.h"
+#include "ui_synthesis-tab.h"
 
+#include <algorithm>
+#include <cmath>
 #include <QCheckBox>
 #include <QMenu>
 #include <QMessageBox>
 #include <QToolButton>
 #include <QVBoxLayout>
-
-#include <algorithm>
-#include <cmath>
 
 SynthesisTab::SynthesisTab(QWidget* parent) : QWidget(parent), ui(new Ui::SynthesisTab) {
     ui->setupUi(this);
@@ -57,12 +55,12 @@ SynthesisTab::~SynthesisTab() {
 }
 
 void SynthesisTab::install_custom_widgets() {
-    form_ = new TranFuncForm(6, 6, QStringLiteral("W<sub>ОУ</sub>(p) = "), ui->formHost);
+    form_             = new TranFuncForm(6, 6, QStringLiteral("W<sub>ОУ</sub>(p) = "), ui->formHost);
     auto* form_layout = new QVBoxLayout(ui->formHost);
     form_layout->setContentsMargins(0, 0, 0, 0);
     form_layout->addWidget(form_, 0, Qt::AlignLeft | Qt::AlignVCenter);
 
-    metrics_ = new RegulationWidget(3, 4, ui->metricsHost);
+    metrics_             = new RegulationWidget(3, 4, ui->metricsHost);
     auto* metrics_layout = new QVBoxLayout(ui->metricsHost);
     metrics_layout->setContentsMargins(0, 0, 0, 0);
     metrics_layout->addWidget(metrics_, 0, Qt::AlignRight | Qt::AlignVCenter);
@@ -85,10 +83,18 @@ void SynthesisTab::install_custom_widgets() {
 
 void SynthesisTab::setup_metrics() {
     metrics_->setLabels({
-        QStringLiteral("t<sub>р</sub>:"),  QStringLiteral("ω<sub>n</sub>:"), QStringLiteral("h<sub>уст</sub>:"),
-        QStringLiteral("ЛИК:"),            QStringLiteral("t<sub>н</sub>:"),  QStringLiteral("ω<sub>c</sub>:"),
-        QStringLiteral("σ<sub>ст</sub>:"), QStringLiteral("ИКК:"),           QStringLiteral("t<sub>п</sub>:"),
-        QStringLiteral("ζ:"),              QStringLiteral("σ<sub>пр</sub>:"), QStringLiteral("СКО:"),
+        QStringLiteral("t<sub>р</sub>:"),
+        QStringLiteral("ω<sub>n</sub>:"),
+        QStringLiteral("h<sub>уст</sub>:"),
+        QStringLiteral("ЛИК:"),
+        QStringLiteral("t<sub>н</sub>:"),
+        QStringLiteral("ω<sub>c</sub>:"),
+        QStringLiteral("σ<sub>ст</sub>:"),
+        QStringLiteral("ИКК:"),
+        QStringLiteral("t<sub>п</sub>:"),
+        QStringLiteral("ζ:"),
+        QStringLiteral("σ<sub>пр</sub>:"),
+        QStringLiteral("СКО:"),
     });
     metrics_->setColors(
         {{1, 2}, {0, 0}, {0, 0}, {1, 2}, {1, 2}, {0, 0}, {0, 0}, {1, 2}, {1, 2}, {2, 1}, {1, 2}, {1, 2}});
@@ -122,8 +128,7 @@ void SynthesisTab::autoSynthesize() {
 
     try {
         const auto plant =
-            tf_builder::plant(std::move(plant_num), std::move(plant_den), form_->delayTime(),
-                              model_param_.approxOrder);
+            tf_builder::plant(std::move(plant_num), std::move(plant_den), form_->delayTime(), model_param_.approxOrder);
         numina::ResponseLab lab(plant);
         const auto q = lab.evaluate();
 
@@ -162,7 +167,8 @@ void SynthesisTab::autoSynthesize() {
         set_param(parameters_[2], Td, false); // D off by default
 
         apply_current_regulator(!charts_->empty());
-    } catch (const std::exception& ex) {
+    }
+    catch (const std::exception& ex) {
         show_error(tr("Автосинтез: %1").arg(QString::fromUtf8(ex.what())));
     }
 }
@@ -173,9 +179,9 @@ void SynthesisTab::apply_current_regulator(bool replace_last) {
     if (!tf_builder::validInput(plant_num, plant_den))
         return;
 
-    const auto reg = regulator_factory::make(parameters_[0]->enabled(), parameters_[1]->enabled(),
-                                             parameters_[2]->enabled(), parameters_[0]->value(),
-                                             parameters_[1]->value(), parameters_[2]->value());
+    const auto reg =
+        regulator_factory::make(parameters_[0]->enabled(), parameters_[1]->enabled(), parameters_[2]->enabled(),
+                                parameters_[0]->value(), parameters_[1]->value(), parameters_[2]->value());
 
     try {
         current_tf_ = tf_builder::closedLoop(std::move(plant_num), std::move(plant_den), reg.num, reg.den,
@@ -205,10 +211,12 @@ void SynthesisTab::apply_current_regulator(bool replace_last) {
                 q.overshoot_percent,
                 q.sigma,
             });
-        } else {
+        }
+        else {
             metrics_->updateValues({});
         }
-    } catch (const std::exception& ex) {
+    }
+    catch (const std::exception& ex) {
         show_error(QString::fromUtf8(ex.what()));
     }
 }

@@ -23,8 +23,7 @@ public:
     using VecPair = chart_utils::VecPair;
     using VecComp = chart_utils::VecComp;
 
-    explicit ChartPanel(const QString& title, const QString& titleX, const QString& titleY,
-                        QWidget* parent = nullptr);
+    explicit ChartPanel(const QString& title, const QString& titleX, const QString& titleY, QWidget* parent = nullptr);
 
     [[nodiscard]] QChart* chart() const { return chart_; }
     [[nodiscard]] QChartView* view() const { return view_; }

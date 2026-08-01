@@ -16,16 +16,16 @@ void ResponseChartBank::refit_all() {
                               phase_bounds_.max_y());
 }
 
-ResponseChartBank::Batch ResponseChartBank::compute_batch(const numina::TransferFunction& tf,
-                                                          const ModelParam& params, const QString& name) {
+ResponseChartBank::Batch ResponseChartBank::compute_batch(const numina::TransferFunction& tf, const ModelParam& params,
+                                                          const QString& name) {
     Batch b;
-    b.name      = name;
-    b.transient = tf_builder::transient(tf, params);
-    b.impulse   = tf_builder::impulse(tf, params);
+    b.name          = name;
+    b.transient     = tf_builder::transient(tf, params);
+    b.impulse       = tf_builder::impulse(tf, params);
     const auto freq = tf_builder::frequencyBundle(tf, params);
-    b.nyquist   = std::move(freq.nyquist);
-    b.amplitude = std::move(freq.amplitude);
-    b.phase     = std::move(freq.phase);
+    b.nyquist       = std::move(freq.nyquist);
+    b.amplitude     = std::move(freq.amplitude);
+    b.phase         = std::move(freq.phase);
     return b;
 }
 

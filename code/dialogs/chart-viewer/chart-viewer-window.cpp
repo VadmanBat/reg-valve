@@ -31,16 +31,15 @@ ChartViewerWindow::ChartViewerWindow(QChart* source_chart, QWidget* parent) : QM
     build_status();
     setup_shortcuts();
 
-    connect(view_, &chart_viewer::InteractiveChartView::cursorMoved, this,
-            [this](double x, double y, bool inside) {
-                if (!coord_label_)
-                    return;
-                if (!inside) {
-                    coord_label_->setText(tr("Курсор вне области графика"));
-                    return;
-                }
-                coord_label_->setText(tr("x = %1    y = %2").arg(x, 0, 'g', 8).arg(y, 0, 'g', 8));
-            });
+    connect(view_, &chart_viewer::InteractiveChartView::cursorMoved, this, [this](double x, double y, bool inside) {
+        if (!coord_label_)
+            return;
+        if (!inside) {
+            coord_label_->setText(tr("Курсор вне области графика"));
+            return;
+        }
+        coord_label_->setText(tr("x = %1    y = %2").arg(x, 0, 'g', 8).arg(y, 0, 'g', 8));
+    });
 }
 
 void ChartViewerWindow::open(QChart* source_chart, QWidget* parent) {

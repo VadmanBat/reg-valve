@@ -2,12 +2,11 @@
 
 #include "code/charts/utils/nice-axis.hpp"
 
+#include <complex>
 #include <QChart>
 #include <QChartView>
 #include <QPen>
 #include <QString>
-
-#include <complex>
 #include <utility>
 #include <vector>
 

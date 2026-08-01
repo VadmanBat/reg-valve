@@ -1,19 +1,18 @@
-#include "code/widgets/tf-form/tran-func-form.h"
 #include "code/widgets/tf-form/tran-func-form-line-edit.hpp"
+#include "code/widgets/tf-form/tran-func-form.h"
 
+#include <algorithm>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
-
-#include <algorithm>
 
 using tf_form_style::apply_coeff_sign;
 using tf_form_style::apply_power_active;
 
 QLayout* TranFuncForm::create_coeff_row(VecLine& line_edits, int factor) {
     auto* layout = new QHBoxLayout;
-    int p = -1;
+    int p        = -1;
     for (auto& line_edit : line_edits) {
         line_edit = new LineEdit(this);
         line_edit->setObjectName(QStringLiteral("tfCoeff"));
@@ -44,8 +43,9 @@ QLayout* TranFuncForm::create_coeff_row(VecLine& line_edits, int factor) {
             if (cur.isEmpty()) {
                 apply_power_active(label, false);
                 apply_coeff_sign(line_edit, 0.0);
-            } else {
-                bool ok = false;
+            }
+            else {
+                bool ok            = false;
                 const double value = num_format::parse(cur, &ok);
                 apply_power_active(label, ok && value != 0.0);
                 apply_coeff_sign(line_edit, ok ? value : 0.0);
@@ -68,7 +68,8 @@ QLayout* TranFuncForm::create_coeff_row(VecLine& line_edits, int factor) {
                     id_ -= factor << p;
                     is_active_[index] = false;
                 }
-            } else if (!is_active_[index]) {
+            }
+            else if (!is_active_[index]) {
                 id_ += factor << p;
                 is_active_[index] = true;
             }
@@ -123,7 +124,7 @@ void TranFuncForm::adjust_line_edit_width(QLineEdit* line_edit) {
 }
 
 TranFuncForm::Vec TranFuncForm::reverse_optimize(const Vec& container) {
-    auto first = container.rbegin();
+    auto first      = container.rbegin();
     const auto last = container.rend();
     if (first == last)
         return {};
@@ -153,12 +154,12 @@ QString TranFuncForm::correct_line(const QString& text) {
 }
 
 void TranFuncForm::reposition_clip_buttons() {
-    const QRect g = delay_group_->geometry();
+    const QRect g     = delay_group_->geometry();
     constexpr int gap = 2;
     constexpr int btn = 24;
-    const int x1 = g.right() - 2 * btn - gap;
-    const int x2 = g.right() - btn;
-    int y = g.bottom() + 1;
+    const int x1      = g.right() - 2 * btn - gap;
+    const int x2      = g.right() - btn;
+    int y             = g.bottom() + 1;
     if (y + btn > height())
         y = qMax(0, height() - btn);
     if (y < g.top())

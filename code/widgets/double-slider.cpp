@@ -1,8 +1,7 @@
 #include "code/widgets/double-slider.h"
 
-#include <QPaintEvent>
-
 #include <algorithm>
+#include <QPaintEvent>
 
 DoubleSlider::DoubleSlider(Qt::Orientation orientation, QWidget* parent) : QSlider(orientation, parent) {
     single_step_ = (max_ - min_) / static_cast<double>(intervals_);

@@ -1,10 +1,9 @@
 #include "code/tabs/analysis-tab.h"
-#include "ui_analysis-tab.h"
 
 #include "code/dialogs/mod-par-dialog.h"
 #include "code/util/tf-builder.hpp"
-
 #include "numina/classes/control/transfer-function/response-lab.h"
+#include "ui_analysis-tab.h"
 
 #include <QMenu>
 #include <QMessageBox>
@@ -48,12 +47,12 @@ AnalysisTab::~AnalysisTab() {
 }
 
 void AnalysisTab::install_custom_widgets() {
-    form_ = new TranFuncForm(6, 6, QStringLiteral("W(p) = "), ui->formHost);
+    form_             = new TranFuncForm(6, 6, QStringLiteral("W(p) = "), ui->formHost);
     auto* form_layout = new QVBoxLayout(ui->formHost);
     form_layout->setContentsMargins(0, 0, 0, 0);
     form_layout->addWidget(form_, 0, Qt::AlignLeft | Qt::AlignVCenter);
 
-    metrics_ = new RegulationWidget(3, 2, ui->metricsHost);
+    metrics_             = new RegulationWidget(3, 2, ui->metricsHost);
     auto* metrics_layout = new QVBoxLayout(ui->metricsHost);
     metrics_layout->setContentsMargins(0, 0, 0, 0);
     metrics_layout->addWidget(metrics_, 0, Qt::AlignRight | Qt::AlignVCenter);
@@ -81,9 +80,10 @@ void AnalysisTab::update_metrics() {
     numina::ResponseLab lab(current_tf_);
     const auto q = lab.evaluate();
     if (q.is_settled) {
-        metrics_->updateValues({q.settling_time, q.natural_frequency, q.rise_time, q.cut_frequency,
-                                q.damping_ratio, q.steady_state});
-    } else {
+        metrics_->updateValues(
+            {q.settling_time, q.natural_frequency, q.rise_time, q.cut_frequency, q.damping_ratio, q.steady_state});
+    }
+    else {
         metrics_->updateValues({});
     }
 }
@@ -108,12 +108,12 @@ void AnalysisTab::addTransferFunction() {
     }
 
     try {
-        current_tf_ =
-            tf_builder::plant(std::move(num), std::move(den), form_->delayTime(), model_param_.approxOrder);
+        current_tf_ = tf_builder::plant(std::move(num), std::move(den), form_->delayTime(), model_param_.approxOrder);
         form_->setTransferFunction(&current_tf_);
         charts_->appendFromTf(current_tf_, model_param_, form_->linkName());
         update_metrics();
-    } catch (const std::exception& ex) {
+    }
+    catch (const std::exception& ex) {
         show_error(QString::fromUtf8(ex.what()));
     }
 }
@@ -130,12 +130,12 @@ void AnalysisTab::replaceTransferFunction() {
         return;
     }
     try {
-        current_tf_ =
-            tf_builder::plant(std::move(num), std::move(den), form_->delayTime(), model_param_.approxOrder);
+        current_tf_ = tf_builder::plant(std::move(num), std::move(den), form_->delayTime(), model_param_.approxOrder);
         form_->setTransferFunction(&current_tf_);
         charts_->replaceLastFromTf(current_tf_, model_param_, form_->linkName());
         update_metrics();
-    } catch (const std::exception& ex) {
+    }
+    catch (const std::exception& ex) {
         show_error(QString::fromUtf8(ex.what()));
     }
 }

@@ -9,12 +9,12 @@ struct ModelParam {
     bool autoFreqRange     = true;
     bool autoFreqIntervals = true;
 
-    double timeMin = 0.0;
-    double timeMax = 500.0;
+    double timeMin    = 0.0;
+    double timeMax    = 500.0;
     int timeIntervals = 100;
 
-    double freqMin = 0.01;
-    double freqMax = 10.0;
+    double freqMin    = 0.01;
+    double freqMax    = 10.0;
     int freqIntervals = 100;
 
     int approxOrder = 6; ///< Padé order for e^{-τp}

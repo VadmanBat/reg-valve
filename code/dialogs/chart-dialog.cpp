@@ -1,4 +1,5 @@
 #include "code/dialogs/chart-dialog.h"
+
 #include "ui_chart-dialog.h"
 
 #include <QColorDialog>
@@ -11,8 +12,7 @@
 #include <QSpinBox>
 #include <QValueAxis>
 
-ChartDialog::ChartDialog(QChart* chart, QWidget* parent)
-    : QDialog(parent), ui(new Ui::ChartDialog), chart_(chart) {
+ChartDialog::ChartDialog(QChart* chart, QWidget* parent) : QDialog(parent), ui(new Ui::ChartDialog), chart_(chart) {
     ui->setupUi(this);
     ui->titleEdit->setText(chart_->title());
     if (auto* ax = axis(Qt::Horizontal))
@@ -38,31 +38,31 @@ QAbstractAxis* ChartDialog::axis(Qt::Orientation orientation) const {
 
 Qt::PenStyle ChartDialog::pen_style_from_index(int index) {
     switch (index) {
-    case 1:
-        return Qt::DashLine;
-    case 2:
-        return Qt::DotLine;
-    case 3:
-        return Qt::DashDotLine;
-    case 4:
-        return Qt::DashDotDotLine;
-    default:
-        return Qt::SolidLine;
+        case 1:
+            return Qt::DashLine;
+        case 2:
+            return Qt::DotLine;
+        case 3:
+            return Qt::DashDotLine;
+        case 4:
+            return Qt::DashDotDotLine;
+        default:
+            return Qt::SolidLine;
     }
 }
 
 int ChartDialog::index_from_pen_style(Qt::PenStyle style) {
     switch (style) {
-    case Qt::DashLine:
-        return 1;
-    case Qt::DotLine:
-        return 2;
-    case Qt::DashDotLine:
-        return 3;
-    case Qt::DashDotDotLine:
-        return 4;
-    default:
-        return 0;
+        case Qt::DashLine:
+            return 1;
+        case Qt::DotLine:
+            return 2;
+        case Qt::DashDotLine:
+            return 3;
+        case Qt::DashDotDotLine:
+            return 4;
+        default:
+            return 0;
     }
 }
 

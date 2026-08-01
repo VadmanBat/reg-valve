@@ -1,8 +1,8 @@
-#include "code/widgets/tf-form/tran-func-form.h"
-#include "code/widgets/tf-form/tran-func-form-line-edit.hpp"
-
 #include "code/util/format.hxx"
+#include "code/widgets/tf-form/tran-func-form-line-edit.hpp"
+#include "code/widgets/tf-form/tran-func-form.h"
 
+#include <algorithm>
 #include <QApplication>
 #include <QClipboard>
 #include <QDoubleSpinBox>
@@ -10,8 +10,6 @@
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QToolTip>
-
-#include <algorithm>
 
 namespace {
 
@@ -21,7 +19,7 @@ std::vector<double> parse_coeff_list(QString line) {
     std::vector<double> out;
     const auto parts = line.split(QRegularExpression(QStringLiteral("\\s+")), Qt::SkipEmptyParts);
     for (const QString& p : parts) {
-        bool ok = false;
+        bool ok        = false;
         const double v = num_format::parse(p, &ok);
         if (ok)
             out.push_back(v);
@@ -32,8 +30,8 @@ std::vector<double> parse_coeff_list(QString line) {
 } // namespace
 
 QString TranFuncForm::exportText() const {
-    const auto num = numerator();
-    const auto den = denominator();
+    const auto num   = numerator();
+    const auto den   = denominator();
     const double tau = delayTime();
 
     QStringList num_parts;
@@ -55,17 +53,16 @@ QString TranFuncForm::exportText() const {
                "tau: %3\n"
                "\n"
                "%4\n")
-        .arg(num_parts.join(QLatin1Char(' ')), den_parts.join(QLatin1Char(' ')), num_format::formatFull(tau),
-             human);
+        .arg(num_parts.join(QLatin1Char(' ')), den_parts.join(QLatin1Char(' ')), num_format::formatFull(tau), human);
 }
 
 bool TranFuncForm::importText(const QString& text) {
     const QStringList lines = text.split(QRegularExpression(QStringLiteral("[\\r\\n]+")), Qt::SkipEmptyParts);
     Vec num, den;
-    double tau = 0.0;
+    double tau      = 0.0;
     bool has_header = false;
-    bool got_num = false;
-    bool got_den = false;
+    bool got_num    = false;
+    bool got_den    = false;
 
     for (QString line : lines) {
         line = line.trimmed();
@@ -74,18 +71,18 @@ bool TranFuncForm::importText(const QString& text) {
             continue;
         }
         if (line.startsWith(QStringLiteral("num:"), Qt::CaseInsensitive)) {
-            num = parse_coeff_list(line.mid(4));
+            num     = parse_coeff_list(line.mid(4));
             got_num = !num.empty();
             continue;
         }
         if (line.startsWith(QStringLiteral("den:"), Qt::CaseInsensitive)) {
-            den = parse_coeff_list(line.mid(4));
+            den     = parse_coeff_list(line.mid(4));
             got_den = !den.empty();
             continue;
         }
         if (line.startsWith(QStringLiteral("tau:"), Qt::CaseInsensitive)) {
             bool ok = false;
-            tau = line.mid(4).trimmed().toDouble(&ok);
+            tau     = line.mid(4).trimmed().toDouble(&ok);
             if (!ok)
                 tau = 0.0;
             continue;
@@ -105,8 +102,8 @@ bool TranFuncForm::importText(const QString& text) {
 
 void TranFuncForm::copyToClipboard() {
     QApplication::clipboard()->setText(exportText());
-    QToolTip::showText(copy_btn_->mapToGlobal(QPoint(0, copy_btn_->height())), tr("ПФ скопирована"), copy_btn_,
-                       QRect(), 1500);
+    QToolTip::showText(copy_btn_->mapToGlobal(QPoint(0, copy_btn_->height())), tr("ПФ скопирована"), copy_btn_, QRect(),
+                       1500);
 }
 
 void TranFuncForm::pasteFromClipboard() {

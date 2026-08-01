@@ -1,7 +1,7 @@
 #pragma once
 
-#include "code/charts/utils/chart-utils.hpp"
 #include "code/charts/interactive-chart-view.h"
+#include "code/charts/utils/chart-utils.hpp"
 
 #include <QMainWindow>
 

@@ -27,7 +27,8 @@ namespace chart_utils {
             nf = 5.0;
         else
             nf = 10.0;
-    } else {
+    }
+    else {
         if (f <= 1.0)
             nf = 1.0;
         else if (f <= 2.0)

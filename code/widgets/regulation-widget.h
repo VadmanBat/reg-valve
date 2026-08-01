@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QWidget>
-
 #include <utility>
 #include <vector>
 

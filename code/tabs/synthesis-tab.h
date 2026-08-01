@@ -5,11 +5,9 @@
 #include "code/widgets/reg-parameter.h"
 #include "code/widgets/regulation-widget.h"
 #include "code/widgets/tf-form/tran-func-form.h"
-
 #include "numina/classes/control/transfer-function.h"
 
 #include <QWidget>
-
 #include <vector>
 
 class QMenu;

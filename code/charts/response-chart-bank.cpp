@@ -29,7 +29,7 @@ void ResponseChartBank::populateMenu(QMenu* menu) {
         return;
     menu->clear();
 
-    auto add = [this, menu](const QString& title, bool ChartVisibility::*field) {
+    auto add = [this, menu](const QString& title, bool ChartVisibility::* field) {
         auto* act = menu->addAction(title);
         act->setCheckable(true);
         act->setChecked(vis_.*field);
@@ -86,50 +86,49 @@ void ResponseChartBank::rebuild_layout() {
         return;
 
     switch (n) {
-    case 1:
-        grid_->addWidget(visible[0], 0, 0);
-        grid_->setRowStretch(0, 1);
-        grid_->setColumnStretch(0, 1);
-        break;
-    case 2:
-        grid_->addWidget(visible[0], 0, 0);
-        grid_->addWidget(visible[1], 0, 1);
-        grid_->setRowStretch(0, 1);
-        grid_->setColumnStretch(0, 1);
-        grid_->setColumnStretch(1, 1);
-        break;
-    case 3:
-        grid_->addWidget(visible[0], 0, 0);
-        grid_->addWidget(visible[1], 0, 1);
-        grid_->addWidget(visible[2], 0, 2);
-        grid_->setRowStretch(0, 1);
-        grid_->setColumnStretch(0, 1);
-        grid_->setColumnStretch(1, 1);
-        grid_->setColumnStretch(2, 1);
-        break;
-    case 4:
-        grid_->addWidget(visible[0], 0, 0);
-        grid_->addWidget(visible[1], 0, 1);
-        grid_->addWidget(visible[2], 1, 0);
-        grid_->addWidget(visible[3], 1, 1);
-        grid_->setRowStretch(0, 1);
-        grid_->setRowStretch(1, 1);
-        grid_->setColumnStretch(0, 1);
-        grid_->setColumnStretch(1, 1);
-        break;
-    default:
-        // 5: 2 top + 3 bottom
-        grid_->addWidget(visible[0], 0, 0);
-        grid_->addWidget(visible[1], 0, 1);
-        grid_->addWidget(visible[2], 1, 0);
-        grid_->addWidget(visible[3], 1, 1);
-        grid_->addWidget(visible[4], 1, 2);
-        grid_->setRowStretch(0, 1);
-        grid_->setRowStretch(1, 1);
-        grid_->setColumnStretch(0, 1);
-        grid_->setColumnStretch(1, 1);
-        grid_->setColumnStretch(2, 1);
-        break;
+        case 1:
+            grid_->addWidget(visible[0], 0, 0);
+            grid_->setRowStretch(0, 1);
+            grid_->setColumnStretch(0, 1);
+            break;
+        case 2:
+            grid_->addWidget(visible[0], 0, 0);
+            grid_->addWidget(visible[1], 0, 1);
+            grid_->setRowStretch(0, 1);
+            grid_->setColumnStretch(0, 1);
+            grid_->setColumnStretch(1, 1);
+            break;
+        case 3:
+            grid_->addWidget(visible[0], 0, 0);
+            grid_->addWidget(visible[1], 0, 1);
+            grid_->addWidget(visible[2], 0, 2);
+            grid_->setRowStretch(0, 1);
+            grid_->setColumnStretch(0, 1);
+            grid_->setColumnStretch(1, 1);
+            grid_->setColumnStretch(2, 1);
+            break;
+        case 4:
+            grid_->addWidget(visible[0], 0, 0);
+            grid_->addWidget(visible[1], 0, 1);
+            grid_->addWidget(visible[2], 1, 0);
+            grid_->addWidget(visible[3], 1, 1);
+            grid_->setRowStretch(0, 1);
+            grid_->setRowStretch(1, 1);
+            grid_->setColumnStretch(0, 1);
+            grid_->setColumnStretch(1, 1);
+            break;
+        default:
+            // 5: 2 top + 3 bottom
+            grid_->addWidget(visible[0], 0, 0);
+            grid_->addWidget(visible[1], 0, 1);
+            grid_->addWidget(visible[2], 1, 0);
+            grid_->addWidget(visible[3], 1, 1);
+            grid_->addWidget(visible[4], 1, 2);
+            grid_->setRowStretch(0, 1);
+            grid_->setRowStretch(1, 1);
+            grid_->setColumnStretch(0, 1);
+            grid_->setColumnStretch(1, 1);
+            grid_->setColumnStretch(2, 1);
+            break;
     }
 }
-

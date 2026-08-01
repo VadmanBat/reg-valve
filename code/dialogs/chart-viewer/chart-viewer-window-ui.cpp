@@ -1,6 +1,5 @@
-#include "code/dialogs/chart-viewer/chart-viewer-window.h"
-
 #include "code/dialogs/chart-dialog.h"
+#include "code/dialogs/chart-viewer/chart-viewer-window.h"
 
 #include <QAction>
 #include <QActionGroup>
@@ -84,12 +83,10 @@ void ChartViewerWindow::build_toolbar() {
     act_close_->setToolTip(tr("Закрыть (Esc)"));
     act_close_->setShortcut(QKeySequence(Qt::Key_Escape));
 
-    connect(act_zoom_, &QAction::triggered, this, [this] {
-        view_->setTool(chart_viewer::InteractiveChartView::Tool::ZoomRect);
-    });
-    connect(act_pan_, &QAction::triggered, this, [this] {
-        view_->setTool(chart_viewer::InteractiveChartView::Tool::Pan);
-    });
+    connect(act_zoom_, &QAction::triggered, this,
+            [this] { view_->setTool(chart_viewer::InteractiveChartView::Tool::ZoomRect); });
+    connect(act_pan_, &QAction::triggered, this,
+            [this] { view_->setTool(chart_viewer::InteractiveChartView::Tool::Pan); });
     connect(act_zoom_in_, &QAction::triggered, view_, &chart_viewer::InteractiveChartView::zoomInStep);
     connect(act_zoom_out_, &QAction::triggered, view_, &chart_viewer::InteractiveChartView::zoomOutStep);
     connect(act_home_, &QAction::triggered, this, [this] { view_->resetView(home_x_, home_y_); });
@@ -110,8 +107,8 @@ void ChartViewerWindow::build_toolbar() {
 void ChartViewerWindow::build_status() {
     coord_label_ = new QLabel(tr("Наведите курсор на график"));
     statusBar()->addWidget(coord_label_, 1);
-    statusBar()->addPermanentWidget(new QLabel(
-        tr("Зум: рамка / колесо · Сдвиг: H или СКМ · Сброс: Home · F11 — полный экран · Esc — закрыть")));
+    statusBar()->addPermanentWidget(
+        new QLabel(tr("Зум: рамка / колесо · Сдвиг: H или СКМ · Сброс: Home · F11 — полный экран · Esc — закрыть")));
 }
 
 void ChartViewerWindow::setup_shortcuts() {

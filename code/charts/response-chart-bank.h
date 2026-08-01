@@ -5,11 +5,9 @@
 #include "code/series/axis-bounds.hpp"
 #include "code/series/bounds-set.hpp"
 #include "code/util/tf-builder.hpp"
-
 #include "numina/classes/control/transfer-function.h"
 
 #include <QWidget>
-
 #include <vector>
 
 class QGridLayout;

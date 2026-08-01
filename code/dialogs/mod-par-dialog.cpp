@@ -1,11 +1,19 @@
 #include "code/dialogs/mod-par-dialog.h"
 
+#include "code/util/dialog-icons.hxx"
+#include "code/util/secondary-text.hxx"
 #include "ui_mod-par-dialog.h"
 
 #include <utility>
 
 ModParDialog::ModParDialog(const ModelParam& values, QWidget* parent) : QDialog(parent), ui(new Ui::ModParDialog) {
     ui->setupUi(this);
+    dialog_icons::apply(this, dialog_icons::Kind::ModelParams);
+    secondary_text::applyAll({ui->hintLabel, ui->approxHint});
+    // Compact default size; user may freely resize.
+    setMinimumWidth(320);
+    resize(400, height());
+    setSizeGripEnabled(true);
 
     ui->autoTimeRangeCheckBox->setChecked(values.autoTimeRange);
     ui->autoTimeIntervalsCheckBox->setChecked(values.autoTimeIntervals);

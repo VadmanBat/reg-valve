@@ -1,5 +1,7 @@
 #include "code/dialogs/chart-dialog.h"
 
+#include "code/util/dialog-icons.hxx"
+#include "code/util/secondary-text.hxx"
 #include "ui_chart-dialog.h"
 
 #include <QColorDialog>
@@ -14,6 +16,8 @@
 
 ChartDialog::ChartDialog(QChart* chart, QWidget* parent) : QDialog(parent), ui(new Ui::ChartDialog), chart_(chart) {
     ui->setupUi(this);
+    dialog_icons::apply(this, dialog_icons::Kind::ChartProps);
+    secondary_text::apply(ui->seriesHint);
     ui->titleEdit->setText(chart_->title());
     if (auto* ax = axis(Qt::Horizontal))
         ui->xAxisLabelEdit->setText(ax->titleText());

@@ -17,6 +17,8 @@ private:
     numina::TransferFunction tf_;
 
     void fill_poles();
+    void setup_copy_menus();
+    void copy_solution_text(const QString& text, QWidget* anchor);
     static QColor root_color(double value);
 
 public:

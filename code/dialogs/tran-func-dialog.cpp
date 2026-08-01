@@ -1,19 +1,44 @@
 #include "code/dialogs/tran-func-dialog.h"
 
+#include "code/util/dialog-icons.hxx"
 #include "code/util/format.hxx"
 #include "ui_tran-func-dialog.h"
 
 #include <cmath>
 #include <complex>
 #include <numbers>
+
 #include <QAbstractItemView>
+#include <QApplication>
 #include <QBrush>
+#include <QClipboard>
 #include <QHeaderView>
+#include <QMenu>
 #include <QTableWidgetItem>
+#include <QToolTip>
+
+namespace {
+
+enum class SolutionFormat { Html, Plain, Latex };
+
+QString solution_text(const numina::LaplaceSolution& sol, SolutionFormat format) {
+    switch (format) {
+        case SolutionFormat::Html:
+            return QString::fromStdString(sol.htmlString());
+        case SolutionFormat::Plain:
+            return QString::fromStdString(sol.plainString());
+        case SolutionFormat::Latex:
+            return QString::fromStdString(sol.latexString());
+    }
+    return {};
+}
+
+} // namespace
 
 TranFuncDialog::TranFuncDialog(const numina::TransferFunction& tf, QWidget* parent)
     : QDialog(parent), ui(new Ui::TranFuncDialog), tf_(tf) {
     ui->setupUi(this);
+    dialog_icons::apply(this, dialog_icons::Kind::TransferFunction);
 
     ui->polesTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->polesTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -22,11 +47,45 @@ TranFuncDialog::TranFuncDialog(const numina::TransferFunction& tf, QWidget* pare
     ui->htTextEdit->setHtml(QString::fromStdString(tf_.transientSolution().htmlString()));
     ui->wtTextEdit->setHtml(QString::fromStdString(tf_.impulseSolution().htmlString()));
 
+    setup_copy_menus();
+
     connect(ui->okButton, &QPushButton::clicked, this, &QDialog::accept);
 }
 
 TranFuncDialog::~TranFuncDialog() {
     delete ui;
+}
+
+void TranFuncDialog::setup_copy_menus() {
+    auto wire = [this](QToolButton* button, bool transient) {
+        auto* menu = new QMenu(button);
+
+        const auto add = [&](const QString& title, SolutionFormat format) {
+            auto* act = menu->addAction(title);
+            connect(act, &QAction::triggered, this, [this, button, transient, format] {
+                const numina::LaplaceSolution& sol =
+                    transient ? tf_.transientSolution() : tf_.impulseSolution();
+                copy_solution_text(solution_text(sol, format), button);
+            });
+        };
+
+        add(tr("Как на экране (HTML)"), SolutionFormat::Html);
+        add(tr("Обычный текст"), SolutionFormat::Plain);
+        add(tr("LaTeX"), SolutionFormat::Latex);
+
+        button->setMenu(menu);
+    };
+
+    wire(ui->htCopyButton, true);
+    wire(ui->wtCopyButton, false);
+}
+
+void TranFuncDialog::copy_solution_text(const QString& text, QWidget* anchor) {
+    QApplication::clipboard()->setText(text);
+    if (anchor) {
+        QToolTip::showText(anchor->mapToGlobal(QPoint(0, anchor->height())), tr("Скопировано"), anchor, QRect(),
+                           1500);
+    }
 }
 
 QColor TranFuncDialog::root_color(double value) {

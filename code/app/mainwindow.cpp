@@ -4,6 +4,7 @@
 #include "code/tabs/id-tab.h"
 #include "code/tabs/rim-tab.h"
 #include "code/tabs/synthesis-tab.h"
+#include "code/util/dialog-icons.hxx"
 #include "ui_mainwindow.h"
 
 #include <QApplication>
@@ -17,11 +18,13 @@ MainWindow::MainWindow(QWidget* parent) : QWidget(parent), ui(new Ui::MainWindow
     ui->setupUi(this);
     load_fonts();
     apply_styles();
+    dialog_icons::apply(this, dialog_icons::Kind::App);
+    qApp->setWindowIcon(windowIcon());
 
-    ui->tabWidget->addTab(new IdTab(this), tr("Идентификация"));
-    ui->tabWidget->addTab(new AnalysisTab(this), tr("Анализ"));
-    ui->tabWidget->addTab(new SynthesisTab(this), tr("Синтез"));
-    ui->tabWidget->addTab(new RimTab(this), tr("Настройка РИМ"));
+    ui->tabWidget->addTab(new IdTab(this), tr("🔍  Идентификация"));
+    ui->tabWidget->addTab(new AnalysisTab(this), tr("🔬  Анализ"));
+    ui->tabWidget->addTab(new SynthesisTab(this), tr("🧪  Синтез"));
+    ui->tabWidget->addTab(new RimTab(this), tr("⚙️  Настройка РИМ"));
 
     center_window();
 }
@@ -31,7 +34,14 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::load_fonts() {
-    QFontDatabase::addApplicationFont(QStringLiteral("data/fonts/font-awesome-6-free-solid-900.otf"));
+    const QStringList candidates = {
+        QStringLiteral("data/fonts/font-awesome-6-free-solid-900.otf"),
+        QStringLiteral("fonts/font-awesome-6-free-solid-900.otf"),
+    };
+    for (const QString& path : candidates) {
+        if (QFontDatabase::addApplicationFont(path) >= 0)
+            return;
+    }
 }
 
 void MainWindow::apply_styles() {

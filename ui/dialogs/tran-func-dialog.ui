@@ -6,119 +6,212 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>820</width>
+    <height>640</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Информация о передаточной функции</string>
+   <string>Передаточная функция</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>12</number>
+   </property>
+   <property name="leftMargin">
+    <number>16</number>
+   </property>
+   <property name="topMargin">
+    <number>16</number>
+   </property>
+   <property name="rightMargin">
+    <number>16</number>
+   </property>
+   <property name="bottomMargin">
+    <number>16</number>
+   </property>
    <item>
     <widget class="QLabel" name="titleLabel">
      <property name="text">
-      <string>Корневая характеристика системы</string>
+      <string>Корневая характеристика и решения</string>
      </property>
      <property name="alignment">
-      <set>Qt::AlignCenter</set>
+      <set>Qt::AlignLeft|Qt::AlignVCenter</set>
      </property>
      <property name="styleSheet">
-      <string>font-size: 12pt; font-weight: bold;</string>
+      <string>font-size: 12pt; font-weight: 600;</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="polesLabel">
-     <property name="text">
-      <string>&lt;b&gt;Полюса (корни) системы:&lt;/b&gt;</string>
+    <widget class="QGroupBox" name="polesGroup">
+     <property name="title">
+      <string>Полюса (корни знаменателя)</string>
      </property>
+     <layout class="QVBoxLayout" name="polesLayout">
+      <item>
+       <widget class="QTableWidget" name="polesTable">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>200</height>
+         </size>
+        </property>
+        <property name="editTriggers">
+         <set>QAbstractItemView::NoEditTriggers</set>
+        </property>
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectRows</enum>
+        </property>
+        <column>
+         <property name="text">
+          <string>Re</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Im</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Abs</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Arg, °</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>τ, с</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>ζ</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>T, с</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Значимость</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
-    <widget class="QTableWidget" name="polesTable">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>250</height>
-      </size>
+    <widget class="QGroupBox" name="htGroup">
+     <property name="title">
+      <string>Переходная характеристика h(t)</string>
      </property>
-     <property name="editTriggers">
-      <set>QAbstractItemView::NoEditTriggers</set>
-     </property>
-     <column>
-      <property name="text">
-       <string>Re</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Im</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Abs</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Arg, °</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>τ, c</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>ζ</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>T, c</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Значимость</string>
-      </property>
-     </column>
+     <layout class="QVBoxLayout" name="htLayout">
+      <item>
+       <layout class="QHBoxLayout" name="htToolLayout">
+        <item>
+         <spacer name="htSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QToolButton" name="htCopyButton">
+          <property name="text">
+           <string>Копировать ▾</string>
+          </property>
+          <property name="popupMode">
+           <enum>QToolButton::InstantPopup</enum>
+          </property>
+          <property name="toolTip">
+           <string>Скопировать h(t) в буфер</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QTextEdit" name="htTextEdit">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="minimumHeight">
+         <number>80</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="htLabel">
-     <property name="text">
-      <string>&lt;b&gt;Переходная характеристика h(t):&lt;/b&gt;</string>
+    <widget class="QGroupBox" name="wtGroup">
+     <property name="title">
+      <string>Импульсная характеристика w(t)</string>
      </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QTextEdit" name="htTextEdit">
-     <property name="readOnly">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="wtLabel">
-     <property name="text">
-      <string>&lt;b&gt;Импульсная характеристика w(t):&lt;/b&gt;</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QTextEdit" name="wtTextEdit">
-     <property name="readOnly">
-      <bool>true</bool>
-     </property>
+     <layout class="QVBoxLayout" name="wtLayout">
+      <item>
+       <layout class="QHBoxLayout" name="wtToolLayout">
+        <item>
+         <spacer name="wtSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QToolButton" name="wtCopyButton">
+          <property name="text">
+           <string>Копировать ▾</string>
+          </property>
+          <property name="popupMode">
+           <enum>QToolButton::InstantPopup</enum>
+          </property>
+          <property name="toolTip">
+           <string>Скопировать w(t) в буфер</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QTextEdit" name="wtTextEdit">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="minimumHeight">
+         <number>80</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="buttonLayout">
      <item>
-      <spacer name="leftSpacer">
+      <spacer name="btnSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -133,22 +226,12 @@
      <item>
       <widget class="QPushButton" name="okButton">
        <property name="text">
-        <string>Понятно</string>
+        <string>Закрыть</string>
+       </property>
+       <property name="default">
+        <bool>true</bool>
        </property>
       </widget>
-     </item>
-     <item>
-      <spacer name="rightSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
      </item>
     </layout>
    </item>

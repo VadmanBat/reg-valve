@@ -2,59 +2,161 @@
 <ui version="4.0">
  <class>ChartDialog</class>
  <widget class="QDialog" name="ChartDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>480</width>
+    <height>420</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Свойства графика</string>
   </property>
-  <layout class="QFormLayout" name="formLayout">
-   <property name="fieldGrowthPolicy">
-    <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>12</number>
    </property>
-   <item row="0" column="0">
-    <widget class="QLabel" name="titleLabel">
-     <property name="text">
-      <string>Заголовок:</string>
+   <property name="leftMargin">
+    <number>16</number>
+   </property>
+   <property name="topMargin">
+    <number>16</number>
+   </property>
+   <property name="rightMargin">
+    <number>16</number>
+   </property>
+   <property name="bottomMargin">
+    <number>16</number>
+   </property>
+   <item>
+    <widget class="QGroupBox" name="axesGroup">
+     <property name="title">
+      <string>Заголовок и оси</string>
      </property>
+     <layout class="QFormLayout" name="axesForm">
+      <property name="horizontalSpacing">
+       <number>12</number>
+      </property>
+      <property name="verticalSpacing">
+       <number>8</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="titleLabel">
+        <property name="text">
+         <string>Заголовок</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="titleEdit">
+        <property name="placeholderText">
+         <string>Название графика</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="xAxisLabel">
+        <property name="text">
+         <string>Ось X</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="xAxisLabelEdit">
+        <property name="placeholderText">
+         <string>Подпись оси X</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="yAxisLabel">
+        <property name="text">
+         <string>Ось Y</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="yAxisLabelEdit">
+        <property name="placeholderText">
+         <string>Подпись оси Y</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
-   <item row="0" column="1">
-    <widget class="QLineEdit" name="titleEdit"/>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="xAxisLabel">
-     <property name="text">
-      <string>Подпись оси X:</string>
+   <item>
+    <widget class="QGroupBox" name="seriesGroup">
+     <property name="title">
+      <string>Кривые</string>
      </property>
+     <layout class="QVBoxLayout" name="seriesLayout">
+      <item>
+       <widget class="QLabel" name="seriesHint">
+        <property name="text">
+         <string>Имя, цвет, толщина и стиль линий. Изменения цвета/стиля видны сразу; «Применить» сохраняет подписи.</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: palette(placeholder-text); font-size: 9pt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="seriesHost" native="true">
+        <property name="minimumHeight">
+         <number>120</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
-   <item row="1" column="1">
-    <widget class="QLineEdit" name="xAxisLabelEdit"/>
-   </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="yAxisLabel">
-     <property name="text">
-      <string>Подпись оси Y:</string>
+   <item>
+    <spacer name="vSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
      </property>
-    </widget>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>8</height>
+      </size>
+     </property>
+    </spacer>
    </item>
-   <item row="2" column="1">
-    <widget class="QLineEdit" name="yAxisLabelEdit"/>
-   </item>
-   <item row="3" column="0" colspan="2">
-    <widget class="QWidget" name="seriesHost" native="true"/>
-   </item>
-   <item row="4" column="0" colspan="2">
+   <item>
     <layout class="QHBoxLayout" name="buttonLayout">
+     <item>
+      <spacer name="btnSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cancelButton">
+       <property name="text">
+        <string>Отмена</string>
+       </property>
+      </widget>
+     </item>
      <item>
       <widget class="QPushButton" name="applyButton">
        <property name="text">
         <string>Применить</string>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="cancelButton">
-       <property name="text">
-        <string>Отменить</string>
+       <property name="default">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

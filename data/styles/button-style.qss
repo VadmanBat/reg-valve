@@ -144,7 +144,17 @@ TranFuncForm QLabel#tfPower {
 }
 
 TranFuncForm QLabel#tfPower[powerActive="false"] {
-    color: palette(mid);
+    /* mid is a bevel fill and nearly invisible on dark themes */
+    color: palette(placeholder-text);
+}
+
+/* Explanatory / secondary labels in dialogs — readable on light and dark */
+QLabel#hintLabel,
+QLabel#structHint,
+QLabel#delayHint,
+QLabel#approxHint,
+QLabel#seriesHint {
+    color: palette(placeholder-text);
 }
 
 TranFuncForm QLabel#tfPower[powerActive="true"] {

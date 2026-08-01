@@ -1,9 +1,11 @@
 #include "code/dialogs/help-dialog.h"
 
+#include "code/util/dialog-icons.hxx"
 #include "ui_help-dialog.h"
 
 HelpDialog::HelpDialog(QWidget* parent) : QDialog(parent), ui(new Ui::HelpDialog) {
     ui->setupUi(this);
+    dialog_icons::apply(this, dialog_icons::Kind::Help);
     ui->textEdit->setHtml(QStringLiteral(
         "<style>p { text-align: justify; text-indent: 20px; margin-bottom: 10px; }</style>"
         "<p><b>ПИД-регулятор</b> — механизм обратной связи для управления системами. "

@@ -2,6 +2,7 @@
 
 #include "code/util/format.hxx"
 #include "code/util/style-core.hpp"
+#include "code/widgets/tf-form/tran-func-form.h"
 
 #include <QFocusEvent>
 #include <QLabel>

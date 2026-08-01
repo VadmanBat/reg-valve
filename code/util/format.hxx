@@ -3,6 +3,7 @@
 #include <cmath>
 #include <limits>
 #include <QString>
+#include <QStringList>
 #include <sstream>
 #include <string>
 #include <vector>

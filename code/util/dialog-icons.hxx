@@ -135,7 +135,7 @@ inline void paint_irbis(QPainter& p, int size) {
     p.setPen(Qt::NoPen);
     p.setBrush(spot);
     const QPointF spots[] = {
-        {9.5 * s, 14 * s},  {22.5 * s, 14 * s}, {11 * s, 20 * s}, {21 * s, 20 * s},
+        {9.5 * s, 14 * s},  {22.5 * s, 14 * s},  {11 * s, 20 * s},     {21 * s, 20 * s},
         {16 * s, 11.5 * s}, {8.5 * s, 17.5 * s}, {23.5 * s, 17.5 * s},
     };
     for (const QPointF& c : spots)

@@ -7,7 +7,6 @@
 #include <cmath>
 #include <complex>
 #include <numbers>
-
 #include <QAbstractItemView>
 #include <QApplication>
 #include <QBrush>
@@ -63,8 +62,7 @@ void TranFuncDialog::setup_copy_menus() {
         const auto add = [&](const QString& title, SolutionFormat format) {
             auto* act = menu->addAction(title);
             connect(act, &QAction::triggered, this, [this, button, transient, format] {
-                const numina::LaplaceSolution& sol =
-                    transient ? tf_.transientSolution() : tf_.impulseSolution();
+                const numina::LaplaceSolution& sol = transient ? tf_.transientSolution() : tf_.impulseSolution();
                 copy_solution_text(solution_text(sol, format), button);
             });
         };
@@ -83,8 +81,7 @@ void TranFuncDialog::setup_copy_menus() {
 void TranFuncDialog::copy_solution_text(const QString& text, QWidget* anchor) {
     QApplication::clipboard()->setText(text);
     if (anchor) {
-        QToolTip::showText(anchor->mapToGlobal(QPoint(0, anchor->height())), tr("Скопировано"), anchor, QRect(),
-                           1500);
+        QToolTip::showText(anchor->mapToGlobal(QPoint(0, anchor->height())), tr("Скопировано"), anchor, QRect(), 1500);
     }
 }
 

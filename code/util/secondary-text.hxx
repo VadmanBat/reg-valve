@@ -1,7 +1,6 @@
 #pragma once
 
 #include <initializer_list>
-
 #include <QColor>
 #include <QLabel>
 #include <QPalette>

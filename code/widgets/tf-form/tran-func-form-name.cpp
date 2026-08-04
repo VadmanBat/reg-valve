@@ -3,6 +3,7 @@
 #include "code/widgets/tf-form/tran-func-form.h"
 
 #include <cmath>
+#include <QDoubleSpinBox>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMenu>
@@ -33,42 +34,63 @@ void TranFuncForm::bindNameLabel(QLabel* label) {
         connect(le, &QLineEdit::editingFinished, this, &TranFuncForm::update_name_label);
     for (auto* le : denominator_)
         connect(le, &QLineEdit::editingFinished, this, &TranFuncForm::update_name_label);
+    if (delay_element_)
+        connect(delay_element_, &QDoubleSpinBox::editingFinished, this, &TranFuncForm::update_name_label);
 }
 
 QString TranFuncForm::linkName() const {
+    QString name;
     switch (id_) {
         case 1 + 1 * 64:
-            return tr("Усилительное (безынерционное)");
+            name = tr("Усилительное (безынерционное)");
+            break;
         case 1 + 2 * 64:
-            return tr("Идеальное интегрирующее (астатическое)");
+            name = tr("Идеальное интегрирующее (астатическое)");
+            break;
         case 1 + 3 * 64:
-            return tr("Инерционное 1-го порядка (апериодическое)");
+            name = tr("Инерционное 1-го порядка (апериодическое)");
+            break;
         case 1 + 5 * 64:
-            return tr("Вырожденное колебательное (консервативное)");
+            name = tr("Вырожденное колебательное (консервативное)");
+            break;
         case 1 + 6 * 64:
-            return tr("Реальное интегрирующее (инерционное)");
+            name = tr("Реальное интегрирующее (инерционное)");
+            break;
         case 1 + 7 * 64: {
             const double a1 = denominator_[1]->stored;
             const double a2 = denominator_[2]->stored;
             if (a2 > 0.0 && a1 / (2.0 * std::sqrt(a2)) < 1.0)
-                return tr("Колебательное");
-            return tr("Инерционное 2-го порядка (апериодическое)");
+                name = tr("Колебательное");
+            else
+                name = tr("Инерционное 2-го порядка (апериодическое)");
+            break;
         }
         case 2 + 1 * 64:
-            return tr("Идеальное дифференцирующее");
+            name = tr("Идеальное дифференцирующее");
+            break;
         case 2 + 3 * 64:
-            return tr("Инерционное (реальное) дифференцирующее");
+            name = tr("Инерционное (реальное) дифференцирующее");
+            break;
         case 4 + 3 * 64:
-            return tr("Реальное дифференцирующее 2-го порядка");
+            name = tr("Реальное дифференцирующее 2-го порядка");
+            break;
         case 3 + 2 * 64:
-            return tr("Изодромное");
+            name = tr("Изодромное");
+            break;
         case 3 + 1 * 64:
-            return tr("Форсирующее");
+            name = tr("Форсирующее");
+            break;
         case 3 + 3 * 64:
-            return tr("Инерционно-форсирующее");
+            name = tr("Инерционно-форсирующее");
+            break;
         case 63 + 21 * 64:
-            return tr("Пропорционально-дифференциальное 2-го порядка");
+            name = tr("Пропорционально-дифференциальное 2-го порядка");
+            break;
         default:
-            return tr("Неизвестно");
+            name = tr("Неизвестно");
+            break;
     }
+    if (hasDelay())
+        name += tr(" с запаздыванием");
+    return name;
 }

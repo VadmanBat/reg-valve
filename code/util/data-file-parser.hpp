@@ -117,8 +117,9 @@ inline Vec extractNumbersFromFile(const QString& filePath) {
 /// time, value pairs (odd leftover numbers discarded).
 inline VecPair asPairs(const Vec& numbers) {
     VecPair res;
-    res.reserve(numbers.size() / 2);
-    for (std::size_t i = 0; i + 1 < numbers.size(); i += 2)
+    const std::size_t n = numbers.size();
+    res.reserve(n / 2);
+    for (std::size_t i = 0; i + 1 < n; i += 2)
         res.emplace_back(numbers[i], numbers[i + 1]);
     return res;
 }
@@ -127,12 +128,13 @@ inline VecPair asPairs(const Vec& numbers) {
 inline bool asValveSignal(const Vec& numbers, VecPair& valve, VecPair& signal) {
     valve.clear();
     signal.clear();
-    if (numbers.size() < 6)
+    const std::size_t n = numbers.size();
+    if (n < 6)
         return false;
-    const std::size_t n = numbers.size() / 3;
-    valve.reserve(n);
-    signal.reserve(n);
-    for (std::size_t i = 0; i + 2 < numbers.size(); i += 3) {
+    const std::size_t triples = n / 3;
+    valve.reserve(triples);
+    signal.reserve(triples);
+    for (std::size_t i = 0; i + 2 < n; i += 3) {
         const double t = numbers[i];
         valve.emplace_back(t, numbers[i + 1]);
         signal.emplace_back(t, numbers[i + 2]);

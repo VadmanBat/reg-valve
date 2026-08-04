@@ -147,7 +147,8 @@ void ChartDialog::applyChanges() {
         ax->setTitleText(ui->xAxisLabelEdit->text());
     if (auto* ax = axis(Qt::Vertical))
         ax->setTitleText(ui->yAxisLabelEdit->text());
-    for (int i = 0; i < line_series_.size(); ++i) {
+    const int n = line_series_.size();
+    for (int i = 0; i < n; ++i) {
         line_series_[i]->setName(series_name_edits_[i]->text());
         line_series_[i]->setPen(current_pens_[i]);
     }
@@ -155,6 +156,7 @@ void ChartDialog::applyChanges() {
 }
 
 void ChartDialog::restoreChart() {
-    for (int i = 0; i < line_series_.size(); ++i)
+    const int n = line_series_.size();
+    for (int i = 0; i < n; ++i)
         line_series_[i]->setPen(init_pens_[i]);
 }

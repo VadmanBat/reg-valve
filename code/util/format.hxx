@@ -128,7 +128,8 @@ inline constexpr int FULL_DIGITS = std::numeric_limits<double>::max_digits10; //
         return QStringLiteral("0");
 
     QString out = terms.front();
-    for (int i = 1; i < terms.size(); ++i) {
+    const int n_terms = terms.size();
+    for (int i = 1; i < n_terms; ++i) {
         const QString& t = terms[i];
         if (t.startsWith(QLatin1Char('-')) || t.startsWith(QStringLiteral("−")))
             out += QStringLiteral(" ") + t;

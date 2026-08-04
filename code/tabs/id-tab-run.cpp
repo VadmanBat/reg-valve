@@ -81,7 +81,8 @@ void IdTab::runIdentification() {
                 show_error(tr("Недостаточно точек клапана/сигнала (строк: %1).").arg(valve_series_.size()));
                 return;
             }
-            for (std::size_t i = 1; i < valve_series_.size(); ++i) {
+            const std::size_t n_valve = valve_series_.size();
+            for (std::size_t i = 1; i < n_valve; ++i) {
                 if (valve_series_[i].first < valve_series_[i - 1].first) {
                     show_error(tr("Время должно быть неубывающим (нарушение около точки %1).").arg(i));
                     return;

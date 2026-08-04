@@ -34,8 +34,9 @@ namespace detail {
 [[nodiscard]] inline QLineSeries* lastDataSeries(QChart* chart) {
     if (!chart)
         return nullptr;
-    const auto all = chart->series();
-    for (auto i = all.size(); i > 0; --i) {
+    const auto all        = chart->series();
+    const auto n_series = all.size();
+    for (auto i = n_series; i > 0; --i) {
         auto* s = qobject_cast<QLineSeries*>(all[i - 1]);
         if (!s || isGuideSeries(s->name()))
             continue;

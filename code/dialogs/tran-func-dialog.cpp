@@ -67,9 +67,9 @@ void TranFuncDialog::setup_copy_menus() {
             });
         };
 
-        add(tr("Как на экране (HTML)"), SolutionFormat::Html);
         add(tr("Обычный текст"), SolutionFormat::Plain);
         add(tr("LaTeX"), SolutionFormat::Latex);
+        add(tr("HTML"), SolutionFormat::Html);
 
         button->setMenu(menu);
     };
@@ -120,11 +120,46 @@ void TranFuncDialog::fill_poles() {
     if (any_multi)
         ui->polesTable->setHorizontalHeaderItem(kCol, new QTableWidgetItem(tr("k")));
 
-    double ref_re = 0.0;
-    if (!reals.empty())
-        ref_re = reals.front().first;
-    else if (!comps.empty())
-        ref_re = comps.front().first.real();
+    // Tooltips on header hover (QTableWidgetItem::setToolTip).
+    const struct {
+        int col;
+        const char* tip;
+    } header_tips[] = {
+        {0, QT_TR_NOOP("Действительная часть полюса (1/с). Цвет: синий — Re < 0 (устойчиво), розовый — Re ≥ 0.")},
+        {1, QT_TR_NOOP("Мнимая часть. Для сопряжённой пары — ±|Im| в одной строке.")},
+        {2, QT_TR_NOOP("Модуль полюса |p| = √(Re² + Im²).")},
+        {3, QT_TR_NOOP("Аргумент полюса, градусы. Для пары — ±|Arg|.")},
+        {4, QT_TR_NOOP("Постоянная времени τ = −1/Re. При Re = 0 — ∞.")},
+        {5, QT_TR_NOOP("Коэффициент демпфирования ζ = −Re / |p|.")},
+        {6, QT_TR_NOOP("Период собственных колебаний T = 2π / |Im|.")},
+        {7, QT_TR_NOOP("Значимость относительно доминантного полюса (max Re): фон по отношению Re_dom / Re.")},
+        {8, QT_TR_NOOP("Кратность корня k (если есть кратные).")},
+    };
+    // Im, ζ, T — complex-related columns (subtle tint).
+    constexpr int kComplexCols[] = {1, 5, 6};
+    const QBrush complex_header_bg(QColor(0x4a, 0x3d, 0x66));
+    const QBrush complex_header_fg(QColor(0xce, 0x93, 0xd8));
+    const QBrush complex_cell_bg(QColor(0x3a, 0x32, 0x4e));
+
+    const int n_tip = any_multi ? 9 : 8;
+    for (int c = 0; c < n_tip; ++c) {
+        auto* item = ui->polesTable->horizontalHeaderItem(c);
+        if (!item) {
+            item = new QTableWidgetItem;
+            ui->polesTable->setHorizontalHeaderItem(c, item);
+        }
+        item->setToolTip(tr(header_tips[c].tip));
+        for (const int cc : kComplexCols) {
+            if (c == cc) {
+                item->setBackground(complex_header_bg);
+                item->setForeground(complex_header_fg);
+                break;
+            }
+        }
+    }
+
+    // Dominant = rightmost pole (max Re); numina keeps roots sorted, dominantPole() uses that.
+    const double dom_re = tf_.hasPoles() ? tf_.dominantPole().real() : 0.0;
 
     auto add_row = [&](std::complex<double> pole, std::size_t mult) {
         const int row = ui->polesTable->rowCount();
@@ -135,25 +170,33 @@ void TranFuncDialog::fill_poles() {
         re_item->setForeground(QBrush(pole.real() < 0 ? QColor(0x80, 0xd8, 0xff) : QColor(0xff, 0xb0, 0xc8)));
         ui->polesTable->setItem(row, 0, re_item);
 
-        const double abs_p = std::abs(pole);
+        const double abs_p    = std::abs(pole);
+        const bool is_complex = std::abs(pole.imag()) > 1e-10;
+        const double arg_deg  = std::arg(pole) * 180.0 / std::numbers::pi;
+
         ui->polesTable->setItem(row, 2, new QTableWidgetItem(num_format::format(abs_p)));
+        // Complex pair: Arg as ±|φ|; real pole — single signed angle.
         ui->polesTable->setItem(row, 3,
-                                new QTableWidgetItem(num_format::format(std::arg(pole) * 180.0 / std::numbers::pi)));
+                                new QTableWidgetItem(is_complex ? QStringLiteral("±") + num_format::format(std::abs(arg_deg))
+                                                                : num_format::format(arg_deg)));
         ui->polesTable->setItem(
             row, 4,
             new QTableWidgetItem(pole.real() != 0.0 ? num_format::format(-1.0 / pole.real()) : QStringLiteral("∞")));
 
-        if (std::abs(pole.imag()) > 1e-10) {
-            ui->polesTable->setItem(
-                row, 1, new QTableWidgetItem(QStringLiteral("±") + num_format::format(std::abs(pole.imag()))));
-            ui->polesTable->setItem(row, 5, new QTableWidgetItem(num_format::format(-pole.real() / abs_p)));
-            ui->polesTable->setItem(
-                row, 6, new QTableWidgetItem(num_format::format(2.0 * std::numbers::pi / std::abs(pole.imag()))));
-        }
+        auto place_complex_cell = [&](int col, const QString& text) {
+            auto* item = new QTableWidgetItem(text);
+            item->setBackground(complex_cell_bg);
+            ui->polesTable->setItem(row, col, item);
+        };
+        // Keep complex columns tinted even when empty (real poles).
+        place_complex_cell(1, is_complex ? QStringLiteral("±") + num_format::format(std::abs(pole.imag())) : QString());
+        place_complex_cell(5, is_complex ? num_format::format(-pole.real() / abs_p) : QString());
+        place_complex_cell(6, is_complex ? num_format::format(2.0 * std::numbers::pi / std::abs(pole.imag()))
+                                         : QString());
 
         auto* color_item = new QTableWidgetItem;
-        if (ref_re != 0.0 && pole.real() != 0.0)
-            color_item->setBackground(root_color(ref_re / pole.real()));
+        if (dom_re != 0.0 && pole.real() != 0.0)
+            color_item->setBackground(root_color(dom_re / pole.real()));
         ui->polesTable->setItem(row, 7, color_item);
 
         if (any_multi)
@@ -162,6 +205,12 @@ void TranFuncDialog::fill_poles() {
 
     for (const auto& [r, mult] : reals)
         add_row({r, 0.0}, mult);
-    for (const auto& [c, mult] : comps)
-        add_row(c, mult);
+
+    // numina: complex roots come as consecutive conjugate pairs (z, conj(z)).
+    const std::size_t n_comp = comps.size();
+    for (std::size_t i = 0; i < n_comp; ++i) {
+        add_row(comps[i].first, comps[i].second);
+        if (i + 1 < n_comp && comps[i + 1].first == std::conj(comps[i].first))
+            ++i; // skip conjugate partner
+    }
 }

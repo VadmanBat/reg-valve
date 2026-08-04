@@ -93,10 +93,13 @@ void RegulationWidget::update_cell_style(std::size_t index, double new_value) {
     style_util::setProperty(line_edits_[index], "metricFlash", flash);
 }
 
-void RegulationWidget::setLabels(const std::vector<QString>& labelNames) {
+void RegulationWidget::setLabels(const std::vector<QString>& labelNames, const std::vector<QString>& tooltips) {
     const auto n = std::min(labels_.size(), labelNames.size());
     for (std::size_t i = 0; i < n; ++i) {
         labels_[i]->setText(labelNames[i]);
+        const QString tip = i < tooltips.size() ? tooltips[i] : QString();
+        labels_[i]->setToolTip(tip);
+        line_edits_[i]->setToolTip(tip);
         labels_[i]->adjustSize();
         labels_[i]->updateGeometry();
     }
@@ -111,7 +114,8 @@ void RegulationWidget::setColors(const std::vector<std::pair<int, int>>& valueCo
 
 void RegulationWidget::updateValues(const std::vector<double>& values) {
     if (values.empty()) {
-        for (std::size_t i = 0; i < line_edits_.size(); ++i) {
+        const std::size_t n = line_edits_.size();
+        for (std::size_t i = 0; i < n; ++i) {
             line_edits_[i]->setText({});
             last_values_[i] = -1;
             style_util::setProperty(line_edits_[i], "metricFlash", 0);

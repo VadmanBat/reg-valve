@@ -26,7 +26,8 @@ private:
 public:
     explicit RegulationWidget(int rows = 3, int cols = 2, QWidget* parent = nullptr);
 
-    void setLabels(const std::vector<QString>& labelNames);
+    /// Short HTML labels; optional tooltips (full metric names) on label + value field.
+    void setLabels(const std::vector<QString>& labelNames, const std::vector<QString>& tooltips = {});
     void setColors(const std::vector<std::pair<int, int>>& valueColors);
     void updateValues(const std::vector<double>& values);
 };

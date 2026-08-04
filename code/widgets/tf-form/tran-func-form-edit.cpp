@@ -109,7 +109,8 @@ void TranFuncForm::rebuild_activity_mask() {
             id_ += 1 << p;
         }
     }
-    for (int p = 0; p < static_cast<int>(denominator_.size()); ++p) {
+    const int m = static_cast<int>(denominator_.size());
+    for (int p = 0; p < m; ++p) {
         const std::size_t index = static_cast<std::size_t>(n + p);
         if (denominator_[static_cast<std::size_t>(p)]->stored != 0.0) {
             is_active_[index] = true;

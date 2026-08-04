@@ -56,7 +56,8 @@ bool saveChartToFile(const QString& fileName, QChart* chart) {
             continue;
         out << "Name: " << series->name() << '\n';
         if (auto* xy = qobject_cast<QXYSeries*>(series)) {
-            for (int i = 0; i < xy->count(); ++i)
+            const int n = xy->count();
+            for (int i = 0; i < n; ++i)
                 out << xy->at(i).x() << ", " << xy->at(i).y() << '\n';
         }
         out << '\n';

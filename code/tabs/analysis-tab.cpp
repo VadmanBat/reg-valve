@@ -61,14 +61,23 @@ void AnalysisTab::install_custom_widgets() {
 }
 
 void AnalysisTab::setup_metrics() {
-    metrics_->setLabels({
-        QStringLiteral("t<sub>р</sub>:"),
-        QStringLiteral("ω<sub>n</sub>:"),
-        QStringLiteral("t<sub>н</sub>:"),
-        QStringLiteral("ω<sub>c</sub>:"),
-        QStringLiteral("ζ:"),
-        QStringLiteral("h<sub>уст</sub>:"),
-    });
+    metrics_->setLabels(
+        {
+            QStringLiteral("t<sub>р</sub>:"),
+            QStringLiteral("ω<sub>n</sub>:"),
+            QStringLiteral("t<sub>н</sub>:"),
+            QStringLiteral("ω<sub>c</sub>:"),
+            QStringLiteral("ζ:"),
+            QStringLiteral("h<sub>уст</sub>:"),
+        },
+        {
+            tr("Время регулирования, с"),
+            tr("Собственная частота, рад/с"),
+            tr("Время нарастания, с"),
+            tr("Частота среза, рад/с"),
+            tr("Коэффициент демпфирования ζ"),
+            tr("Установившееся значение"),
+        });
     metrics_->setColors({{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}});
 }
 

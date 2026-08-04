@@ -82,20 +82,35 @@ void SynthesisTab::install_custom_widgets() {
 }
 
 void SynthesisTab::setup_metrics() {
-    metrics_->setLabels({
-        QStringLiteral("t<sub>р</sub>:"),
-        QStringLiteral("ω<sub>n</sub>:"),
-        QStringLiteral("h<sub>уст</sub>:"),
-        QStringLiteral("ЛИК:"),
-        QStringLiteral("t<sub>н</sub>:"),
-        QStringLiteral("ω<sub>c</sub>:"),
-        QStringLiteral("σ<sub>ст</sub>:"),
-        QStringLiteral("ИКК:"),
-        QStringLiteral("t<sub>п</sub>:"),
-        QStringLiteral("ζ:"),
-        QStringLiteral("σ<sub>пр</sub>:"),
-        QStringLiteral("СКО:"),
-    });
+    metrics_->setLabels(
+        {
+            QStringLiteral("t<sub>р</sub>:"),
+            QStringLiteral("ω<sub>n</sub>:"),
+            QStringLiteral("h<sub>уст</sub>:"),
+            QStringLiteral("ЛИК:"),
+            QStringLiteral("t<sub>н</sub>:"),
+            QStringLiteral("ω<sub>c</sub>:"),
+            QStringLiteral("σ<sub>ст</sub>:"),
+            QStringLiteral("ИКК:"),
+            QStringLiteral("t<sub>п</sub>:"),
+            QStringLiteral("ζ:"),
+            QStringLiteral("σ<sub>пр</sub>:"),
+            QStringLiteral("СКО:"),
+        },
+        {
+            tr("Время регулирования, с"),
+            tr("Собственная частота, рад/с"),
+            tr("Установившееся значение"),
+            tr("Линейный интегральный критерий"),
+            tr("Время нарастания, с"),
+            tr("Частота среза, рад/с"),
+            tr("Статическая ошибка"),
+            tr("Интегральный квадратичный критерий (ИКК)"),
+            tr("Время пика, с"),
+            tr("Коэффициент демпфирования ζ"),
+            tr("Перерегулирование, %"),
+            tr("Среднеквадратичное отклонение ошибки (СКО)"),
+        });
     metrics_->setColors(
         {{1, 2}, {0, 0}, {0, 0}, {1, 2}, {1, 2}, {0, 0}, {0, 0}, {1, 2}, {1, 2}, {2, 1}, {1, 2}, {1, 2}});
 }

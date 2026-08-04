@@ -1,6 +1,7 @@
 #pragma once
 
 #include "code/charts/utils/nice-axis.hpp"
+#include "code/series/axis-bounds.hpp"
 
 #include <complex>
 #include <QChart>
@@ -10,41 +11,59 @@
 #include <utility>
 #include <vector>
 
+class QValueAxis;
+
+/// Stateless helpers for QChart (shared by ChartPanel, InteractiveChartView, clone).
+/// Stateful UI lives in ChartPanel / InteractiveChartView / ResponseChartBank — not here.
 namespace chart_utils {
 
 using Pair    = std::pair<double, double>;
 using VecPair = std::vector<Pair>;
 using VecComp = std::vector<std::complex<double>>;
 
-/// Guide series names (bold black axes through origin). Skipped by save / dialog / clear.
-inline constexpr auto kHorGuide = "hor-line";
-inline constexpr auto kVerGuide = "ver-line";
+inline constexpr auto kHorGuide  = "hor-line";
+inline constexpr auto kVerGuide  = "ver-line";
+inline constexpr int kMajorTicks = 5;
+
+/// Result of adding/replacing a series (stack POD — no heap, no optional).
+struct SeriesWrite {
+    bool wrote{false};
+    AxisBounds bounds{};
+};
+
+enum class GridMode {
+    Tab,    ///< Fixed ticks; optional snap_x/y (tabs, no pan)
+    Viewer, ///< Dynamic ticks + anchor 0 (detached viewer)
+};
 
 QPen penForIndex(std::size_t index);
 
 void createAxes(QChart* chart, const QString& titleX, const QString& titleY);
 void createChartContextMenu(QChartView* chartView);
-/// Open detached interactive viewer (non-modal). Safe if chart is null.
 void openChartViewer(QChart* chart, QWidget* parent = nullptr);
 void removeAllSeries(QChart* chart);
 
-/// Legacy alias → niceAxisRange(..., include_zero=true).
-[[nodiscard]] Pair computeAxesRange(double min, double max);
+/// Set range then style. Default: no lattice re-snap (fitAxes already applied nice/data ranges).
+void updateAxes(QChart* chart, const Pair& range_x, const Pair& range_y, GridMode mode = GridMode::Tab,
+                bool snap_x = false, bool snap_y = false);
 
-void updateAxes(QChart* chart, const Pair& range_x, const Pair& range_y);
-
-/// Ensure bold black cross at (0,0) spanning current ranges.
+void applyViewerGrid(QValueAxis* axis);
+void applyViewerGrid(QChart* chart);
 void updateOriginGuides(QChart* chart, const Pair& range_x, const Pair& range_y);
 
-void addRealSeries(QChart* chart, const VecPair& points, const QString& title, std::size_t index = 0);
-void addComplexSeries(QChart* chart, const VecComp& points, const QString& title, std::size_t index = 0);
-
-bool replaceLastRealSeries(QChart* chart, const VecPair& points, const QString& title);
-bool replaceLastComplexSeries(QChart* chart, const VecComp& points, const QString& title);
+/// One pass: QLineSeries points + AxisBounds. wrote=false if empty / no chart / no series to replace.
+[[nodiscard]] SeriesWrite addRealSeries(QChart* chart, const VecPair& points, const QString& title,
+                                        std::size_t index = 0);
+[[nodiscard]] SeriesWrite addComplexSeries(QChart* chart, const VecComp& points, const QString& title,
+                                           std::size_t index = 0);
+[[nodiscard]] SeriesWrite replaceLastRealSeries(QChart* chart, const VecPair& points, const QString& title);
+[[nodiscard]] SeriesWrite replaceLastComplexSeries(QChart* chart, const VecComp& points, const QString& title);
 
 bool saveChartToFile(const QString& fileName, QChart* chart);
 
 QChartView* makeChartView(QChart* chart, QWidget* parent, const QString& title, const QString& titleX,
                           const QString& titleY);
+
+[[nodiscard]] QChart* cloneChart(QChart* src);
 
 } // namespace chart_utils

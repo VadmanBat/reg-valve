@@ -1,6 +1,6 @@
 #include "code/dialogs/chart-viewer/chart-viewer-window.h"
 
-#include "code/charts/utils/chart-clone.hpp"
+#include "code/charts/utils/chart-utils.hpp"
 
 #include <QGuiApplication>
 #include <QLabel>

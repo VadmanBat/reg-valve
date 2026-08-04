@@ -60,6 +60,8 @@ private:
 
     void rebuild_layout();
     void refit_all();
+    /// If a panel was hidden during adds, materialize series from history when shown.
+    void ensure_visible_series();
     void push_batch(Batch b, bool replace_last);
     static Batch compute_batch(const numina::TransferFunction& tf, const ModelParam& params, const QString& name);
 

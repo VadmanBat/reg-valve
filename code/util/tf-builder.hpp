@@ -64,8 +64,7 @@ inline std::pair<double, double> timeRange(const ModelParam& p) {
     return {t0, t1};
 }
 
-inline VecPair transient(const numina::TransferFunction& tf, const ModelParam& p) {
-    numina::ResponseLab lab(tf);
+inline VecPair transient(numina::ResponseLab& lab, const ModelParam& p) {
     if (p.autoTimeRange)
         return lab.transient();
     const auto range = timeRange(p);
@@ -74,8 +73,7 @@ inline VecPair transient(const numina::TransferFunction& tf, const ModelParam& p
     return lab.transient(range, static_cast<std::size_t>(std::max(2, p.timeIntervals)));
 }
 
-inline VecPair impulse(const numina::TransferFunction& tf, const ModelParam& p) {
-    numina::ResponseLab lab(tf);
+inline VecPair impulse(numina::ResponseLab& lab, const ModelParam& p) {
     if (p.autoTimeRange)
         return lab.impulse();
     const auto range = timeRange(p);
@@ -84,20 +82,31 @@ inline VecPair impulse(const numina::TransferFunction& tf, const ModelParam& p) 
     return lab.impulse(range, static_cast<std::size_t>(std::max(2, p.timeIntervals)));
 }
 
+inline VecPair transient(const numina::TransferFunction& tf, const ModelParam& p) {
+    numina::ResponseLab lab(tf);
+    return transient(lab, p);
+}
+
+inline VecPair impulse(const numina::TransferFunction& tf, const ModelParam& p) {
+    numina::ResponseLab lab(tf);
+    return impulse(lab, p);
+}
+
 /// True when free term of denominator is ~0 (pole at s=0 / free integrator) — avoid ω=0.
 inline bool hasZeroDenConstant(const numina::TransferFunction& tf) noexcept {
     const auto& den = tf.getDenominator();
-    if (den.degree() < 0)
+    const int deg   = den.degree();
+    if (deg < 0)
         return true;
-    const auto v = den.vector();
-    if (v.empty())
-        return true;
-    return std::abs(v.back()) <= 1e-14 * (1.0 + std::abs(v.front()));
+    // coeffs: [0]=leading … [deg]=free term — no vector() copy.
+    const double lead = den[0];
+    const double free = den[static_cast<std::size_t>(deg)];
+    return std::abs(free) <= 1e-14 * (1.0 + std::abs(lead));
 }
 
-/// КЧХ + АЧХ + ФЧХ — always logarithmic ω-grid.
-inline FrequencyBundle frequencyBundle(const numina::TransferFunction& tf, const ModelParam& p) {
-    numina::ResponseLab lab(tf);
+/// КЧХ + АЧХ + ФЧХ — always logarithmic ω-grid (one ResponseLab / one TF evaluation path).
+inline FrequencyBundle frequencyBundle(numina::ResponseLab& lab, const ModelParam& p) {
+    const numina::TransferFunction& tf = lab.tf();
     std::pair<double, double> range = p.autoFreqRange ? lab.frequencyRange() : std::make_pair(p.freqMin, p.freqMax);
 
     if (hasZeroDenConstant(tf)) {
@@ -130,6 +139,11 @@ inline FrequencyBundle frequencyBundle(const numina::TransferFunction& tf, const
         out.phase.emplace_back(w, std::arg(W) * rad2deg);
     }
     return out;
+}
+
+inline FrequencyBundle frequencyBundle(const numina::TransferFunction& tf, const ModelParam& p) {
+    numina::ResponseLab lab(tf);
+    return frequencyBundle(lab, p);
 }
 
 inline bool validInput(const std::vector<double>& num, const std::vector<double>& den) {

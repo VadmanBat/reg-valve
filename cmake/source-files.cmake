@@ -44,6 +44,7 @@ set(SOURCES
         ${CMAKE_SOURCE_DIR}/code/charts/response-chart-bank-data.cpp
         ${CMAKE_SOURCE_DIR}/code/charts/interactive-chart-view.cpp
         ${CMAKE_SOURCE_DIR}/code/charts/utils/chart-utils.cpp
+        ${CMAKE_SOURCE_DIR}/code/charts/utils/chart-utils-axes.cpp
         ${CMAKE_SOURCE_DIR}/code/charts/utils/chart-utils-series.cpp
         ${CMAKE_SOURCE_DIR}/code/charts/utils/chart-utils-menu.cpp
 

@@ -19,45 +19,72 @@ void ChartPanel::setChartTitle(const QString& title) {
         chart_->setTitle(title);
 }
 
-void ChartPanel::addRealCurve(const VecPair& points, const QString& name) {
-    chart_utils::addRealSeries(chart_, points, name, curve_count_);
-    ++curve_count_;
+AxisBounds ChartPanel::addRealCurve(const VecPair& points, const QString& name) {
+    const auto w = chart_utils::addRealSeries(chart_, points, name, curve_count_);
+    if (w.wrote)
+        ++curve_count_;
+    return w.bounds;
 }
 
-void ChartPanel::addComplexCurve(const VecComp& points, const QString& name) {
-    chart_utils::addComplexSeries(chart_, points, name, curve_count_);
-    ++curve_count_;
+AxisBounds ChartPanel::addComplexCurve(const VecComp& points, const QString& name) {
+    const auto w = chart_utils::addComplexSeries(chart_, points, name, curve_count_);
+    if (w.wrote)
+        ++curve_count_;
+    return w.bounds;
 }
 
-bool ChartPanel::replaceLastRealCurve(const VecPair& points, const QString& name) {
+AxisBounds ChartPanel::replaceLastRealCurve(const VecPair& points, const QString& name) {
+    if (points.empty())
+        return {};
     if (curve_count_ == 0)
-        return false;
-    if (chart_utils::replaceLastRealSeries(chart_, points, name))
-        return true;
-    chart_utils::addRealSeries(chart_, points, name, curve_count_ - 1);
-    return true;
+        return addRealCurve(points, name);
+
+    const auto w = chart_utils::replaceLastRealSeries(chart_, points, name);
+    if (w.wrote)
+        return w.bounds;
+
+    // No data series on chart — add without bumping curve_count_ (already counted).
+    return chart_utils::addRealSeries(chart_, points, name, curve_count_ - 1).bounds;
 }
 
-bool ChartPanel::replaceLastComplexCurve(const VecComp& points, const QString& name) {
+AxisBounds ChartPanel::replaceLastComplexCurve(const VecComp& points, const QString& name) {
+    if (points.empty())
+        return {};
     if (curve_count_ == 0)
-        return false;
-    if (chart_utils::replaceLastComplexSeries(chart_, points, name))
-        return true;
-    chart_utils::addComplexSeries(chart_, points, name, curve_count_ - 1);
-    return true;
+        return addComplexCurve(points, name);
+
+    const auto w = chart_utils::replaceLastComplexSeries(chart_, points, name);
+    if (w.wrote)
+        return w.bounds;
+
+    return chart_utils::addComplexSeries(chart_, points, name, curve_count_ - 1).bounds;
+}
+
+void ChartPanel::clearDataSeries() {
+    chart_utils::removeAllSeries(chart_);
+    curve_count_ = 0;
 }
 
 void ChartPanel::clearCurves() {
-    chart_utils::removeAllSeries(chart_);
-    curve_count_ = 0;
-    // Keep origin cross and a neutral frame
+    if (view_)
+        view_->setUpdatesEnabled(false);
+    clearDataSeries();
+    if (chart_)
+        chart_->zoomReset();
     constexpr chart_utils::Pair def{-1.0, 1.0};
-    chart_utils::updateAxes(chart_, def, def);
+    chart_utils::updateAxes(chart_, def, def, chart_utils::GridMode::Tab, false, false);
+    if (view_) {
+        view_->setUpdatesEnabled(true);
+        view_->viewport()->update();
+    }
 }
 
-void ChartPanel::fitAxes(double minX, double maxX, double minY, double maxY, bool /*padY*/) {
-    // Nice outward bounds (1–2–5×10^k) + always include origin for axis cross.
-    const auto rx = chart_utils::niceAxisRange(minX, maxX, /*include_zero=*/true);
-    const auto ry = chart_utils::niceAxisRange(minY, maxY, /*include_zero=*/true);
-    chart_utils::updateAxes(chart_, rx, ry);
+void ChartPanel::fitAxes(double minX, double maxX, double minY, double maxY, bool niceX, bool niceY) {
+    // Range: nice → 1–2–5; data → exact (t, ω); padded → +2%.
+    // Snap only on nice axes: Fixed ticks on lattice through 0 (КЧХ grid crosses origin).
+    // t/ω keep exact span — no snap (would pull ω down to 0).
+    const auto rx = niceX ? chart_utils::niceAxisRange(minX, maxX, true) : chart_utils::dataAxisRange(minX, maxX, true);
+    const auto ry =
+        niceY ? chart_utils::niceAxisRange(minY, maxY, true) : chart_utils::paddedAxisRange(minY, maxY, true);
+    chart_utils::updateAxes(chart_, rx, ry, chart_utils::GridMode::Tab, /*snap_x=*/niceX, /*snap_y=*/niceY);
 }

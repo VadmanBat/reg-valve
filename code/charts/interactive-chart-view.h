@@ -8,17 +8,19 @@
 class QKeyEvent;
 class QMouseEvent;
 class QWheelEvent;
+class QValueAxis;
 
 namespace chart_viewer {
 
-/// Chart view with zoom-rectangle, pan, wheel zoom and coordinate readout.
+/// Detached / fullscreen chart interaction: pan, zoom, world grid (anchor 0).
+/// Owns no chart data — operates on the QChart given to QChartView.
 class InteractiveChartView : public QChartView {
     Q_OBJECT
 
 public:
     enum class Tool {
-        ZoomRect, ///< LMB drag: rubber-band zoom (default)
-        Pan,      ///< LMB drag: pan
+        ZoomRect,
+        Pan,
     };
 
 private:
@@ -28,7 +30,10 @@ private:
     bool grid_on_{true};
 
     void apply_tool_cursor();
-    void sync_guides_to_axes();
+    void sync_axes_after_view_change();
+    void pan_by_pixels(int dx_px, int dy_px);
+    [[nodiscard]] QValueAxis* axis_x() const;
+    [[nodiscard]] QValueAxis* axis_y() const;
 
 protected:
     void mousePressEvent(QMouseEvent* event) override;

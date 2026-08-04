@@ -1,6 +1,8 @@
 #include "code/charts/utils/chart-utils-detail.hpp"
 #include "code/charts/utils/chart-utils.hpp"
 
+#include <utility>
+
 #include <QFile>
 #include <QLineSeries>
 #include <QTextStream>
@@ -8,42 +10,50 @@
 
 namespace chart_utils {
 
-void addRealSeries(QChart* chart, const VecPair& points, const QString& title, std::size_t index) {
-    if (points.empty())
-        return;
+SeriesWrite addRealSeries(QChart* chart, const VecPair& points, const QString& title, std::size_t index) {
+    if (!chart || points.empty())
+        return {};
+    auto pb      = detail::toPointsWithBounds(points);
     auto* series = new QLineSeries;
     series->setName(title);
     series->setPen(penForIndex(index));
-    series->replace(detail::toPoints(points));
+    series->replace(std::move(pb.points));
     chart->addSeries(series);
+    detail::attachToAxes(chart, series);
+    return {true, pb.bounds};
 }
 
-void addComplexSeries(QChart* chart, const VecComp& points, const QString& title, std::size_t index) {
-    if (points.empty())
-        return;
+SeriesWrite addComplexSeries(QChart* chart, const VecComp& points, const QString& title, std::size_t index) {
+    if (!chart || points.empty())
+        return {};
+    auto pb      = detail::toPointsWithBounds(points);
     auto* series = new QLineSeries;
     series->setName(title);
     series->setPen(penForIndex(index));
-    series->replace(detail::toPoints(points));
+    series->replace(std::move(pb.points));
     chart->addSeries(series);
+    detail::attachToAxes(chart, series);
+    return {true, pb.bounds};
 }
 
-bool replaceLastRealSeries(QChart* chart, const VecPair& points, const QString& title) {
+SeriesWrite replaceLastRealSeries(QChart* chart, const VecPair& points, const QString& title) {
     auto* series = detail::lastDataSeries(chart);
     if (!series || points.empty())
-        return false;
+        return {};
+    auto pb = detail::toPointsWithBounds(points);
     series->setName(title);
-    series->replace(detail::toPoints(points));
-    return true;
+    series->replace(std::move(pb.points));
+    return {true, pb.bounds};
 }
 
-bool replaceLastComplexSeries(QChart* chart, const VecComp& points, const QString& title) {
+SeriesWrite replaceLastComplexSeries(QChart* chart, const VecComp& points, const QString& title) {
     auto* series = detail::lastDataSeries(chart);
     if (!series || points.empty())
-        return false;
+        return {};
+    auto pb = detail::toPointsWithBounds(points);
     series->setName(title);
-    series->replace(detail::toPoints(points));
-    return true;
+    series->replace(std::move(pb.points));
+    return {true, pb.bounds};
 }
 
 bool saveChartToFile(const QString& fileName, QChart* chart) {

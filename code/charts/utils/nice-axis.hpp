@@ -53,9 +53,8 @@ namespace detail {
 
 } // namespace detail
 
-/// Expand [min,max] outward to nice tick multiples; optionally force-include 0.
-/// Example: [0, 155.456] → [0, 160] (step 20).
-[[nodiscard]] inline std::pair<double, double> niceAxisRange(double min_v, double max_v,
+/// Bounds from data only (no 1–2–5 snap, no % pad). For independent X (t, ω).
+[[nodiscard]] inline std::pair<double, double> dataAxisRange(double min_v, double max_v,
                                                              bool include_zero = true) noexcept {
     if (!std::isfinite(min_v) || !std::isfinite(max_v))
         return {-1.0, 1.0};
@@ -79,41 +78,89 @@ namespace detail {
         }
     }
 
-    // ~2% margin so the curve does not sit on the frame (one-sided if data is one-sided)
-    const double span0 = max_v - min_v;
-    const double pad   = 0.02 * span0;
-    if (!(include_zero && data_min >= 0.0))
-        min_v -= pad;
-    if (!(include_zero && data_max <= 0.0))
-        max_v += pad;
     if (include_zero) {
-        min_v = std::min(min_v, 0.0);
-        max_v = std::max(max_v, 0.0);
+        if (data_min >= 0.0)
+            min_v = 0.0;
+        if (data_max <= 0.0)
+            max_v = 0.0;
     }
+    if (!(max_v > min_v))
+        max_v = min_v + 1.0;
+    return {min_v, max_v};
+}
 
-    const double span = max_v - min_v;
-    double step       = niceNumber(span / 6.0, /*round=*/true);
+/// Expand range with ~2% pad and optional origin; no 1–2–5 snap of bounds (value axes).
+[[nodiscard]] inline std::pair<double, double> paddedAxisRange(double min_v, double max_v,
+                                                               bool include_zero = true) noexcept {
+    const auto base    = dataAxisRange(min_v, max_v, include_zero);
+    const double lo0   = base.first;
+    const double hi0   = base.second;
+    const double span0 = hi0 - lo0;
+    const double pad   = 0.02 * span0;
+    double lo          = lo0;
+    double hi          = hi0;
+    // Do not pad past a one-sided zero edge.
+    if (!(include_zero && lo0 == 0.0))
+        lo -= pad;
+    if (!(include_zero && hi0 == 0.0))
+        hi += pad;
+    if (include_zero) {
+        lo = std::min(lo, 0.0);
+        hi = std::max(hi, 0.0);
+        if (lo0 == 0.0)
+            lo = 0.0;
+        if (hi0 == 0.0)
+            hi = 0.0;
+    }
+    if (!(hi > lo))
+        hi = lo + 1.0;
+    return {lo, hi};
+}
+
+/// Expand [min,max] outward to nice tick multiples; optionally force-include 0.
+/// No % pad here — pad + snap was expanding twice (e.g. 100 → 120). Example: [0, 155.456] → [0, 160].
+[[nodiscard]] inline std::pair<double, double> niceAxisRange(double min_v, double max_v,
+                                                             bool include_zero = true) noexcept {
+    // Remember one-sided data (pin lo/hi to 0 after floor/ceil).
+    const bool data_nonneg = std::isfinite(min_v) && min_v >= 0.0;
+    const bool data_nonpos = std::isfinite(max_v) && max_v <= 0.0;
+
+    auto [lo0, hi0] = dataAxisRange(min_v, max_v, include_zero);
+
+    const double span = hi0 - lo0;
+    // Denser than label count so outer bounds stay tight (155 → 160, not 200).
+    double step = niceNumber(span / 6.0, /*round=*/true);
     if (!(step > 0.0))
         step = 1.0;
 
-    double lo = std::floor(min_v / step) * step;
-    double hi = std::ceil(max_v / step) * step;
+    double lo = std::floor(lo0 / step) * step;
+    double hi = std::ceil(hi0 / step) * step;
     lo        = detail::snap_tick(lo, step);
     hi        = detail::snap_tick(hi, step);
 
     if (include_zero) {
         lo = std::min(lo, 0.0);
         hi = std::max(hi, 0.0);
-        // Time / magnitude axes: data starts at 0 → do not open a negative half-plane
-        if (data_min >= 0.0)
+        if (data_nonneg)
             lo = 0.0;
-        if (data_max <= 0.0)
+        if (data_nonpos)
             hi = 0.0;
     }
     if (!(hi > lo))
         hi = lo + step;
 
     return {lo, hi};
+}
+
+/// Major tick step for ~`major_ticks` labels across span (default 5 → 4 intervals).
+[[nodiscard]] inline double niceTickStep(double span, int major_ticks = 5) noexcept {
+    if (!std::isfinite(span) || !(span > 0.0))
+        return 1.0;
+    const int intervals = major_ticks > 1 ? major_ticks - 1 : 1;
+    double step         = niceNumber(span / static_cast<double>(intervals), /*round=*/true);
+    if (!(step > 0.0))
+        step = 1.0;
+    return step;
 }
 
 } // namespace chart_utils

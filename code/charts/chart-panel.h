@@ -8,7 +8,8 @@ class QChart;
 class QChartView;
 class QVBoxLayout;
 
-/// Self-contained chart widget: owns QChart + QChartView, context menu, series API.
+/// Owns one QChart + QChartView for a tab panel (series, fit, clear).
+/// Low-level QChart ops stay in chart_utils; this class is the UI boundary.
 class ChartPanel : public QWidget {
     Q_OBJECT
 
@@ -31,15 +32,16 @@ public:
 
     void setChartTitle(const QString& title);
 
-    void addRealCurve(const VecPair& points, const QString& name);
-    void addComplexCurve(const VecComp& points, const QString& name);
-
-    /// In-place update of the last data curve (slider / replace).
-    bool replaceLastRealCurve(const VecPair& points, const QString& name);
-    bool replaceLastComplexCurve(const VecComp& points, const QString& name);
+    /// One-pass series build + extents. Empty data → default bounds, no series, count unchanged.
+    [[nodiscard]] AxisBounds addRealCurve(const VecPair& points, const QString& name);
+    [[nodiscard]] AxisBounds addComplexCurve(const VecComp& points, const QString& name);
+    /// Replace last data curve (or add if none); returns extents of written data.
+    [[nodiscard]] AxisBounds replaceLastRealCurve(const VecPair& points, const QString& name);
+    [[nodiscard]] AxisBounds replaceLastComplexCurve(const VecComp& points, const QString& name);
 
     void clearCurves();
+    void clearDataSeries();
 
-    /// Nice outward ranges (1–2–5×10^k), always include (0,0); draw origin cross.
-    void fitAxes(double minX, double maxX, double minY, double maxY, bool padY = true);
+    /// niceX/niceY: true → nice range + zero-anchored Fixed grid; false X → exact (t, ω); false Y → pad ~2%.
+    void fitAxes(double minX, double maxX, double minY, double maxY, bool niceX = true, bool niceY = true);
 };

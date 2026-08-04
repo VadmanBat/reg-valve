@@ -59,6 +59,9 @@ void ResponseChartBank::setVisibility(ChartVisibility vis) {
         vis.transient = true;
     vis_ = vis;
     rebuild_layout();
+    // Materialize series for panels that were hidden during earlier adds, then fit.
+    ensure_visible_series();
+    refit_all();
 }
 
 void ResponseChartBank::rebuild_layout() {

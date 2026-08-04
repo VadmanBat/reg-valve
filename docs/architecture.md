@@ -78,7 +78,7 @@ Rule: **one class / 1–2 files → flat domain folder**; **one class / 3+ sourc
 
 ```
 code/widgets/tf-form/          TranFuncForm (+ edit, io, name, line-edit)
-code/charts/utils/             chart_utils, nice-axis, chart-clone
+code/charts/utils/             chart_utils (+ axes, series, menu), nice-axis
 code/dialogs/chart-viewer/     ChartViewerWindow (+ ui)
 ```
 
@@ -135,10 +135,30 @@ Logic lives in `id-tab-run.cpp` (keep UI wiring in `id-tab.cpp`).
 
 ### 4.4 Charts
 
-- **`ResponseChartBank`**: 5 panels, visibility menu, history of batches, multi-series bounds.
-- **`ChartPanel`**: owns `QChart` + `QChartView`, series count.
-- **`chart_utils`**: axes, origin guides (`hor-line`/`ver-line`), series add/replace, context menu, PNG/TXT.
-- **`ChartViewerWindow`**: non-modal clone via `cloneChart`; zoom/pan in `InteractiveChartView`.
+Ownership (top → bottom):
+
+| Layer | Role |
+|-------|------|
+| **`ResponseChartBank`** | 5 panels, visibility, `history_` batches, `BoundsSet` per panel, lazy materialize |
+| **`ChartPanel`** | owns `QChart` + `QChartView`; add/replace/fit/clear |
+| **`chart_utils`** | free functions on bare `QChart*` — no UI state |
+| **`InteractiveChartView`** | pan/zoom + `GridMode::Viewer` (detached window) |
+| **`ChartViewerWindow`** | non-modal clone via `cloneChart` |
+
+**Series write path (one pass):**  
+`toPointsWithBounds` → `QLineSeries` + `AxisBounds` → `SeriesWrite{wrote, bounds}`.  
+Visible panels: bounds from write. Hidden: `boundsOf*` only; series built on show from `history_`.
+
+**Axis policy (`ChartPanel::fitAxes`):**
+
+| Axis | Flag | Range + grid |
+|------|------|----------------|
+| t / ω | `niceX=false` | `dataAxisRange`, Fixed exact (no snap → ω stays off 0) |
+| value Y | `niceY=true` | `niceAxisRange` + snap lattice through 0 |
+| КЧХ X/Y | both nice | same: majors at …,−s,0,s,… so grid crosses origin |
+
+Snap picks 1–2–5 step with **minimal** expansion (avoids old 160→200).  
+Guides `hor-line` / `ver-line` are not cloned into the viewer legend.
 
 Opening viewer: context menu **«Открыть в окне…»** or **double-click** on a panel chart.
 
@@ -153,7 +173,7 @@ Per **cpp-my-style**: class implementations split into **~100–150 line** `.cpp
 | `TranFuncForm` | `widgets/tf-form/tran-func-form.cpp` (+ `-edit`, `-io`, `-name`, `*-line-edit.hpp`) |
 | `ChartViewerWindow` | `dialogs/chart-viewer/chart-viewer-window.cpp` (+ `-ui.cpp`) |
 | `InteractiveChartView` | `charts/interactive-chart-view.h/.cpp` |
-| `chart_utils` | `charts/utils/chart-utils.cpp` (+ `-series`, `-menu`, `*-detail.hpp`, `nice-axis`, `chart-clone`) |
+| `chart_utils` | `charts/utils/chart-utils.cpp` (+ `-axes`, `-series`, `-menu`, `*-detail.hpp`, `nice-axis`) |
 | `ResponseChartBank` | `charts/response-chart-bank.cpp` (+ `-data.cpp`) |
 | `IdTab` | `tabs/id-tab.cpp` (+ `id-tab-run.cpp`) |
 
@@ -231,4 +251,4 @@ Tests (optional): `REGVALVE_BUILD_TESTS` → `nice_axis_test` (pure math, no Qt 
 
 ---
 
-*Last structural refactor: multi-unit split + module folders (`tf-form/`, `charts/utils/`, `chart-viewer/`).*
+*Last structural refactor: chart stack coherence (`SeriesWrite`, one-pass bounds, `GridMode` Tab/Viewer, split `chart-utils-axes`).*

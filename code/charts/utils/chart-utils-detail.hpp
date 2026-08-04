@@ -1,6 +1,7 @@
 #pragma once
 
 #include "code/charts/utils/chart-utils.hpp"
+#include "code/series/axis-bounds.hpp"
 
 #include <QChart>
 #include <QLineSeries>
@@ -11,24 +12,64 @@
 namespace chart_utils {
 namespace detail {
 
+struct PointsWithBounds {
+    QList<QPointF> points;
+    AxisBounds bounds;
+};
+
 [[nodiscard]] inline bool isGuideSeries(const QString& name) {
     return name == QLatin1String(kHorGuide) || name == QLatin1String(kVerGuide);
 }
 
-[[nodiscard]] inline QList<QPointF> toPoints(const VecPair& data) {
-    QList<QPointF> pts;
-    pts.reserve(static_cast<int>(data.size()));
-    for (const auto& [x, y] : data)
-        pts.append(QPointF(x, y));
-    return pts;
+/// One pass: QPointF list + axis extents (avoids boundsOf + toPoints double scan).
+[[nodiscard]] inline PointsWithBounds toPointsWithBounds(const VecPair& data) {
+    PointsWithBounds out;
+    if (data.empty())
+        return out;
+    out.points.reserve(static_cast<int>(data.size()));
+    const auto& [x0, y0] = data.front();
+    out.bounds.min_x = out.bounds.max_x = x0;
+    out.bounds.min_y = out.bounds.max_y = y0;
+    out.points.append(QPointF(x0, y0));
+    for (std::size_t i = 1; i < data.size(); ++i) {
+        const auto& [x, y] = data[i];
+        out.points.append(QPointF(x, y));
+        if (x < out.bounds.min_x)
+            out.bounds.min_x = x;
+        if (x > out.bounds.max_x)
+            out.bounds.max_x = x;
+        if (y < out.bounds.min_y)
+            out.bounds.min_y = y;
+        if (y > out.bounds.max_y)
+            out.bounds.max_y = y;
+    }
+    return out;
 }
 
-[[nodiscard]] inline QList<QPointF> toPoints(const VecComp& data) {
-    QList<QPointF> pts;
-    pts.reserve(static_cast<int>(data.size()));
-    for (const auto& z : data)
-        pts.append(QPointF(z.real(), z.imag()));
-    return pts;
+[[nodiscard]] inline PointsWithBounds toPointsWithBounds(const VecComp& data) {
+    PointsWithBounds out;
+    if (data.empty())
+        return out;
+    out.points.reserve(static_cast<int>(data.size()));
+    const double x0 = data.front().real();
+    const double y0 = data.front().imag();
+    out.bounds.min_x = out.bounds.max_x = x0;
+    out.bounds.min_y = out.bounds.max_y = y0;
+    out.points.append(QPointF(x0, y0));
+    for (std::size_t i = 1; i < data.size(); ++i) {
+        const double x = data[i].real();
+        const double y = data[i].imag();
+        out.points.append(QPointF(x, y));
+        if (x < out.bounds.min_x)
+            out.bounds.min_x = x;
+        if (x > out.bounds.max_x)
+            out.bounds.max_x = x;
+        if (y < out.bounds.min_y)
+            out.bounds.min_y = y;
+        if (y > out.bounds.max_y)
+            out.bounds.max_y = y;
+    }
+    return out;
 }
 
 [[nodiscard]] inline QLineSeries* lastDataSeries(QChart* chart) {

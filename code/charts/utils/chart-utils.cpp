@@ -1,5 +1,6 @@
-#include "code/charts/utils/chart-utils-detail.hpp"
 #include "code/charts/utils/chart-utils.hpp"
+
+#include "code/charts/utils/chart-utils-detail.hpp"
 
 #include <QBrush>
 #include <QLegend>

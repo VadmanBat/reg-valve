@@ -107,7 +107,7 @@ inline bool hasZeroDenConstant(const numina::TransferFunction& tf) noexcept {
 /// КЧХ + АЧХ + ФЧХ — always logarithmic ω-grid (one ResponseLab / one TF evaluation path).
 inline FrequencyBundle frequencyBundle(numina::ResponseLab& lab, const ModelParam& p) {
     const numina::TransferFunction& tf = lab.tf();
-    std::pair<double, double> range = p.autoFreqRange ? lab.frequencyRange() : std::make_pair(p.freqMin, p.freqMax);
+    std::pair<double, double> range    = p.autoFreqRange ? lab.frequencyRange() : std::make_pair(p.freqMin, p.freqMax);
 
     if (hasZeroDenConstant(tf)) {
         constexpr double w_min_floor = 1e-4;

@@ -1,5 +1,4 @@
 #include "code/charts/response-chart-bank.h"
-
 #include "numina/classes/control/transfer-function/response-lab.h"
 
 namespace {
@@ -42,8 +41,7 @@ void ResponseChartBank::ensure_visible_series() {
         return;
 
     // Materialize series only if panel was hidden during adds. curveCount > n_hist: overlays (Id experiment).
-    auto materialize = [&]<typename AddFn>(ChartPanel* panel, BoundsSet& bounds, bool visible, auto getter,
-                                           AddFn add) {
+    auto materialize = [&]<typename AddFn>(ChartPanel* panel, BoundsSet& bounds, bool visible, auto getter, AddFn add) {
         if (!visible || !panel || panel->curveCount() >= n_hist)
             return;
 
@@ -70,16 +68,17 @@ void ResponseChartBank::ensure_visible_series() {
         return p->addComplexCurve(d, n);
     };
 
-    materialize(chart_tran_, tran_bounds_, vis_.transient, [](const Batch& b) -> const auto& { return b.transient; },
-                add_real);
-    materialize(chart_impulse_, impulse_bounds_, vis_.impulse, [](const Batch& b) -> const auto& { return b.impulse; },
-                add_real);
-    materialize(chart_nyquist_, nyquist_bounds_, vis_.nyquist, [](const Batch& b) -> const auto& { return b.nyquist; },
-                add_cx);
-    materialize(chart_amp_, amp_bounds_, vis_.amplitude, [](const Batch& b) -> const auto& { return b.amplitude; },
-                add_real);
-    materialize(chart_phase_, phase_bounds_, vis_.phase, [](const Batch& b) -> const auto& { return b.phase; },
-                add_real);
+    materialize(
+        chart_tran_, tran_bounds_, vis_.transient, [](const Batch& b) -> const auto& { return b.transient; }, add_real);
+    materialize(
+        chart_impulse_, impulse_bounds_, vis_.impulse, [](const Batch& b) -> const auto& { return b.impulse; },
+        add_real);
+    materialize(
+        chart_nyquist_, nyquist_bounds_, vis_.nyquist, [](const Batch& b) -> const auto& { return b.nyquist; }, add_cx);
+    materialize(
+        chart_amp_, amp_bounds_, vis_.amplitude, [](const Batch& b) -> const auto& { return b.amplitude; }, add_real);
+    materialize(
+        chart_phase_, phase_bounds_, vis_.phase, [](const Batch& b) -> const auto& { return b.phase; }, add_real);
 }
 
 ResponseChartBank::Batch ResponseChartBank::compute_batch(const numina::TransferFunction& tf, const ModelParam& params,

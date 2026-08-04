@@ -127,7 +127,7 @@ inline constexpr int FULL_DIGITS = std::numeric_limits<double>::max_digits10; //
     if (terms.isEmpty())
         return QStringLiteral("0");
 
-    QString out = terms.front();
+    QString out       = terms.front();
     const int n_terms = terms.size();
     for (int i = 1; i < n_terms; ++i) {
         const QString& t = terms[i];

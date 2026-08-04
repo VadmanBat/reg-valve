@@ -176,9 +176,10 @@ void TranFuncDialog::fill_poles() {
 
         ui->polesTable->setItem(row, 2, new QTableWidgetItem(num_format::format(abs_p)));
         // Complex pair: Arg as ±|φ|; real pole — single signed angle.
-        ui->polesTable->setItem(row, 3,
-                                new QTableWidgetItem(is_complex ? QStringLiteral("±") + num_format::format(std::abs(arg_deg))
-                                                                : num_format::format(arg_deg)));
+        ui->polesTable->setItem(
+            row, 3,
+            new QTableWidgetItem(is_complex ? QStringLiteral("±") + num_format::format(std::abs(arg_deg))
+                                            : num_format::format(arg_deg)));
         ui->polesTable->setItem(
             row, 4,
             new QTableWidgetItem(pole.real() != 0.0 ? num_format::format(-1.0 / pole.real()) : QStringLiteral("∞")));
@@ -191,8 +192,8 @@ void TranFuncDialog::fill_poles() {
         // Keep complex columns tinted even when empty (real poles).
         place_complex_cell(1, is_complex ? QStringLiteral("±") + num_format::format(std::abs(pole.imag())) : QString());
         place_complex_cell(5, is_complex ? num_format::format(-pole.real() / abs_p) : QString());
-        place_complex_cell(6, is_complex ? num_format::format(2.0 * std::numbers::pi / std::abs(pole.imag()))
-                                         : QString());
+        place_complex_cell(6,
+                           is_complex ? num_format::format(2.0 * std::numbers::pi / std::abs(pole.imag())) : QString());
 
         auto* color_item = new QTableWidgetItem;
         if (dom_re != 0.0 && pole.real() != 0.0)

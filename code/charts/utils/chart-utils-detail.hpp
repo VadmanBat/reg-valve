@@ -51,8 +51,8 @@ struct PointsWithBounds {
     if (data.empty())
         return out;
     out.points.reserve(static_cast<int>(data.size()));
-    const double x0 = data.front().real();
-    const double y0 = data.front().imag();
+    const double x0  = data.front().real();
+    const double y0  = data.front().imag();
     out.bounds.min_x = out.bounds.max_x = x0;
     out.bounds.min_y = out.bounds.max_y = y0;
     out.points.append(QPointF(x0, y0));
@@ -75,7 +75,7 @@ struct PointsWithBounds {
 [[nodiscard]] inline QLineSeries* lastDataSeries(QChart* chart) {
     if (!chart)
         return nullptr;
-    const auto all        = chart->series();
+    const auto all      = chart->series();
     const auto n_series = all.size();
     for (auto i = n_series; i > 0; --i) {
         auto* s = qobject_cast<QLineSeries*>(all[i - 1]);

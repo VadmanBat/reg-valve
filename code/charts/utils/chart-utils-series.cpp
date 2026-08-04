@@ -1,12 +1,11 @@
 #include "code/charts/utils/chart-utils-detail.hpp"
 #include "code/charts/utils/chart-utils.hpp"
 
-#include <utility>
-
 #include <QFile>
 #include <QLineSeries>
 #include <QTextStream>
 #include <QXYSeries>
+#include <utility>
 
 namespace chart_utils {
 

@@ -6,43 +6,52 @@
 #include <QClipboard>
 #include <QCoreApplication>
 #include <QEvent>
-#include <QFileDialog>
+#include <QFont>
+#include <QIcon>
 #include <QMenu>
-#include <QMessageBox>
 #include <QMouseEvent>
+#include <QPainter>
+#include <QPixmap>
 
 #define CHART_TR(str) QCoreApplication::translate("chart_utils", str)
 
 namespace chart_utils {
+namespace {
+
+/// Menu icon from emoji (same visual language as chart viewer toolbar).
+QIcon menu_icon(const QString& emoji) {
+    constexpr int size = 18;
+    QPixmap pm(size, size);
+    pm.fill(Qt::transparent);
+    QPainter painter(&pm);
+    painter.setRenderHint(QPainter::TextAntialiasing);
+    QFont font(QStringLiteral("Segoe UI Emoji"));
+    font.setPixelSize(14);
+    painter.setFont(font);
+    painter.drawText(QRect(0, 0, size, size), Qt::AlignCenter, emoji);
+    return QIcon(pm);
+}
+
+} // namespace
 
 void openChartViewer(QChart* chart, QWidget* parent) {
     ChartViewerWindow::open(chart, parent);
 }
 
 void createChartContextMenu(QChartView* chart_view) {
-    auto* open_viewer_action = new QAction(CHART_TR("Открыть в окне…"), chart_view);
-    auto* save_image_action  = new QAction(CHART_TR("Сохранить как PNG"), chart_view);
-    auto* save_text_action   = new QAction(CHART_TR("Сохранить как TXT"), chart_view);
-    auto* copy_action        = new QAction(CHART_TR("Копировать изображение"), chart_view);
-    auto* properties_action  = new QAction(CHART_TR("Свойства"), chart_view);
+    auto* open_viewer_action = new QAction(menu_icon(QStringLiteral("🖼️")), CHART_TR("Открыть в окне…"), chart_view);
+    auto* save_as_action     = new QAction(menu_icon(QStringLiteral("💾")), CHART_TR("Сохранить как…"), chart_view);
+    auto* copy_action        = new QAction(menu_icon(QStringLiteral("📋")), CHART_TR("Копировать изображение"), chart_view);
+    auto* properties_action  = new QAction(menu_icon(QStringLiteral("⚙️")), CHART_TR("Свойства"), chart_view);
 
     QChart* chart = chart_view->chart();
 
     QObject::connect(open_viewer_action, &QAction::triggered,
                      [chart, chart_view] { openChartViewer(chart, chart_view->window()); });
 
-    QObject::connect(save_image_action, &QAction::triggered, [chart, chart_view] {
-        const QString file_name = QFileDialog::getSaveFileName(nullptr, CHART_TR("Сохранить график"), chart->title(),
-                                                               CHART_TR("Рисунок PNG (*.png);;Все файлы (*)"));
-        if (!file_name.isEmpty() && !chart_view->grab().save(file_name, "png"))
-            QMessageBox::warning(nullptr, CHART_TR("Ошибка"), CHART_TR("Не удалось сохранить график!"));
-    });
-
-    QObject::connect(save_text_action, &QAction::triggered, [chart] {
-        const QString file_name = QFileDialog::getSaveFileName(nullptr, CHART_TR("Сохранить график"), chart->title(),
-                                                               CHART_TR("Текст txt (*.txt);;Все файлы (*)"));
-        if (!file_name.isEmpty() && !saveChartToFile(file_name, chart))
-            QMessageBox::warning(nullptr, CHART_TR("Ошибка"), CHART_TR("Не удалось сохранить график!"));
+    QObject::connect(save_as_action, &QAction::triggered, [chart, chart_view] {
+        const QString name = chart ? chart->title() : QString{};
+        saveChartAsDialog(chart_view->window(), chart_view, name);
     });
 
     QObject::connect(copy_action, &QAction::triggered,
@@ -56,8 +65,7 @@ void createChartContextMenu(QChartView* chart_view) {
     auto* context_menu = new QMenu(chart_view);
     context_menu->addAction(open_viewer_action);
     context_menu->addSeparator();
-    context_menu->addAction(save_image_action);
-    context_menu->addAction(save_text_action);
+    context_menu->addAction(save_as_action);
     context_menu->addAction(copy_action);
     context_menu->addSeparator();
     context_menu->addAction(properties_action);

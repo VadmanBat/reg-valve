@@ -47,6 +47,7 @@ set(SOURCES
         ${CMAKE_SOURCE_DIR}/code/charts/utils/chart-utils-axes.cpp
         ${CMAKE_SOURCE_DIR}/code/charts/utils/chart-utils-series.cpp
         ${CMAKE_SOURCE_DIR}/code/charts/utils/chart-utils-menu.cpp
+        ${CMAKE_SOURCE_DIR}/code/charts/utils/chart-utils-export.cpp
 
         ${UI_FILES}
 )

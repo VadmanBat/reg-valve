@@ -65,6 +65,12 @@ bool removeLastDataSeries(QChart* chart);
 
 bool saveChartToFile(const QString& fileName, QChart* chart);
 
+/// Save by path; format from suffix (.png / .svg / .txt). Returns false on failure.
+bool saveChartExport(QChartView* view, const QString& path);
+
+/// «Сохранить как…» dialog (PNG / SVG / TXT). Returns true if a file was written.
+bool saveChartAsDialog(QWidget* parent, QChartView* view, const QString& suggestedName);
+
 QChartView* makeChartView(QChart* chart, QWidget* parent, const QString& title, const QString& titleX,
                           const QString& titleY);
 

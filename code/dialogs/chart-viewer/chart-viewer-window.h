@@ -36,7 +36,7 @@ private:
     void build_toolbar();
     void build_status();
     void setup_shortcuts();
-    void save_png();
+    void save_as();
     void copy_image();
     void open_properties();
     void toggle_fullscreen(bool on);

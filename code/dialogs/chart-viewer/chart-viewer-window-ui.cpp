@@ -6,11 +6,9 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QEvent>
-#include <QFileDialog>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QLegend>
-#include <QMessageBox>
 #include <QMouseEvent>
 #include <QSizePolicy>
 #include <QStatusBar>
@@ -85,10 +83,10 @@ void ChartViewerWindow::build_toolbar() {
 
     tb->addSeparator();
 
-    act_save_  = add_tb_action(tb, QStringLiteral("💾"), tr("PNG"));
+    act_save_  = add_tb_action(tb, QStringLiteral("💾"), tr("Сохранить"));
     act_copy_  = add_tb_action(tb, QStringLiteral("📋"), tr("Копировать"));
     act_props_ = add_tb_action(tb, QStringLiteral("⚙️"), tr("Свойства"));
-    act_save_->setToolTip(tr("Сохранить как PNG"));
+    act_save_->setToolTip(tr("Сохранить как PNG / SVG / TXT"));
     act_copy_->setToolTip(tr("Копировать изображение в буфер"));
     act_props_->setToolTip(tr("Цвета, толщины, подписи"));
 
@@ -119,7 +117,7 @@ void ChartViewerWindow::build_toolbar() {
         if (chart_->legend())
             chart_->legend()->setVisible(on);
     });
-    connect(act_save_, &QAction::triggered, this, &ChartViewerWindow::save_png);
+    connect(act_save_, &QAction::triggered, this, &ChartViewerWindow::save_as);
     connect(act_copy_, &QAction::triggered, this, &ChartViewerWindow::copy_image);
     connect(act_props_, &QAction::triggered, this, &ChartViewerWindow::open_properties);
     connect(act_fullscreen_, &QAction::toggled, this, &ChartViewerWindow::toggle_fullscreen);
@@ -153,13 +151,8 @@ void ChartViewerWindow::setup_shortcuts() {
     addAction(act_zoom_out_);
 }
 
-void ChartViewerWindow::save_png() {
-    const QString path = QFileDialog::getSaveFileName(this, tr("Сохранить график"), chart_->title(),
-                                                      tr("Рисунок PNG (*.png);;Все файлы (*)"));
-    if (path.isEmpty())
-        return;
-    if (!view_->grab().save(path, "png"))
-        QMessageBox::warning(this, tr("Ошибка"), tr("Не удалось сохранить PNG."));
+void ChartViewerWindow::save_as() {
+    chart_utils::saveChartAsDialog(this, view_, chart_ ? chart_->title() : QString{});
 }
 
 void ChartViewerWindow::copy_image() {

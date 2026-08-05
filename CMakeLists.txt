@@ -29,7 +29,7 @@ if (NOT Qt6_DIR)
         list(PREPEND CMAKE_PREFIX_PATH "C:/Qt/Qt6.8.0/mingw_64")
     endif ()
 endif ()
-find_package(Qt6 COMPONENTS Widgets Charts REQUIRED)
+find_package(Qt6 COMPONENTS Widgets Charts Svg REQUIRED)
 
 # numina static library
 set(NUMINA_ROOT "C:/cpp/projects/static-libs/numina" CACHE PATH "Path to numina sources")
@@ -49,6 +49,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME} PRIVATE
         Qt6::Widgets
         Qt6::Charts
+        Qt6::Svg
         numina::numina
 )
 

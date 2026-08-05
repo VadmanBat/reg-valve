@@ -10,22 +10,65 @@
 
 namespace chart_utils {
 
+void applyAxisTheme(QValueAxis* axis, const ChartTheme& theme) {
+    if (!axis)
+        return;
+    axis->setLabelsColor(theme.text);
+    axis->setTitleBrush(QBrush(theme.text));
+    axis->setLinePen(QPen(theme.axis_line, 1.0));
+    axis->setGridLineColor(theme.grid);
+    axis->setMinorGridLineColor(theme.minor_grid);
+    // Keep grid visibility as configured by set_grid_visible / viewer.
+}
+
+void applyChartTheme(QChart* chart, QChartView* view) {
+    if (!chart)
+        return;
+
+    const ChartTheme theme = currentTheme();
+
+    chart->setBackgroundVisible(true);
+    chart->setBackgroundBrush(QBrush(theme.background));
+    chart->setPlotAreaBackgroundVisible(true);
+    chart->setPlotAreaBackgroundBrush(QBrush(theme.plot));
+    chart->setTitleBrush(QBrush(theme.text));
+
+    if (QLegend* legend = chart->legend()) {
+        legend->setLabelColor(theme.text);
+        legend->setBrush(QBrush(theme.legend_bg));
+        legend->setBorderColor(theme.grid);
+        legend->setColor(theme.text);
+    }
+
+    for (QAbstractAxis* ax : chart->axes()) {
+        if (auto* v = qobject_cast<QValueAxis*>(ax))
+            applyAxisTheme(v, theme);
+    }
+
+    // Guides + default curve palette (brighter on dark). Custom dialog colors are reset on theme flip.
+    std::size_t data_index = 0;
+    for (QAbstractSeries* s : chart->series()) {
+        auto* line = qobject_cast<QLineSeries*>(s);
+        if (!line)
+            continue;
+        if (detail::isGuideSeries(line->name()))
+            line->setPen(guidePen(theme));
+        else
+            line->setPen(penForIndexTheme(data_index++, theme.dark));
+    }
+
+    if (view)
+        view->setBackgroundBrush(QBrush(theme.background));
+}
+
 QPen penForIndex(std::size_t index) {
-    static const QPen pens[6] = {
-        QPen(QColor(0x1f, 0x77, 0xb4), 2), QPen(QColor(0xff, 0x7f, 0x0e), 2), QPen(QColor(0x2c, 0xa0, 0x2c), 2),
-        QPen(QColor(0xd6, 0x27, 0x28), 2), QPen(QColor(0x94, 0x67, 0xbd), 2), QPen(QColor(0x8c, 0x56, 0x4b), 2),
-    };
-    return pens[index % 6];
+    return penForIndexTheme(index, isDarkTheme());
 }
 
 QChartView* makeChartView(QChart* chart, QWidget* parent, const QString& title, const QString& titleX,
                           const QString& titleY) {
     chart->setTitle(title);
     chart->setAnimationOptions(QChart::NoAnimation);
-    chart->setBackgroundVisible(true);
-    chart->setBackgroundBrush(QBrush(Qt::white));
-    chart->setPlotAreaBackgroundVisible(true);
-    chart->setPlotAreaBackgroundBrush(QBrush(Qt::white));
     chart->legend()->setVisible(true);
     createAxes(chart, titleX, titleY);
 
@@ -34,7 +77,7 @@ QChartView* makeChartView(QChart* chart, QWidget* parent, const QString& title, 
     auto* view = new QChartView(chart, parent);
     view->setRenderHint(QPainter::Antialiasing, true);
     view->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
-    view->setBackgroundBrush(QBrush(Qt::white));
+    applyChartTheme(chart, view);
     createChartContextMenu(view);
     return view;
 }
@@ -46,10 +89,6 @@ QChart* cloneChart(QChart* src) {
     auto* dst = new QChart;
     dst->setTitle(src->title());
     dst->setAnimationOptions(QChart::NoAnimation);
-    dst->setBackgroundVisible(true);
-    dst->setBackgroundBrush(QBrush(Qt::white));
-    dst->setPlotAreaBackgroundVisible(true);
-    dst->setPlotAreaBackgroundBrush(QBrush(Qt::white));
     if (src->legend())
         dst->legend()->setVisible(src->legend()->isVisible());
 
@@ -85,6 +124,7 @@ QChart* cloneChart(QChart* src) {
 
     // Preserve source extents; viewer switches to GridMode::Viewer after open.
     updateAxes(dst, range_x, range_y, GridMode::Tab, /*snap_x=*/false, /*snap_y=*/false);
+    applyChartTheme(dst, nullptr);
     return dst;
 }
 

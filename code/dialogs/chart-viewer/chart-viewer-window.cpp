@@ -1,6 +1,7 @@
 #include "code/dialogs/chart-viewer/chart-viewer-window.h"
 
 #include "code/charts/utils/chart-utils.hpp"
+#include "code/util/dialog-icons.hxx"
 
 #include <QGuiApplication>
 #include <QLabel>
@@ -9,7 +10,11 @@
 
 ChartViewerWindow::ChartViewerWindow(QChart* source_chart, QWidget* parent) : QMainWindow(parent) {
     setAttribute(Qt::WA_DeleteOnClose);
-    setWindowTitle(source_chart ? source_chart->title() : tr("График"));
+    setObjectName(QStringLiteral("ChartViewerWindow"));
+    dialog_icons::apply(this, dialog_icons::Kind::ChartProps);
+
+    const QString chart_title = source_chart ? source_chart->title() : tr("График");
+    setWindowTitle(chart_title.isEmpty() ? tr("Просмотр графика") : tr("Просмотр — %1").arg(chart_title));
     resize(1000, 700);
 
     if (auto* screen = QGuiApplication::primaryScreen()) {
@@ -25,6 +30,7 @@ ChartViewerWindow::ChartViewerWindow(QChart* source_chart, QWidget* parent) : QM
         home_y_ = {ay->min(), ay->max()};
 
     view_ = new chart_viewer::InteractiveChartView(chart_, this);
+    view_->setObjectName(QStringLiteral("chartViewerView"));
     setCentralWidget(view_);
 
     build_toolbar();

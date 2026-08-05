@@ -12,75 +12,99 @@
 #include <QLegend>
 #include <QMessageBox>
 #include <QMouseEvent>
+#include <QSizePolicy>
 #include <QStatusBar>
 #include <QToolBar>
+#include <QWidget>
+
+namespace {
+
+/// Toolbar action: emoji + label (emoji must be in Segoe UI Emoji / color font).
+QAction* add_tb_action(QToolBar* tb, const QString& emoji, const QString& label) {
+    const QString text = label.isEmpty() ? emoji : (emoji + QStringLiteral("  ") + label);
+    return tb->addAction(text);
+}
+
+} // namespace
 
 void ChartViewerWindow::build_toolbar() {
     auto* tb = addToolBar(tr("Навигация"));
+    tb->setObjectName(QStringLiteral("chartViewerToolBar"));
     tb->setMovable(false);
-    tb->setIconSize(QSize(20, 20));
+    tb->setFloatable(false);
+    tb->setIconSize(QSize(18, 18));
     tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    tb->setStyleSheet(QString()); // use app QSS via objectName
 
     auto* tools = new QActionGroup(this);
     tools->setExclusive(true);
 
-    act_zoom_ = tb->addAction(tr("🔍□  Зум"));
+    // Tools — only widely-supported emoji (no geometric symbols that become □).
+    // Z / H switch tools — they do not zoom by themselves.
+    act_zoom_ = add_tb_action(tb, QStringLiteral("🔍"), tr("Рамка"));
     act_zoom_->setCheckable(true);
     act_zoom_->setChecked(true);
-    act_zoom_->setToolTip(tr("Выделение фрагмента (ЛКМ + рамка)\nКолесо — масштаб к курсору"));
-    act_zoom_->setShortcut(QKeySequence(tr("Z")));
+    act_zoom_->setToolTip(tr("Инструмент: зум рамкой\n"
+                              "ЛКМ — выделить область (приблизить)\n"
+                              "Колесо — зум к курсору · клавиша Z — выбрать этот режим"));
+    act_zoom_->setShortcut(QKeySequence(Qt::Key_Z));
     tools->addAction(act_zoom_);
 
-    act_pan_ = tb->addAction(tr("✋  Сдвиг"));
+    act_pan_ = add_tb_action(tb, QStringLiteral("✋"), tr("Сдвиг"));
     act_pan_->setCheckable(true);
-    act_pan_->setToolTip(tr("Панорамирование (ЛКМ или СКМ)"));
-    act_pan_->setShortcut(QKeySequence(tr("H")));
+    act_pan_->setToolTip(tr("Инструмент: панорамирование\n"
+                             "ЛКМ или СКМ — сдвиг · клавиша H — выбрать этот режим"));
+    act_pan_->setShortcut(QKeySequence(Qt::Key_H));
     tools->addAction(act_pan_);
 
     tb->addSeparator();
 
-    act_zoom_in_  = tb->addAction(tr("＋"));
-    act_zoom_out_ = tb->addAction(tr("−"));
-    act_home_     = tb->addAction(tr("⌂  Исходный"));
+    act_zoom_in_  = add_tb_action(tb, QStringLiteral("➕"), {});
+    act_zoom_out_ = add_tb_action(tb, QStringLiteral("➖"), {});
+    act_home_     = add_tb_action(tb, QStringLiteral("🏠"), tr("Исходный"));
     act_zoom_in_->setToolTip(tr("Приблизить (+)"));
     act_zoom_out_->setToolTip(tr("Отдалить (−)"));
-    act_home_->setToolTip(tr("Сбросить масштаб (Home / двойной клик)"));
+    act_home_->setToolTip(tr("Сбросить вид (Home / двойной клик)"));
     act_home_->setShortcut(QKeySequence(Qt::Key_Home));
     act_zoom_in_->setShortcut(QKeySequence(Qt::Key_Plus));
     act_zoom_out_->setShortcut(QKeySequence(Qt::Key_Minus));
 
     tb->addSeparator();
 
-    act_grid_ = tb->addAction(tr("▦  Сетка"));
+    act_grid_ = add_tb_action(tb, QStringLiteral("🔲"), tr("Сетка"));
     act_grid_->setCheckable(true);
     act_grid_->setChecked(true);
-    act_grid_->setToolTip(tr("Показать/скрыть сетку"));
+    act_grid_->setToolTip(tr("Показать / скрыть сетку · G"));
     act_grid_->setShortcut(QKeySequence(tr("G")));
 
-    act_legend_ = tb->addAction(tr("☰  Легенда"));
+    act_legend_ = add_tb_action(tb, QStringLiteral("🏷️"), tr("Легенда"));
     act_legend_->setCheckable(true);
     act_legend_->setChecked(chart_->legend() && chart_->legend()->isVisible());
-    act_legend_->setToolTip(tr("Показать/скрыть легенду"));
+    act_legend_->setToolTip(tr("Показать / скрыть легенду · L"));
     act_legend_->setShortcut(QKeySequence(tr("L")));
 
     tb->addSeparator();
 
-    act_save_  = tb->addAction(tr("💾  PNG"));
-    act_copy_  = tb->addAction(tr("📋  Копировать"));
-    act_props_ = tb->addAction(tr("⚙  Свойства"));
+    act_save_  = add_tb_action(tb, QStringLiteral("💾"), tr("PNG"));
+    act_copy_  = add_tb_action(tb, QStringLiteral("📋"), tr("Копировать"));
+    act_props_ = add_tb_action(tb, QStringLiteral("⚙️"), tr("Свойства"));
     act_save_->setToolTip(tr("Сохранить как PNG"));
     act_copy_->setToolTip(tr("Копировать изображение в буфер"));
     act_props_->setToolTip(tr("Цвета, толщины, подписи"));
 
-    tb->addSeparator();
+    // Push window chrome to the right.
+    auto* spacer = new QWidget(tb);
+    spacer->setObjectName(QStringLiteral("chartViewerToolBarSpacer"));
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    tb->addWidget(spacer);
 
-    act_fullscreen_ = tb->addAction(tr("⛶  На весь экран"));
+    act_fullscreen_ = add_tb_action(tb, QStringLiteral("🖥️"), tr("На весь экран"));
     act_fullscreen_->setCheckable(true);
     act_fullscreen_->setShortcut(QKeySequence(Qt::Key_F11));
-    act_fullscreen_->setToolTip(tr("Полноэкранный режим (F11)"));
+    act_fullscreen_->setToolTip(tr("Полноэкранный режим · F11"));
 
-    act_close_ = tb->addAction(tr("✕"));
-    act_close_->setToolTip(tr("Закрыть (Esc)"));
+    act_close_ = add_tb_action(tb, QStringLiteral("❌"), {});
+    act_close_->setToolTip(tr("Закрыть · Esc"));
     act_close_->setShortcut(QKeySequence(Qt::Key_Escape));
 
     connect(act_zoom_, &QAction::triggered, this,
@@ -106,9 +130,15 @@ void ChartViewerWindow::build_toolbar() {
 
 void ChartViewerWindow::build_status() {
     coord_label_ = new QLabel(tr("Наведите курсор на график"));
+    coord_label_->setObjectName(QStringLiteral("chartViewerCoordLabel"));
+    statusBar()->setObjectName(QStringLiteral("chartViewerStatusBar"));
+    statusBar()->setSizeGripEnabled(true);
     statusBar()->addWidget(coord_label_, 1);
-    statusBar()->addPermanentWidget(
-        new QLabel(tr("Зум: рамка / колесо · Сдвиг: H или СКМ · Сброс: Home · F11 — полный экран · Esc — закрыть")));
+
+    auto* hints = new QLabel(
+        tr("Z — режим рамки · H — сдвиг · +/− / колесо — масштаб · Home — сброс · F11 · Esc"));
+    hints->setObjectName(QStringLiteral("chartViewerHintsLabel"));
+    statusBar()->addPermanentWidget(hints);
 }
 
 void ChartViewerWindow::setup_shortcuts() {

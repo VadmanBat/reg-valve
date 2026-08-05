@@ -6,6 +6,7 @@
 
 class QChart;
 class QChartView;
+class QEvent;
 class QVBoxLayout;
 
 /// Owns one QChart + QChartView for a tab panel (series, fit, clear).
@@ -18,6 +19,11 @@ private:
     QChartView* view_{nullptr};
     QVBoxLayout* layout_{nullptr};
     std::size_t curve_count_{0};
+
+    void apply_theme();
+
+protected:
+    void changeEvent(QEvent* event) override;
 
 public:
     using Pair    = chart_utils::Pair;

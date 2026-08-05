@@ -29,11 +29,7 @@ void hide_legend_marker(QChart* chart, QAbstractSeries* series) {
 }
 
 QPen guide_pen() {
-    QPen pen(QColor(0x12, 0x12, 0x12), 2.0);
-    pen.setCosmetic(true);
-    pen.setCapStyle(Qt::FlatCap);
-    pen.setStyle(Qt::SolidLine);
-    return pen;
+    return guidePen(currentTheme());
 }
 
 void attach_all_series(QChart* chart, QValueAxis* axis_x, QValueAxis* axis_y) {
@@ -47,15 +43,22 @@ void attach_all_series(QChart* chart, QValueAxis* axis_x, QValueAxis* axis_y) {
     }
 }
 
-void set_grid_visible(QValueAxis* axis) {
+void ensure_minor_ticks(QValueAxis* axis) {
+    if (!axis)
+        return;
+    if (axis->minorTickCount() != 1)
+        axis->setMinorTickCount(1);
+}
+
+/// Tab charts always show grid. Viewer may hide it — do not use there.
+void force_grid_on(QValueAxis* axis) {
     if (!axis)
         return;
     if (!axis->isGridLineVisible())
         axis->setGridLineVisible(true);
     if (!axis->isMinorGridLineVisible())
         axis->setMinorGridLineVisible(true);
-    if (axis->minorTickCount() != 1)
-        axis->setMinorTickCount(1);
+    ensure_minor_ticks(axis);
 }
 
 void apply_tab_grid_exact(QValueAxis* axis) {
@@ -65,7 +68,7 @@ void apply_tab_grid_exact(QValueAxis* axis) {
         axis->setTickType(QValueAxis::TicksFixed);
     if (axis->tickCount() != kMajorTicks)
         axis->setTickCount(kMajorTicks);
-    set_grid_visible(axis);
+    force_grid_on(axis);
 }
 
 /// Fixed ticks on a 1–2–5 lattice through 0 (…,−2s,−s,0,s,2s,…) so grid crosses origin.
@@ -141,9 +144,11 @@ void apply_tab_grid_snap(QValueAxis* axis) {
     axis->setTickType(QValueAxis::TicksFixed);
     axis->setTickCount(best_count);
     axis->setRange(best_lo, best_hi);
-    set_grid_visible(axis);
+    force_grid_on(axis);
 }
 
+/// Viewer: refresh 1–2–5 tick step after pan/zoom. Does not force grid lines on
+/// (user may have hidden them via toolbar).
 void apply_viewer_grid(QValueAxis* axis) {
     if (!axis)
         return;
@@ -154,7 +159,7 @@ void apply_viewer_grid(QValueAxis* axis) {
         axis->setTickAnchor(0.0);
     if (std::abs(axis->tickInterval() - step) > 1e-12 * std::max(1.0, step))
         axis->setTickInterval(step);
-    set_grid_visible(axis);
+    ensure_minor_ticks(axis);
 }
 
 void apply_axis_style(QValueAxis* axis, GridMode mode, bool snap) {
@@ -175,6 +180,9 @@ void createAxes(QChart* chart, const QString& titleX, const QString& titleY) {
     axis_y->setTitleText(titleY);
     apply_tab_grid_exact(axis_x);
     apply_tab_grid_exact(axis_y);
+    const ChartTheme theme = currentTheme();
+    applyAxisTheme(axis_x, theme);
+    applyAxisTheme(axis_y, theme);
     chart->addAxis(axis_x, Qt::AlignBottom);
     chart->addAxis(axis_y, Qt::AlignLeft);
 }
@@ -208,6 +216,11 @@ void updateOriginGuides(QChart* chart, const Pair& range_x, const Pair& range_y)
         hor->replace(QList<QPointF>{{range_x.first, 0.0}, {range_x.second, 0.0}});
     if (!ver_ok)
         ver->replace(QList<QPointF>{{0.0, range_y.first}, {0.0, range_y.second}});
+
+    // Refresh guide color when theme flips (series may already exist).
+    const QPen gpen = guide_pen();
+    hor->setPen(gpen);
+    ver->setPen(gpen);
 
     detail::attachToAxes(chart, hor);
     detail::attachToAxes(chart, ver);
@@ -255,6 +268,10 @@ void updateAxes(QChart* chart, const Pair& range_x, const Pair& range_y, GridMod
             axis_y->setRange(range_y.first, range_y.second);
         apply_axis_style(axis_x, mode, snap_x);
         apply_axis_style(axis_y, mode, snap_y);
+        // Restyle after tick config (grid pens must stay theme-colored).
+        const ChartTheme theme = currentTheme();
+        applyAxisTheme(axis_x, theme);
+        applyAxisTheme(axis_y, theme);
     }
 
     updateOriginGuides(chart, {axis_x->min(), axis_x->max()}, {axis_y->min(), axis_y->max()});

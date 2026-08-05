@@ -2,6 +2,7 @@
 
 #include <QChart>
 #include <QChartView>
+#include <QEvent>
 #include <QVBoxLayout>
 
 ChartPanel::ChartPanel(const QString& title, const QString& titleX, const QString& titleY, QWidget* parent)
@@ -12,6 +13,17 @@ ChartPanel::ChartPanel(const QString& title, const QString& titleX, const QStrin
     layout_ = new QVBoxLayout(this);
     layout_->setContentsMargins(0, 0, 0, 0);
     layout_->addWidget(view_);
+}
+
+void ChartPanel::apply_theme() {
+    chart_utils::applyChartTheme(chart_, view_);
+}
+
+void ChartPanel::changeEvent(QEvent* event) {
+    if (event->type() == QEvent::PaletteChange || event->type() == QEvent::StyleChange ||
+        event->type() == QEvent::ThemeChange)
+        apply_theme();
+    QWidget::changeEvent(event);
 }
 
 void ChartPanel::setChartTitle(const QString& title) {

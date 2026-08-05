@@ -1,5 +1,6 @@
 #pragma once
 
+#include "code/charts/utils/chart-utils-theme.hpp"
 #include "code/charts/utils/nice-axis.hpp"
 #include "code/series/axis-bounds.hpp"
 

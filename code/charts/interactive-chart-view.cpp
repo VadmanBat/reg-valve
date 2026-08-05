@@ -1,5 +1,6 @@
 #include "code/charts/interactive-chart-view.h"
 
+#include <QEvent>
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QPainter>
@@ -43,6 +44,20 @@ InteractiveChartView::InteractiveChartView(QChart* chart, QWidget* parent) : QCh
     apply_axis_grid(chart, grid_on_);
     if (chart)
         chart_utils::applyViewerGrid(chart);
+    apply_theme();
+}
+
+void InteractiveChartView::apply_theme() {
+    chart_utils::applyChartTheme(chart(), this);
+    // Theme only restyles; keep toolbar grid toggle.
+    apply_axis_grid(chart(), grid_on_);
+}
+
+void InteractiveChartView::changeEvent(QEvent* event) {
+    if (event->type() == QEvent::PaletteChange || event->type() == QEvent::StyleChange ||
+        event->type() == QEvent::ThemeChange)
+        apply_theme();
+    QChartView::changeEvent(event);
 }
 
 void InteractiveChartView::apply_tool_cursor() {
@@ -69,8 +84,10 @@ void InteractiveChartView::sync_axes_after_view_change() {
     auto* ay = axis_y();
     if (!ax || !ay)
         return;
+    // Tick lattice only — must not re-enable grid if user turned it off.
     chart_utils::applyViewerGrid(ax);
     chart_utils::applyViewerGrid(ay);
+    apply_axis_grid(chart(), grid_on_);
     chart_utils::updateOriginGuides(chart(), {ax->min(), ax->max()}, {ay->min(), ay->max()});
 }
 
@@ -91,7 +108,8 @@ void InteractiveChartView::pan_by_pixels(int dx_px, int dy_px) {
 void InteractiveChartView::zoomInStep() {
     if (!chart())
         return;
-    chart()->zoom(0.8);
+    // QChart::zoom(f): f > 1 zooms in, 0 < f < 1 zooms out.
+    chart()->zoom(1.25);
     sync_axes_after_view_change();
     emit viewChanged();
 }
@@ -99,7 +117,7 @@ void InteractiveChartView::zoomInStep() {
 void InteractiveChartView::zoomOutStep() {
     if (!chart())
         return;
-    chart()->zoom(1.25);
+    chart()->zoom(0.8);
     sync_axes_after_view_change();
     emit viewChanged();
 }
@@ -109,6 +127,7 @@ void InteractiveChartView::resetView(const chart_utils::Pair& home_x, const char
         return;
     chart()->zoomReset();
     chart_utils::updateAxes(chart(), home_x, home_y, chart_utils::GridMode::Viewer, false, false);
+    apply_axis_grid(chart(), grid_on_);
     emit viewChanged();
 }
 
@@ -169,7 +188,9 @@ void InteractiveChartView::wheelEvent(QWheelEvent* event) {
     }
     const QPointF pos    = event->position();
     const QPointF before = chart()->mapToValue(pos);
-    chart()->zoom(event->angleDelta().y() > 0 ? 0.85 : 1.0 / 0.85);
+    // Wheel up → zoom in (factor > 1); wheel down → zoom out.
+    constexpr double k_step = 1.25;
+    chart()->zoom(event->angleDelta().y() > 0 ? k_step : 1.0 / k_step);
     const QPointF after = chart()->mapToValue(pos);
     auto* ax            = axis_x();
     auto* ay            = axis_y();

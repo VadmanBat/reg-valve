@@ -314,3 +314,75 @@ QDoubleSpinBox#regParamMin,
 QDoubleSpinBox#regParamMax {
     font-size: 9pt;
 }
+
+/* ---- Chart viewer window (detached graph) — palette-driven for light/dark ---- */
+QMainWindow#ChartViewerWindow {
+    background-color: palette(window);
+}
+
+QMainWindow#ChartViewerWindow QToolBar#chartViewerToolBar {
+    background-color: palette(base);
+    border: none;
+    border-bottom: 1px solid palette(mid);
+    spacing: 4px;
+    padding: 6px 10px;
+}
+
+QMainWindow#ChartViewerWindow QToolBar#chartViewerToolBar QToolButton {
+    background-color: transparent;
+    color: palette(window-text);
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 5px 10px;
+    margin: 0 1px;
+    font-size: 10.5pt;
+}
+
+QMainWindow#ChartViewerWindow QToolBar#chartViewerToolBar QToolButton:hover {
+    background-color: palette(alternate-base);
+    border-color: palette(mid);
+}
+
+QMainWindow#ChartViewerWindow QToolBar#chartViewerToolBar QToolButton:pressed {
+    background-color: palette(midlight);
+}
+
+QMainWindow#ChartViewerWindow QToolBar#chartViewerToolBar QToolButton:checked {
+    background-color: palette(highlight);
+    border-color: palette(highlight);
+    color: palette(highlighted-text);
+    font-weight: 600;
+}
+
+QMainWindow#ChartViewerWindow QToolBar#chartViewerToolBar::separator {
+    background-color: palette(mid);
+    width: 1px;
+    margin: 4px 8px;
+}
+
+QMainWindow#ChartViewerWindow QStatusBar#chartViewerStatusBar {
+    background-color: palette(base);
+    border-top: 1px solid palette(mid);
+    color: palette(window-text);
+    padding: 2px 8px;
+    min-height: 26px;
+}
+
+QMainWindow#ChartViewerWindow QLabel#chartViewerCoordLabel {
+    color: palette(window-text);
+    font-family: "Consolas", "Cascadia Mono", "Courier New", monospace;
+    font-size: 9.5pt;
+    padding: 2px 4px;
+}
+
+QMainWindow#ChartViewerWindow QLabel#chartViewerHintsLabel {
+    color: palette(placeholder-text);
+    font-size: 9pt;
+    padding: 2px 4px;
+}
+
+QMainWindow#ChartViewerWindow QChartView#chartViewerView {
+    background-color: palette(base);
+    border: none;
+}
+

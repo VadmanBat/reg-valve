@@ -5,6 +5,7 @@
 #include <QChartView>
 #include <QPoint>
 
+class QEvent;
 class QKeyEvent;
 class QMouseEvent;
 class QWheelEvent;
@@ -32,10 +33,12 @@ private:
     void apply_tool_cursor();
     void sync_axes_after_view_change();
     void pan_by_pixels(int dx_px, int dy_px);
+    void apply_theme();
     [[nodiscard]] QValueAxis* axis_x() const;
     [[nodiscard]] QValueAxis* axis_y() const;
 
 protected:
+    void changeEvent(QEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;

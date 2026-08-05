@@ -130,13 +130,26 @@ inline FrequencyBundle frequencyBundle(numina::ResponseLab& lab, const ModelPara
     out.phase.reserve(omegas.size());
 
     constexpr double rad2deg = 180.0 / std::numbers::pi;
+    double prev_deg          = 0.0;
+    bool have_prev           = false;
     for (const double w : omegas) {
         if (!(w > 0.0))
             continue;
         const auto W = tf.frequencyResponse({0.0, w});
         out.nyquist.push_back(W);
         out.amplitude.emplace_back(w, std::abs(W));
-        out.phase.emplace_back(w, std::arg(W) * rad2deg);
+
+        // Continuous phase (unwrap ±180° jumps from principal arg).
+        double deg = std::arg(W) * rad2deg;
+        if (have_prev) {
+            while (deg - prev_deg > 180.0)
+                deg -= 360.0;
+            while (deg - prev_deg < -180.0)
+                deg += 360.0;
+        }
+        have_prev = true;
+        prev_deg  = deg;
+        out.phase.emplace_back(w, deg);
     }
     return out;
 }

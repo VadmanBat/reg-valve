@@ -137,8 +137,10 @@ TranFuncForm::Vec TranFuncForm::reverse_optimize(const Vec& container) {
 TranFuncForm::Vec TranFuncForm::get_line_edit_data(const VecLine& line_edits) {
     const auto size = line_edits.size();
     Vec values(size);
-    for (std::size_t i = 0; i < size; ++i)
+    for (std::size_t i = 0; i < size; ++i) {
+        line_edits[i]->commitIfDirty();
         values[i] = line_edits[i]->stored;
+    }
     return reverse_optimize(values);
 }
 

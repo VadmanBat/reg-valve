@@ -34,8 +34,12 @@ AxisBounds ChartPanel::addComplexCurve(const VecComp& points, const QString& nam
 }
 
 AxisBounds ChartPanel::replaceLastRealCurve(const VecPair& points, const QString& name) {
-    if (points.empty())
+    if (points.empty()) {
+        // Drop last curve so stale points do not remain after empty recompute.
+        if (curve_count_ > 0 && chart_utils::removeLastDataSeries(chart_))
+            --curve_count_;
         return {};
+    }
     if (curve_count_ == 0)
         return addRealCurve(points, name);
 
@@ -48,8 +52,11 @@ AxisBounds ChartPanel::replaceLastRealCurve(const VecPair& points, const QString
 }
 
 AxisBounds ChartPanel::replaceLastComplexCurve(const VecComp& points, const QString& name) {
-    if (points.empty())
+    if (points.empty()) {
+        if (curve_count_ > 0 && chart_utils::removeLastDataSeries(chart_))
+            --curve_count_;
         return {};
+    }
     if (curve_count_ == 0)
         return addComplexCurve(points, name);
 

@@ -41,7 +41,7 @@ SynthesisTab::SynthesisTab(QWidget* parent) : QWidget(parent), ui(new Ui::Synthe
     charts_btn->setFixedSize(40, 40);
     ui->buttonLayout->insertWidget(ui->buttonLayout->indexOf(ui->settingsButton), charts_btn);
 
-    form_->setTransferFunction(&current_tf_);
+    form_->setTransferFunction(&plant_tf_);
 
     connect(ui->helpButton, &QPushButton::clicked, this, &SynthesisTab::openHelp);
     connect(ui->settingsButton, &QPushButton::clicked, this, &SynthesisTab::openSettings);
@@ -199,9 +199,12 @@ void SynthesisTab::apply_current_regulator(bool replace_last) {
                                 parameters_[0]->value(), parameters_[1]->value(), parameters_[2]->value());
 
     try {
-        current_tf_ = tf_builder::closedLoop(std::move(plant_num), std::move(plant_den), reg.num, reg.den,
-                                             form_->delayTime(), model_param_.approxOrder);
-        form_->setTransferFunction(&current_tf_);
+        const double tau  = form_->delayTime();
+        const int order   = model_param_.approxOrder;
+        plant_tf_         = tf_builder::plant(plant_num, plant_den, tau, order);
+        current_tf_       = tf_builder::closedLoop(std::move(plant_num), std::move(plant_den), reg.num, reg.den, tau,
+                                                   order);
+        form_->setTransferFunction(&plant_tf_);
 
         const QString title = QString::fromStdString(reg.title);
         if (replace_last && !charts_->empty())

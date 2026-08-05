@@ -58,8 +58,15 @@ private:
 
     std::vector<Batch> history_;
 
+    /// Experimental h(t) overlay (Id) — not part of history_ / bounds stack alignment.
+    bool has_tran_overlay_{false};
+    QString tran_overlay_name_;
+    chart_utils::VecPair tran_overlay_points_;
+    AxisBounds tran_overlay_bounds_{};
+
     void rebuild_layout();
     void refit_all();
+    void fit_transient();
     /// If a panel was hidden during adds, materialize series from history when shown.
     void ensure_visible_series();
     void push_batch(Batch b, bool replace_last);

@@ -27,7 +27,8 @@ private:
     ResponseChartBank* charts_{nullptr};
     QMenu* charts_menu_{nullptr};
     ModelParam model_param_;
-    numina::TransferFunction current_tf_;
+    numina::TransferFunction plant_tf_;    ///< Object for form «Подробнее»
+    numina::TransferFunction current_tf_;  ///< Closed loop for charts / metrics
 
     void install_custom_widgets();
     void setup_metrics();

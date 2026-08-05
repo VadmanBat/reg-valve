@@ -59,6 +59,9 @@ void updateOriginGuides(QChart* chart, const Pair& range_x, const Pair& range_y)
 [[nodiscard]] SeriesWrite replaceLastRealSeries(QChart* chart, const VecPair& points, const QString& title);
 [[nodiscard]] SeriesWrite replaceLastComplexSeries(QChart* chart, const VecComp& points, const QString& title);
 
+/// Remove last non-guide QLineSeries. Returns true if a series was deleted.
+bool removeLastDataSeries(QChart* chart);
+
 bool saveChartToFile(const QString& fileName, QChart* chart);
 
 QChartView* makeChartView(QChart* chart, QWidget* parent, const QString& title, const QString& titleX,

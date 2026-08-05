@@ -125,7 +125,7 @@ void IdTab::openFile() {
     if (path.isEmpty())
         return;
     file_path_ = path;
-    has_data_  = true;
+    has_data_  = false; // set true only after successful load in runIdentification
     ui->fileLabel->setText(QFileInfo(path).fileName());
     ui->fileLabel->setToolTip(path);
     runIdentification();

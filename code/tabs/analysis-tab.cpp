@@ -99,8 +99,18 @@ void AnalysisTab::update_metrics() {
 
 void AnalysisTab::openSettings() {
     ModParDialog dialog(model_param_, this);
-    if (dialog.exec() == QDialog::Accepted)
-        model_param_ = dialog.data();
+    if (dialog.exec() != QDialog::Accepted)
+        return;
+    model_param_ = dialog.data();
+    if (charts_->empty())
+        return;
+    try {
+        charts_->replaceLastFromTf(current_tf_, model_param_, form_->linkName());
+        update_metrics();
+    }
+    catch (const std::exception& ex) {
+        show_error(QString::fromUtf8(ex.what()));
+    }
 }
 
 void AnalysisTab::addTransferFunction() {

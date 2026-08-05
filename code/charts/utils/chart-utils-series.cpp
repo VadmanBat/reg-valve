@@ -55,7 +55,18 @@ SeriesWrite replaceLastComplexSeries(QChart* chart, const VecComp& points, const
     return {true, pb.bounds};
 }
 
+bool removeLastDataSeries(QChart* chart) {
+    auto* series = detail::lastDataSeries(chart);
+    if (!series)
+        return false;
+    chart->removeSeries(series);
+    delete series;
+    return true;
+}
+
 bool saveChartToFile(const QString& fileName, QChart* chart) {
+    if (!chart)
+        return false;
     QFile file(fileName);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
         return false;

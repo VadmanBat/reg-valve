@@ -51,6 +51,24 @@ namespace detail {
     return v;
 }
 
+/// Drop tiny sign-crossing noise so Y does not flip between [0,h] and [−ε,h] while tuning.
+/// Real undershoot/overshoot (≥ ~2% of opposite peak) is kept.
+inline void suppress_sign_noise(double& min_v, double& max_v) noexcept {
+    if (!std::isfinite(min_v) || !std::isfinite(max_v))
+        return;
+    if (!(max_v > 0.0 && min_v < 0.0))
+        return;
+
+    constexpr double k_rel = 0.02;
+    constexpr double k_abs = 1e-12;
+    const double thr_lo = std::max(k_abs, k_rel * max_v);
+    const double thr_hi = std::max(k_abs, k_rel * (-min_v));
+    if (-min_v <= thr_lo)
+        min_v = 0.0;
+    else if (max_v <= thr_hi)
+        max_v = 0.0;
+}
+
 } // namespace detail
 
 /// Bounds from data only (no 1–2–5 snap, no % pad). For independent X (t, ω).
@@ -58,6 +76,9 @@ namespace detail {
                                                              bool include_zero = true) noexcept {
     if (!std::isfinite(min_v) || !std::isfinite(max_v))
         return {-1.0, 1.0};
+
+    if (include_zero)
+        detail::suppress_sign_noise(min_v, max_v);
 
     const double data_min = min_v;
     const double data_max = max_v;

@@ -66,8 +66,10 @@ void IdTab::runIdentification() {
         const std::size_t den_n = static_cast<std::size_t>(std::clamp(id_settings_.denOrder, 1, 12));
         const std::size_t num_m =
             static_cast<std::size_t>(std::clamp(id_settings_.numOrder, 0, static_cast<int>(den_n)));
-        const std::size_t max_order = static_cast<std::size_t>(std::clamp(model_param_.approxOrder, 2, 12));
-        const bool want_tau         = id_settings_.estimateTau;
+        // Plant structure order is independent of Padé approxOrder (model settings).
+        const std::size_t max_order =
+            static_cast<std::size_t>(std::clamp(id_settings_.maxAutoOrder, 2, 12));
+        const bool want_tau = id_settings_.estimateTau;
 
         if (method == Method::StepResponse) {
             if (step_series_.size() < 2) {

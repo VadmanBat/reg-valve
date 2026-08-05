@@ -63,6 +63,20 @@ int main() {
         expect_true("point includes 0", r.first <= 0.0 && r.second >= 0.0);
     }
 
+    // Tiny numerical undershoot → pin lo at 0 (no axis flip while tuning)
+    {
+        const auto r = niceAxisRange(-0.01, 1.0, true);
+        expect_near("noise_neg lo", r.first, 0.0);
+        expect_true("noise_neg hi >= 1", r.second >= 1.0);
+    }
+
+    // Real undershoot (~10%) must stay visible
+    {
+        const auto r = niceAxisRange(-0.1, 1.0, true);
+        expect_true("undershoot lo < 0", r.first < 0.0);
+        expect_true("undershoot hi >= 1", r.second >= 1.0);
+    }
+
     if (g_failed) {
         std::fprintf(stderr, "\n%d test(s) failed\n", g_failed);
         return 1;

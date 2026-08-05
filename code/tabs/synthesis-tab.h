@@ -11,7 +11,6 @@
 #include <vector>
 
 class QMenu;
-class QTimer;
 
 namespace Ui {
 class SynthesisTab;
@@ -27,7 +26,6 @@ private:
     std::vector<RegParameter*> parameters_;
     ResponseChartBank* charts_{nullptr};
     QMenu* charts_menu_{nullptr};
-    QTimer* recompute_timer_{nullptr};
     ModelParam model_param_;
     numina::TransferFunction plant_tf_;   ///< Object for form «Подробнее»
     numina::TransferFunction current_tf_; ///< Closed loop for charts / metrics
@@ -37,7 +35,6 @@ private:
     void show_error(const QString& message);
     void apply_current_regulator(bool replace_last);
     void update_metrics_from_bank();
-    void schedule_replace();
     void block_param_signals(bool block);
 
 private slots:

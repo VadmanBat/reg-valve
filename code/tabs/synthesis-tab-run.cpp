@@ -7,18 +7,12 @@
 #include <algorithm>
 #include <cmath>
 #include <QCheckBox>
-#include <QTimer>
 
 void SynthesisTab::block_param_signals(bool block) {
     for (auto* p : parameters_) {
         p->checkBox()->blockSignals(block);
         p->slider()->blockSignals(block);
     }
-}
-
-void SynthesisTab::schedule_replace() {
-    if (!charts_->empty())
-        recompute_timer_->start();
 }
 
 void SynthesisTab::update_metrics_from_bank() {
@@ -88,7 +82,6 @@ void SynthesisTab::autoSynthesize() {
         if (q.is_settled && q.rise_time > 1e-6)
             T = std::max(T, q.rise_time * 4.0);
 
-        recompute_timer_->stop();
         block_param_signals(true);
         auto set_param = [](RegParameter* p, double v, bool on) {
             const double lo = std::max(0.05, v / 20.0);

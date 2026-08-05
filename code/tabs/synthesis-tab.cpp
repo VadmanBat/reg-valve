@@ -8,7 +8,6 @@
 #include <QCheckBox>
 #include <QMenu>
 #include <QMessageBox>
-#include <QTimer>
 #include <QVBoxLayout>
 
 SynthesisTab::SynthesisTab(QWidget* parent) : QWidget(parent), ui(new Ui::SynthesisTab) {
@@ -28,14 +27,6 @@ SynthesisTab::SynthesisTab(QWidget* parent) : QWidget(parent), ui(new Ui::Synthe
     charts_menu_     = new QMenu(this);
     auto* charts_btn = tab_ui::makeChartsButton(this, charts_, charts_menu_);
     ui->buttonLayout->insertWidget(ui->buttonLayout->indexOf(ui->settingsButton), charts_btn);
-
-    recompute_timer_ = new QTimer(this);
-    recompute_timer_->setSingleShot(true);
-    recompute_timer_->setInterval(80);
-    connect(recompute_timer_, &QTimer::timeout, this, [this] {
-        if (!charts_->empty())
-            apply_current_regulator(true);
-    });
 
     form_->setTransferFunction(&plant_tf_);
 
@@ -72,8 +63,8 @@ void SynthesisTab::install_custom_widgets() {
     ui->paramsLayout->setSizeConstraint(QLayout::SetMinimumSize);
     for (auto* p : parameters_) {
         ui->paramsLayout->addLayout(p->layout());
-        connect(p->checkBox(), &QCheckBox::toggled, this, [this](bool) { schedule_replace(); });
-        connect(p->slider(), &DoubleSlider::doubleValueChanged, this, [this](double) { schedule_replace(); });
+        connect(p->checkBox(), &QCheckBox::toggled, this, [this](bool) { replaceTransferFunction(); });
+        connect(p->slider(), &DoubleSlider::doubleValueChanged, this, [this](double) { replaceTransferFunction(); });
     }
 }
 
@@ -121,19 +112,16 @@ void SynthesisTab::openHelp() {
 }
 
 void SynthesisTab::addTransferFunction() {
-    recompute_timer_->stop();
     apply_current_regulator(false);
 }
 
 void SynthesisTab::replaceTransferFunction() {
     if (charts_->empty())
         return;
-    recompute_timer_->stop();
     apply_current_regulator(true);
 }
 
 void SynthesisTab::clearCharts() {
-    recompute_timer_->stop();
     charts_->clearAll();
     metrics_->updateValues({});
 }

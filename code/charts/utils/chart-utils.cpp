@@ -45,16 +45,13 @@ void applyChartTheme(QChart* chart, QChartView* view) {
             applyAxisTheme(v, theme);
     }
 
-    // Guides + default curve palette (brighter on dark). Custom dialog colors are reset on theme flip.
-    std::size_t data_index = 0;
+    // Guides follow theme. Data series keep pens (Properties / palette at add time).
     for (QAbstractSeries* s : chart->series()) {
         auto* line = qobject_cast<QLineSeries*>(s);
         if (!line)
             continue;
         if (detail::isGuideSeries(line->name()))
             line->setPen(guidePen(theme));
-        else
-            line->setPen(penForIndexTheme(data_index++, theme.dark));
     }
 
     if (view)

@@ -41,8 +41,8 @@ void openChartViewer(QChart* chart, QWidget* parent) {
 void createChartContextMenu(QChartView* chart_view) {
     auto* open_viewer_action = new QAction(menu_icon(QStringLiteral("🖼️")), CHART_TR("Открыть в окне…"), chart_view);
     auto* save_as_action     = new QAction(menu_icon(QStringLiteral("💾")), CHART_TR("Сохранить как…"), chart_view);
-    auto* copy_action        = new QAction(menu_icon(QStringLiteral("📋")), CHART_TR("Копировать изображение"), chart_view);
-    auto* properties_action  = new QAction(menu_icon(QStringLiteral("⚙️")), CHART_TR("Свойства"), chart_view);
+    auto* copy_action = new QAction(menu_icon(QStringLiteral("📋")), CHART_TR("Копировать изображение"), chart_view);
+    auto* properties_action = new QAction(menu_icon(QStringLiteral("⚙️")), CHART_TR("Свойства"), chart_view);
 
     QChart* chart = chart_view->chart();
 

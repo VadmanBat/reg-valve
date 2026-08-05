@@ -161,8 +161,10 @@ void InteractiveChartView::mouseMoveEvent(QMouseEvent* event) {
     }
 
     if (chart()) {
-        const QPointF v   = chart()->mapToValue(event->pos());
-        const bool inside = chart()->plotArea().contains(event->pos());
+        // event pos is view coords; mapToValue expects chart item coords.
+        const QPointF chart_pos = chart()->mapFromScene(mapToScene(event->pos()));
+        const QPointF v         = chart()->mapToValue(chart_pos);
+        const bool inside       = chart()->plotArea().contains(chart_pos);
         emit cursorMoved(v.x(), v.y(), inside);
     }
 }
@@ -186,12 +188,12 @@ void InteractiveChartView::wheelEvent(QWheelEvent* event) {
         QChartView::wheelEvent(event);
         return;
     }
-    const QPointF pos    = event->position();
-    const QPointF before = chart()->mapToValue(pos);
+    const QPointF chart_pos = chart()->mapFromScene(mapToScene(event->position().toPoint()));
+    const QPointF before    = chart()->mapToValue(chart_pos);
     // Wheel up → zoom in (factor > 1); wheel down → zoom out.
     constexpr double k_step = 1.25;
     chart()->zoom(event->angleDelta().y() > 0 ? k_step : 1.0 / k_step);
-    const QPointF after = chart()->mapToValue(pos);
+    const QPointF after = chart()->mapToValue(chart_pos);
     auto* ax            = axis_x();
     auto* ay            = axis_y();
     if (ax && ay) {

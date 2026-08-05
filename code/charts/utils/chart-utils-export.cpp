@@ -33,13 +33,13 @@ ExportFormat format_from_filter(const QString& filter) {
 
 const char* suffix_for(ExportFormat fmt) {
     switch (fmt) {
-    case ExportFormat::Svg:
-        return ".svg";
-    case ExportFormat::Txt:
-        return ".txt";
-    case ExportFormat::Png:
-    default:
-        return ".png";
+        case ExportFormat::Svg:
+            return ".svg";
+        case ExportFormat::Txt:
+            return ".txt";
+        case ExportFormat::Png:
+        default:
+            return ".png";
     }
 }
 
@@ -80,13 +80,13 @@ bool saveChartExport(QChartView* view, const QString& path) {
         return false;
 
     switch (format_from_suffix(path)) {
-    case ExportFormat::Svg:
-        return save_svg(view, path);
-    case ExportFormat::Txt:
-        return saveChartToFile(path, view->chart());
-    case ExportFormat::Png:
-    default:
-        return save_png(view, path);
+        case ExportFormat::Svg:
+            return save_svg(view, path);
+        case ExportFormat::Txt:
+            return saveChartToFile(path, view->chart());
+        case ExportFormat::Png:
+        default:
+            return save_png(view, path);
     }
 }
 
@@ -94,15 +94,15 @@ bool saveChartAsDialog(QWidget* parent, QChartView* view, const QString& suggest
     if (!view)
         return false;
 
-    const QString filters = CHART_TR("Рисунок PNG (*.png);;Рисунок SVG (*.svg);;Текст TXT (*.txt);;Все файлы (*)");
+    const QString filters   = CHART_TR("Рисунок PNG (*.png);;Рисунок SVG (*.svg);;Текст TXT (*.txt);;Все файлы (*)");
     QString selected_filter = CHART_TR("Рисунок PNG (*.png)");
-    QString path = QFileDialog::getSaveFileName(parent, CHART_TR("Сохранить график"), suggestedName, filters,
-                                                &selected_filter);
+    QString path =
+        QFileDialog::getSaveFileName(parent, CHART_TR("Сохранить график"), suggestedName, filters, &selected_filter);
     if (path.isEmpty())
         return false;
 
-    const ExportFormat fmt = QFileInfo(path).suffix().isEmpty() ? format_from_filter(selected_filter)
-                                                               : format_from_suffix(path);
+    const ExportFormat fmt =
+        QFileInfo(path).suffix().isEmpty() ? format_from_filter(selected_filter) : format_from_suffix(path);
     path = ensure_suffix(path, fmt);
 
     if (!saveChartExport(view, path)) {

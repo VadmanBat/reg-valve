@@ -61,8 +61,8 @@ inline void suppress_sign_noise(double& min_v, double& max_v) noexcept {
 
     constexpr double k_rel = 0.02;
     constexpr double k_abs = 1e-12;
-    const double thr_lo = std::max(k_abs, k_rel * max_v);
-    const double thr_hi = std::max(k_abs, k_rel * (-min_v));
+    const double thr_lo    = std::max(k_abs, k_rel * max_v);
+    const double thr_hi    = std::max(k_abs, k_rel * (-min_v));
     if (-min_v <= thr_lo)
         min_v = 0.0;
     else if (max_v <= thr_hi)

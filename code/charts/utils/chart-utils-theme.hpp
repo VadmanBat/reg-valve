@@ -14,13 +14,13 @@ namespace chart_utils {
 /// Chrome colors for QChart derived from the application palette (light / dark).
 struct ChartTheme {
     bool dark{false};
-    QColor background;  ///< chart + view outer fill
-    QColor plot;        ///< plot area
-    QColor text;        ///< title, labels, legend
-    QColor axis_line;   ///< axis spines
-    QColor grid;        ///< major grid
-    QColor minor_grid;  ///< minor grid
-    QColor guide;       ///< origin crosshair
+    QColor background; ///< chart + view outer fill
+    QColor plot;       ///< plot area
+    QColor text;       ///< title, labels, legend
+    QColor axis_line;  ///< axis spines
+    QColor grid;       ///< major grid
+    QColor minor_grid; ///< minor grid
+    QColor guide;      ///< origin crosshair
     QColor legend_bg;
 };
 

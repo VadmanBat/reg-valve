@@ -20,8 +20,7 @@ ResponseChartBank::ResponseChartBank(QWidget* parent) : QWidget(parent) {
 }
 
 void ResponseChartBank::setTransientTitle(const QString& title) {
-    if (chart_tran_)
-        chart_tran_->setChartTitle(title);
+    chart_tran_->setChartTitle(title);
 }
 
 void ResponseChartBank::populateMenu(QMenu* menu) {
@@ -46,7 +45,6 @@ void ResponseChartBank::populateMenu(QMenu* menu) {
         });
     };
 
-    // Menu order: Переходная, Импульсная, КЧХ, ФЧХ, АЧХ
     add(tr("Переходная"), &ChartVisibility::transient);
     add(tr("Импульсная"), &ChartVisibility::impulse);
     add(tr("КЧХ"), &ChartVisibility::nyquist);
@@ -59,7 +57,9 @@ void ResponseChartBank::setVisibility(ChartVisibility vis) {
         vis.transient = true;
     vis_ = vis;
     rebuild_layout();
-    // Materialize series for panels that were hidden during earlier adds, then fit.
+    for (Batch& batch : history_)
+        ensure_visible_channels(batch);
+    rebuild_bounds_from_history();
     ensure_visible_series();
     refit_all();
 }
@@ -121,7 +121,6 @@ void ResponseChartBank::rebuild_layout() {
             grid_->setColumnStretch(1, 1);
             break;
         default:
-            // 5: 2 top + 3 bottom
             grid_->addWidget(visible[0], 0, 0);
             grid_->addWidget(visible[1], 0, 1);
             grid_->addWidget(visible[2], 1, 0);

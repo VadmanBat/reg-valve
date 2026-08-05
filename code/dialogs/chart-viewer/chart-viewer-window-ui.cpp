@@ -42,16 +42,18 @@ void ChartViewerWindow::build_toolbar() {
     act_zoom_ = add_tb_action(tb, QStringLiteral("🔍"), tr("Рамка"));
     act_zoom_->setCheckable(true);
     act_zoom_->setChecked(true);
-    act_zoom_->setToolTip(tr("Инструмент: зум рамкой\n"
-                              "ЛКМ — выделить область (приблизить)\n"
-                              "Колесо — зум к курсору · клавиша Z — выбрать этот режим"));
+    act_zoom_->setToolTip(
+        tr("Инструмент: зум рамкой\n"
+           "ЛКМ — выделить область (приблизить)\n"
+           "Колесо — зум к курсору · клавиша Z — выбрать этот режим"));
     act_zoom_->setShortcut(QKeySequence(Qt::Key_Z));
     tools->addAction(act_zoom_);
 
     act_pan_ = add_tb_action(tb, QStringLiteral("✋"), tr("Сдвиг"));
     act_pan_->setCheckable(true);
-    act_pan_->setToolTip(tr("Инструмент: панорамирование\n"
-                             "ЛКМ или СКМ — сдвиг · клавиша H — выбрать этот режим"));
+    act_pan_->setToolTip(
+        tr("Инструмент: панорамирование\n"
+           "ЛКМ или СКМ — сдвиг · клавиша H — выбрать этот режим"));
     act_pan_->setShortcut(QKeySequence(Qt::Key_H));
     tools->addAction(act_pan_);
 
@@ -133,8 +135,7 @@ void ChartViewerWindow::build_status() {
     statusBar()->setSizeGripEnabled(true);
     statusBar()->addWidget(coord_label_, 1);
 
-    auto* hints = new QLabel(
-        tr("Z — режим рамки · H — сдвиг · +/− / колесо — масштаб · Home — сброс · F11 · Esc"));
+    auto* hints = new QLabel(tr("Z — режим рамки · H — сдвиг · +/− / колесо — масштаб · Home — сброс · F11 · Esc"));
     hints->setObjectName(QStringLiteral("chartViewerHintsLabel"));
     statusBar()->addPermanentWidget(hints);
 }

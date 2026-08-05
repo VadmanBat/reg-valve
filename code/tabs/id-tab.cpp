@@ -2,6 +2,7 @@
 
 #include "code/dialogs/id-settings-dialog.h"
 #include "code/dialogs/mod-par-dialog.h"
+#include "code/tabs/tab-charts-button.hpp"
 #include "ui_id-tab.h"
 
 #include <QComboBox>
@@ -9,7 +10,6 @@
 #include <QFileInfo>
 #include <QMenu>
 #include <QMessageBox>
-#include <QToolButton>
 #include <QVBoxLayout>
 
 IdTab::IdTab(QWidget* parent) : QWidget(parent), ui(new Ui::IdTab) {
@@ -29,16 +29,8 @@ IdTab::IdTab(QWidget* parent) : QWidget(parent), ui(new Ui::IdTab) {
     vis.impulse = vis.amplitude = vis.phase = false;
     charts_->setVisibility(vis);
 
-    charts_menu_ = new QMenu(this);
-    connect(charts_menu_, &QMenu::aboutToShow, this, [this] { charts_->populateMenu(charts_menu_); });
-
-    auto* charts_btn = new QToolButton(this);
-    charts_btn->setObjectName(QStringLiteral("chartsButton"));
-    charts_btn->setText(QStringLiteral("◫"));
-    charts_btn->setToolTip(tr("Отображаемые графики"));
-    charts_btn->setPopupMode(QToolButton::InstantPopup);
-    charts_btn->setMenu(charts_menu_);
-    charts_btn->setFixedSize(40, 40);
+    charts_menu_     = new QMenu(this);
+    auto* charts_btn = tab_ui::makeChartsButton(this, charts_, charts_menu_);
     ui->buttonLayout->insertWidget(ui->buttonLayout->indexOf(ui->idSettingsButton), charts_btn);
 
     ui->methodCombo->setToolTip(
@@ -91,7 +83,7 @@ void IdTab::setup_metrics() {
             tr("Собственная частота, рад/с"),
             tr("Время нарастания, с"),
             tr("Частота среза, рад/с"),
-            tr("Коэффициент демпфирования ζ"),
+            tr("Коэффициент демпфирования, %"),
             tr("Установившееся значение"),
         });
     metrics_->setColors({{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}});
@@ -106,8 +98,20 @@ void IdTab::openSettings() {
     if (dialog.exec() != QDialog::Accepted)
         return;
     model_param_ = dialog.data();
-    if (has_data_ && !display_->isEmpty())
-        runIdentification();
+    // Grid/Padé-sample settings only: recompute responses, keep identified plant.
+    if (!charts_->empty()) {
+        charts_->recomputeAll(model_param_);
+        if (charts_->hasLastQuality()) {
+            const auto& q = charts_->lastQuality();
+            if (q.is_settled) {
+                metrics_->updateValues({q.settling_time, q.natural_frequency, q.rise_time, q.cut_frequency,
+                                        q.damping_ratio, q.steady_state});
+            }
+            else {
+                metrics_->updateValues({});
+            }
+        }
+    }
 }
 
 void IdTab::openIdSettings() {

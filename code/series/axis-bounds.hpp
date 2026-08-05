@@ -5,12 +5,13 @@
 #include <vector>
 
 /// Axis extents for a single curve (no point storage — charts keep QLineSeries).
-/// Empty / default: degenerate at origin (does not inflate stacked BoundsSet to 0…1).
+/// Invalid/empty bounds must not participate in stacked min/max (BoundsSet skips them).
 struct AxisBounds {
     double min_x{0.0};
     double max_x{0.0};
     double min_y{0.0};
     double max_y{0.0};
+    bool valid{false};
 };
 
 [[nodiscard]] inline AxisBounds boundsOfReal(const std::vector<std::pair<double, double>>& data) noexcept {
@@ -19,6 +20,7 @@ struct AxisBounds {
     AxisBounds b;
     b.min_x = b.max_x = data.front().first;
     b.min_y = b.max_y = data.front().second;
+    b.valid           = true;
     for (const auto& [x, y] : data) {
         if (x < b.min_x)
             b.min_x = x;
@@ -38,6 +40,7 @@ struct AxisBounds {
     AxisBounds b;
     b.min_x = b.max_x = data.front().real();
     b.min_y = b.max_y = data.front().imag();
+    b.valid           = true;
     for (const auto& z : data) {
         const double x = z.real();
         const double y = z.imag();

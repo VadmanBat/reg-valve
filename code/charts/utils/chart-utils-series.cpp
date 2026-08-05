@@ -37,20 +37,28 @@ SeriesWrite addComplexSeries(QChart* chart, const VecComp& points, const QString
 
 SeriesWrite replaceLastRealSeries(QChart* chart, const VecPair& points, const QString& title) {
     auto* series = detail::lastDataSeries(chart);
-    if (!series || points.empty())
+    if (!series)
         return {};
-    auto pb = detail::toPointsWithBounds(points);
     series->setName(title);
+    if (points.empty()) {
+        series->clear();
+        return {true, {}};
+    }
+    auto pb = detail::toPointsWithBounds(points);
     series->replace(std::move(pb.points));
     return {true, pb.bounds};
 }
 
 SeriesWrite replaceLastComplexSeries(QChart* chart, const VecComp& points, const QString& title) {
     auto* series = detail::lastDataSeries(chart);
-    if (!series || points.empty())
+    if (!series)
         return {};
-    auto pb = detail::toPointsWithBounds(points);
     series->setName(title);
+    if (points.empty()) {
+        series->clear();
+        return {true, {}};
+    }
+    auto pb = detail::toPointsWithBounds(points);
     series->replace(std::move(pb.points));
     return {true, pb.bounds};
 }

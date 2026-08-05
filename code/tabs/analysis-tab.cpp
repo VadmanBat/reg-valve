@@ -1,13 +1,12 @@
 #include "code/tabs/analysis-tab.h"
 
 #include "code/dialogs/mod-par-dialog.h"
+#include "code/tabs/tab-charts-button.hpp"
 #include "code/util/tf-builder.hpp"
-#include "numina/classes/control/transfer-function/response-lab.h"
 #include "ui_analysis-tab.h"
 
 #include <QMenu>
 #include <QMessageBox>
-#include <QToolButton>
 #include <QVBoxLayout>
 
 AnalysisTab::AnalysisTab(QWidget* parent) : QWidget(parent), ui(new Ui::AnalysisTab) {
@@ -21,16 +20,8 @@ AnalysisTab::AnalysisTab(QWidget* parent) : QWidget(parent), ui(new Ui::Analysis
     ui->verticalLayout->setStretch(1, 0);
     ui->verticalLayout->setStretch(2, 1);
 
-    charts_menu_ = new QMenu(this);
-    connect(charts_menu_, &QMenu::aboutToShow, this, [this] { charts_->populateMenu(charts_menu_); });
-
-    auto* charts_btn = new QToolButton(this);
-    charts_btn->setObjectName(QStringLiteral("chartsButton"));
-    charts_btn->setText(QStringLiteral("◫"));
-    charts_btn->setToolTip(tr("Отображаемые графики"));
-    charts_btn->setPopupMode(QToolButton::InstantPopup);
-    charts_btn->setMenu(charts_menu_);
-    charts_btn->setFixedSize(40, 40);
+    charts_menu_     = new QMenu(this);
+    auto* charts_btn = tab_ui::makeChartsButton(this, charts_, charts_menu_);
     ui->buttonLayout->insertWidget(ui->buttonLayout->indexOf(ui->settingsButton), charts_btn);
 
     form_->bindNameLabel(ui->nameLabel);
@@ -75,7 +66,7 @@ void AnalysisTab::setup_metrics() {
             tr("Собственная частота, рад/с"),
             tr("Время нарастания, с"),
             tr("Частота среза, рад/с"),
-            tr("Коэффициент демпфирования ζ"),
+            tr("Коэффициент демпфирования, %"),
             tr("Установившееся значение"),
         });
     metrics_->setColors({{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}});
@@ -86,15 +77,13 @@ void AnalysisTab::show_error(const QString& message) {
 }
 
 void AnalysisTab::update_metrics() {
-    numina::ResponseLab lab(current_tf_);
-    const auto q = lab.evaluate();
-    if (q.is_settled) {
-        metrics_->updateValues(
-            {q.settling_time, q.natural_frequency, q.rise_time, q.cut_frequency, q.damping_ratio, q.steady_state});
-    }
-    else {
+    if (!charts_->hasLastQuality() || !charts_->lastQuality().is_settled) {
         metrics_->updateValues({});
+        return;
     }
+    const auto& q = charts_->lastQuality();
+    metrics_->updateValues(
+        {q.settling_time, q.natural_frequency, q.rise_time, q.cut_frequency, q.damping_ratio, q.steady_state});
 }
 
 void AnalysisTab::openSettings() {
@@ -105,7 +94,7 @@ void AnalysisTab::openSettings() {
     if (charts_->empty())
         return;
     try {
-        charts_->replaceLastFromTf(current_tf_, model_param_, form_->linkName());
+        charts_->recomputeAll(model_param_);
         update_metrics();
     }
     catch (const std::exception& ex) {
@@ -145,7 +134,12 @@ void AnalysisTab::replaceTransferFunction() {
     auto num = form_->numerator();
     auto den = form_->denominator();
     if (!tf_builder::validInput(num, den)) {
-        show_error(tr("Некорректная передаточная функция"));
+        if (den.empty())
+            show_error(tr("Знаменатель НЕ может быть равен нулю!"));
+        else if (den.size() == 1)
+            show_error(tr("Порядок знаменателя НЕ может быть меньше первого!"));
+        else
+            show_error(tr("Порядок числителя НЕ может быть больше порядка знаменателя!"));
         return;
     }
     try {

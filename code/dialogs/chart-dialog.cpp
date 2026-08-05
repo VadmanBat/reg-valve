@@ -149,7 +149,11 @@ void ChartDialog::applyChanges() {
         ax->setTitleText(ui->yAxisLabelEdit->text());
     const int n = line_series_.size();
     for (int i = 0; i < n; ++i) {
-        line_series_[i]->setName(series_name_edits_[i]->text());
+        QString name = series_name_edits_[i]->text().trimmed();
+        // Reserved guide ids — must not collide with origin crosshair series.
+        if (name == QLatin1String("hor-line") || name == QLatin1String("ver-line") || name.isEmpty())
+            name = tr("Кривая %1").arg(i + 1);
+        line_series_[i]->setName(name);
         line_series_[i]->setPen(current_pens_[i]);
     }
     accept();

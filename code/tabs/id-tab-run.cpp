@@ -3,7 +3,6 @@
 #include "code/util/tf-builder.hpp"
 #include "numina/classes/control/duhamel-solver.h"
 #include "numina/classes/control/simoyu-identifier.h"
-#include "numina/classes/control/transfer-function/response-lab.h"
 #include "ui_id-tab.h"
 
 #include <algorithm>
@@ -67,9 +66,8 @@ void IdTab::runIdentification() {
         const std::size_t num_m =
             static_cast<std::size_t>(std::clamp(id_settings_.numOrder, 0, static_cast<int>(den_n)));
         // Plant structure order is independent of Padé approxOrder (model settings).
-        const std::size_t max_order =
-            static_cast<std::size_t>(std::clamp(id_settings_.maxAutoOrder, 2, 12));
-        const bool want_tau = id_settings_.estimateTau;
+        const std::size_t max_order = static_cast<std::size_t>(std::clamp(id_settings_.maxAutoOrder, 2, 12));
+        const bool want_tau         = id_settings_.estimateTau;
 
         if (method == Method::StepResponse) {
             if (step_series_.size() < 2) {
@@ -143,9 +141,8 @@ void IdTab::apply_result(const numina::TransferFunction& plant, double tau, cons
     charts_->appendTransientCurve(experimental_h, tr("Эксперимент"));
     charts_->appendFromTf(model, model_param_, tr("Модель"));
 
-    try {
-        numina::ResponseLab lab(model);
-        const auto q = lab.evaluate();
+    if (charts_->hasLastQuality()) {
+        const auto& q = charts_->lastQuality();
         if (q.is_settled) {
             metrics_->updateValues(
                 {q.settling_time, q.natural_frequency, q.rise_time, q.cut_frequency, q.damping_ratio, q.steady_state});
@@ -154,7 +151,7 @@ void IdTab::apply_result(const numina::TransferFunction& plant, double tau, cons
             metrics_->updateValues({});
         }
     }
-    catch (...) {
+    else {
         metrics_->updateValues({});
     }
 }

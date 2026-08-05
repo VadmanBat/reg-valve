@@ -30,6 +30,7 @@ struct PointsWithBounds {
     const auto& [x0, y0] = data.front();
     out.bounds.min_x = out.bounds.max_x = x0;
     out.bounds.min_y = out.bounds.max_y = y0;
+    out.bounds.valid                    = true;
     out.points.append(QPointF(x0, y0));
     for (std::size_t i = 1; i < data.size(); ++i) {
         const auto& [x, y] = data[i];
@@ -55,6 +56,7 @@ struct PointsWithBounds {
     const double y0  = data.front().imag();
     out.bounds.min_x = out.bounds.max_x = x0;
     out.bounds.min_y = out.bounds.max_y = y0;
+    out.bounds.valid                    = true;
     out.points.append(QPointF(x0, y0));
     for (std::size_t i = 1; i < data.size(); ++i) {
         const double x = data[i].real();

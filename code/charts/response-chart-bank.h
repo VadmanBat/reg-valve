@@ -6,14 +6,16 @@
 #include "code/series/bounds-set.hpp"
 #include "code/util/tf-builder.hpp"
 #include "numina/classes/control/transfer-function.h"
+#include "numina/classes/control/transfer-function/quality-report.h"
 
+#include <array>
+#include <cstdint>
 #include <QWidget>
 #include <vector>
 
 class QGridLayout;
 class QMenu;
 
-/// Which response plots are shown (Analysis / Synthesis).
 struct ChartVisibility {
     bool transient = true;
     bool impulse   = false;
@@ -32,14 +34,35 @@ class ResponseChartBank : public QWidget {
     Q_OBJECT
 
 private:
+    enum class Channel : int { Transient = 0, Impulse, Nyquist, Amplitude, Phase };
+
     struct Batch {
         QString name;
+        numina::TransferFunction tf;
+        ModelParam params;
+
         tf_builder::VecPair transient;
         tf_builder::VecPair impulse;
         tf_builder::VecComp nyquist;
         tf_builder::VecPair amplitude;
         tf_builder::VecPair phase;
+
+        bool has_transient{false};
+        bool has_impulse{false};
+        bool has_freq{false}; ///< nyquist + amplitude + phase filled together
+
+        void clear_channels() {
+            transient.clear();
+            impulse.clear();
+            nyquist.clear();
+            amplitude.clear();
+            phase.clear();
+            has_transient = has_impulse = has_freq = false;
+        }
     };
+
+    static constexpr std::size_t kMaxHistory = 24;
+    static constexpr int kPanelCount         = 5;
 
     ChartVisibility vis_{};
     QGridLayout* grid_{nullptr};
@@ -57,8 +80,12 @@ private:
     BoundsSet phase_bounds_;
 
     std::vector<Batch> history_;
+    std::uint64_t data_gen_{0};
+    std::array<std::uint64_t, kPanelCount> panel_gen_{};
 
-    /// Experimental h(t) overlay (Id) — not part of history_ / bounds stack alignment.
+    numina::QualityReport last_quality_{};
+    bool has_last_quality_{false};
+
     bool has_tran_overlay_{false};
     QString tran_overlay_name_;
     chart_utils::VecPair tran_overlay_points_;
@@ -67,30 +94,40 @@ private:
     void rebuild_layout();
     void refit_all();
     void fit_transient();
-    /// If a panel was hidden during adds, materialize series from history when shown.
+    void bump_data() { ++data_gen_; }
+
+    void ensure_channel(Batch& batch, Channel ch);
+    void ensure_visible_channels(Batch& batch);
     void ensure_visible_series();
+    void rebuild_bounds_from_history();
+    bool trim_history();
+    void rematerialize_panel(int panel_idx);
     void push_batch(Batch b, bool replace_last);
-    static Batch compute_batch(const numina::TransferFunction& tf, const ModelParam& params, const QString& name);
+    Batch make_batch(const numina::TransferFunction& tf, const ModelParam& params, const QString& name);
+    void refresh_last_quality();
+
+    [[nodiscard]] ChartPanel* panel_at(int idx) const noexcept;
+    [[nodiscard]] BoundsSet& bounds_at(int idx) noexcept;
+    void pop_all_bounds();
+    void set_panel_updates_all(bool on);
 
 public:
     explicit ResponseChartBank(QWidget* parent = nullptr);
 
-    /// Override title of the transient chart (e.g. synthesis: «Переходный процесс»).
     void setTransientTitle(const QString& title);
 
     [[nodiscard]] ChartVisibility visibility() const { return vis_; }
     void setVisibility(ChartVisibility vis);
 
-    /// Build checkable actions into menu (owned by caller or bank).
     void populateMenu(QMenu* menu);
 
     void appendFromTf(const numina::TransferFunction& tf, const ModelParam& params, const QString& name);
     void replaceLastFromTf(const numina::TransferFunction& tf, const ModelParam& params, const QString& name);
-
-    /// Overlay experimental h(t) on the transient chart only (for identification comparison).
+    void recomputeAll(const ModelParam& params);
     void appendTransientCurve(const chart_utils::VecPair& points, const QString& name);
-
     void clearAll();
 
     [[nodiscard]] bool empty() const { return history_.empty(); }
+    [[nodiscard]] bool hasLastQuality() const noexcept { return has_last_quality_; }
+    [[nodiscard]] const numina::QualityReport& lastQuality() const noexcept { return last_quality_; }
 };
